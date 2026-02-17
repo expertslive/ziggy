@@ -48,7 +48,10 @@ events.get('/api/events/:slug/config', async (c) => {
     languages: ['nl', 'en'],
     defaultLanguage: 'nl',
     branding: DEFAULT_BRANDING,
-    days: [],
+    days: [
+      { date: '2026-06-01', label: { nl: 'Workshops - 1 juni', en: 'Workshops - June 1' } },
+      { date: '2026-06-02', label: { nl: 'Sessies - 2 juni', en: 'Sessions - June 2' } },
+    ],
   })
 })
 

@@ -108,7 +108,7 @@ admin.post('/api/admin/upload', async (c) => {
     return c.json({ error: `Unsupported file type: ${file.type}` }, 400)
   }
 
-  const maxSize = 10 * 1024 * 1024 // 10 MB
+  const maxSize = 25 * 1024 * 1024 // 25 MB
   if (file.size > maxSize) {
     return c.json({ error: 'File too large. Maximum size is 10 MB.' }, 400)
   }
