@@ -6,6 +6,7 @@ import {
   fetchBooths,
   fetchSearch,
   fetchSponsors,
+  fetchSponsorTiers,
   fetchFloorMaps,
   fetchEventConfig,
 } from './api';
@@ -16,6 +17,7 @@ import type {
   Booth,
   AgendaSession,
   Sponsor,
+  SponsorTier,
   FloorMap,
   EventConfig,
 } from './api';
@@ -72,6 +74,14 @@ export function useSponsors() {
   return useQuery<Sponsor[]>({
     queryKey: ['sponsors', slug],
     queryFn: () => fetchSponsors(slug),
+  });
+}
+
+export function useSponsorTiers() {
+  const slug = useSlug();
+  return useQuery<SponsorTier[]>({
+    queryKey: ['sponsor-tiers', slug],
+    queryFn: () => fetchSponsorTiers(slug),
   });
 }
 

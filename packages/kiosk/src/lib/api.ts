@@ -162,8 +162,20 @@ export function fetchSearch(slug: string, query: string): Promise<AgendaSession[
   return fetchJson<AgendaSession[]>(`/api/events/${slug}/search?q=${encoded}`);
 }
 
+export interface SponsorTier {
+  id: string;
+  name: string;
+  label: Record<string, string>;
+  sortOrder: number;
+  displaySize: 'large' | 'medium' | 'small';
+}
+
 export function fetchSponsors(slug: string): Promise<Sponsor[]> {
   return fetchJson<Sponsor[]>(`/api/events/${slug}/sponsors`);
+}
+
+export function fetchSponsorTiers(slug: string): Promise<SponsorTier[]> {
+  return fetchJson<SponsorTier[]>(`/api/events/${slug}/sponsor-tiers`);
 }
 
 export function fetchFloorMaps(slug: string): Promise<FloorMap[]> {

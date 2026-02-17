@@ -5,6 +5,8 @@ export interface EnvConfig {
   eventSlug: string
   runEventsApiKey: string
   nodeEnv: 'development' | 'production' | 'test'
+  cosmosConnectionString: string
+  jwtSecret: string
 }
 
 export function getEnv(): EnvConfig {
@@ -13,5 +15,8 @@ export function getEnv(): EnvConfig {
     eventSlug: process.env.EVENT_SLUG || 'experts-live-netherlands-2026',
     runEventsApiKey: process.env.RUN_EVENTS_API_KEY || '',
     nodeEnv: (process.env.NODE_ENV as EnvConfig['nodeEnv']) || 'development',
+    cosmosConnectionString: process.env.COSMOS_CONNECTION_STRING || '',
+    jwtSecret:
+      process.env.JWT_SECRET || crypto.randomUUID() + crypto.randomUUID(),
   }
 }

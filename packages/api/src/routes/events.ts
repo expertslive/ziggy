@@ -5,9 +5,12 @@ import {
   type RunEventsAgendaItem,
   type FloorMap,
   type Sponsor,
+  type SponsorTier,
+  type EventConfig,
 } from '@ziggy/shared'
 import { getEnv } from '../env.js'
 import * as runEvents from '../lib/run-events.js'
+import { findAll, findById } from '../lib/cosmos.js'
 
 const events = new Hono()
 
@@ -18,10 +21,21 @@ function getEventApiKey(slug: string): string | null {
 }
 
 // GET /api/events/:slug/config
-events.get('/api/events/:slug/config', (c) => {
+events.get('/api/events/:slug/config', async (c) => {
   const slug = c.req.param('slug')
   const env = getEnv()
 
+  // Try Cosmos DB first
+  try {
+    const config = await findById<EventConfig>('events', slug, slug)
+    if (config) {
+      return c.json(config)
+    }
+  } catch {
+    // Cosmos DB not available — fall through to defaults
+  }
+
+  // Fall back to hardcoded defaults
   if (slug !== env.eventSlug) {
     return c.json({ error: 'Event not found' }, 404)
   }
@@ -148,24 +162,42 @@ events.get('/api/events/:slug/search', async (c) => {
   }
 })
 
-// GET /api/events/:slug/sponsors (placeholder — Cosmos DB later)
-events.get('/api/events/:slug/sponsors', (c) => {
+// GET /api/events/:slug/sponsor-tiers
+events.get('/api/events/:slug/sponsor-tiers', async (c) => {
   const slug = c.req.param('slug')
-  const env = getEnv()
-  if (slug !== env.eventSlug) return c.json({ error: 'Event not found' }, 404)
 
-  const sponsors: Sponsor[] = []
-  return c.json(sponsors)
+  try {
+    const tiers = await findAll<SponsorTier>('sponsor-tiers', 'eventSlug', slug)
+    return c.json(tiers)
+  } catch {
+    return c.json([] as SponsorTier[])
+  }
 })
 
-// GET /api/events/:slug/floor-maps (placeholder — Cosmos DB later)
-events.get('/api/events/:slug/floor-maps', (c) => {
+// GET /api/events/:slug/sponsors
+events.get('/api/events/:slug/sponsors', async (c) => {
   const slug = c.req.param('slug')
-  const env = getEnv()
-  if (slug !== env.eventSlug) return c.json({ error: 'Event not found' }, 404)
 
-  const floorMaps: FloorMap[] = []
-  return c.json(floorMaps)
+  try {
+    const sponsors = await findAll<Sponsor>('sponsors', 'eventSlug', slug)
+    return c.json(sponsors)
+  } catch {
+    // Cosmos DB not available — return empty array
+    return c.json([] as Sponsor[])
+  }
+})
+
+// GET /api/events/:slug/floor-maps
+events.get('/api/events/:slug/floor-maps', async (c) => {
+  const slug = c.req.param('slug')
+
+  try {
+    const floorMaps = await findAll<FloorMap>('floor-maps', 'eventSlug', slug)
+    return c.json(floorMaps)
+  } catch {
+    // Cosmos DB not available — return empty array
+    return c.json([] as FloorMap[])
+  }
 })
 
 export default events

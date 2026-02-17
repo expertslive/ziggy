@@ -5,6 +5,7 @@ import { serve } from '@hono/node-server'
 import { getEnv } from './env.js'
 import health from './routes/health.js'
 import events from './routes/events.js'
+import admin from './routes/admin.js'
 
 const app = new Hono()
 
@@ -23,7 +24,8 @@ if (env.nodeEnv === 'production') {
     '*',
     cors({
       origin: [
-        // Add production kiosk/admin origins here
+        'https://ziggy.expertslive.dev',
+        'https://victorious-plant-071edeb03.6.azurestaticapps.net',
       ],
       allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowHeaders: ['Content-Type', 'Authorization'],
@@ -47,6 +49,7 @@ if (env.nodeEnv === 'production') {
 
 app.route('/', health)
 app.route('/', events)
+app.route('/', admin)
 
 // ---------------------------------------------------------------------------
 // Start server

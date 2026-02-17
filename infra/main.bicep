@@ -13,10 +13,17 @@ param runEventsApiKey string
 @description('Event slug')
 param eventSlug string = 'experts-live-netherlands-2026'
 
+@description('JWT secret for admin auth')
+@secure()
+param jwtSecret string
+
+@description('Location for Cosmos DB (fallback if primary region has capacity issues)')
+param cosmosDbLocation string = 'northeurope'
+
 // Unique suffix for globally unique names
 var uniqueSuffix = uniqueString(resourceGroup().id)
 var containerRegistryName = '${baseName}cr${uniqueSuffix}'
-var cosmosDbName = '${baseName}-cosmos-${uniqueSuffix}'
+var cosmosDbName = '${baseName}-db-${uniqueSuffix}'
 var storageAccountName = '${baseName}st${uniqueSuffix}'
 var logAnalyticsName = '${baseName}-logs'
 var containerAppEnvName = '${baseName}-cae'
@@ -38,17 +45,16 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
 // ─── Cosmos DB (free tier) ────────────────────────────────────────────
 resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
   name: cosmosDbName
-  location: location
+  location: cosmosDbLocation
   kind: 'GlobalDocumentDB'
   properties: {
     databaseAccountOfferType: 'Standard'
-    enableFreeTier: true
     consistencyPolicy: {
       defaultConsistencyLevel: 'Session'
     }
     locations: [
       {
-        locationName: location
+        locationName: cosmosDbLocation
         failoverPriority: 0
         isZoneRedundant: false
       }
@@ -188,6 +194,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'cosmos-connection-string'
           value: cosmosDb.listConnectionStrings().connectionStrings[0].connectionString
         }
+        {
+          name: 'jwt-secret'
+          value: jwtSecret
+        }
       ]
     }
     template: {
@@ -205,6 +215,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'EVENT_SLUG', value: eventSlug }
             { name: 'RUN_EVENTS_API_KEY', secretRef: 'run-events-api-key' }
             { name: 'COSMOS_CONNECTION_STRING', secretRef: 'cosmos-connection-string' }
+            { name: 'JWT_SECRET', secretRef: 'jwt-secret' }
           ]
         }
       ]
