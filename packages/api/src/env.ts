@@ -7,6 +7,7 @@ export interface EnvConfig {
   nodeEnv: 'development' | 'production' | 'test'
   cosmosConnectionString: string
   jwtSecret: string
+  storageConnectionString: string
 }
 
 export function getEnv(): EnvConfig {
@@ -18,5 +19,6 @@ export function getEnv(): EnvConfig {
     cosmosConnectionString: process.env.COSMOS_CONNECTION_STRING || '',
     jwtSecret:
       process.env.JWT_SECRET || crypto.randomUUID() + crypto.randomUUID(),
+    storageConnectionString: process.env.STORAGE_CONNECTION_STRING || '',
   }
 }

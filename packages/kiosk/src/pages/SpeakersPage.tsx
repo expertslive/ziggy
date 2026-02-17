@@ -55,7 +55,7 @@ export function SpeakersPage() {
       </p>
 
       {/* Speaker grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {sortedSpeakers.map((speaker) => (
           <button
             key={speaker.uniqueId}
@@ -65,7 +65,7 @@ export function SpeakersPage() {
             }}
             className="flex flex-col items-center text-center bg-el-gray rounded-xl p-4 active:scale-[0.98] transition-transform"
           >
-            <div className="w-20 h-20 rounded-full bg-el-gray-light overflow-hidden mb-3 shrink-0">
+            <div className="w-24 h-24 rounded-full bg-el-gray-light overflow-hidden mb-3 shrink-0">
               {speaker.image ? (
                 <img
                   src={speaker.image}

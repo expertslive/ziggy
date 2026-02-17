@@ -21,11 +21,16 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
       }}
     >
       <div
-        className="w-full max-w-2xl max-h-[80vh] bg-el-dark rounded-t-2xl overflow-hidden flex flex-col animate-slide-up"
+        className="w-full max-h-[85vh] bg-el-dark rounded-t-3xl overflow-hidden flex flex-col animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Drag handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-el-light/20" />
+        </div>
+
         {/* Header */}
-        <div className="flex items-start justify-between p-6 pb-4 border-b border-el-gray">
+        <div className="flex items-start justify-between px-6 pb-4 border-b border-el-gray">
           <div className="flex-1 mr-4">
             <h2 className="text-xl font-extrabold text-el-light leading-tight">
               {session.title}

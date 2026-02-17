@@ -20,6 +20,8 @@
 html {
   overflow: hidden;
   touch-action: manipulation;
+  /* Optimized for 1080x1920 portrait PixioDisplay kiosks */
+  font-size: 18px;
 }
 
 body {

@@ -92,6 +92,31 @@ export function updateFloorMap(id: string, data: any) {
 export function deleteFloorMap(id: string) {
   return fetchJson(`/api/admin/events/${slug}/floor-maps/${id}`, { method: 'DELETE' });
 }
+export async function fetchFloorMap(id: string) {
+  const maps = await fetchFloorMaps();
+  const map = maps.find((m: any) => m.id === id);
+  if (!map) throw new Error('Floor map not found');
+  return map;
+}
+
+// Upload
+export async function uploadImage(file: File): Promise<{ url: string }> {
+  const token = getToken();
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${BASE_URL}/api/admin/upload`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  if (res.status === 401) {
+    clearToken();
+    window.location.href = '/login';
+    throw new Error('Unauthorized');
+  }
+  if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+  return res.json();
+}
 
 // Event Config
 export function fetchEventConfig() {

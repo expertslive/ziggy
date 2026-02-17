@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { SponsorsPage } from './pages/SponsorsPage';
 import { SponsorTiersPage } from './pages/SponsorTiersPage';
 import { FloorMapsPage } from './pages/FloorMapsPage';
+import { HotspotEditorPage } from './pages/HotspotEditorPage';
 import { EventConfigPage } from './pages/EventConfigPage';
 import type { ReactNode } from 'react';
 
@@ -90,6 +91,14 @@ export function App() {
     <ToastProvider>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/floor-maps/:id"
+          element={
+            <ProtectedRoute>
+              <HotspotEditorPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/*"
           element={

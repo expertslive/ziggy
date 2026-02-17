@@ -198,6 +198,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'jwt-secret'
           value: jwtSecret
         }
+        {
+          name: 'storage-connection-string'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
+        }
       ]
     }
     template: {
@@ -216,6 +220,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'RUN_EVENTS_API_KEY', secretRef: 'run-events-api-key' }
             { name: 'COSMOS_CONNECTION_STRING', secretRef: 'cosmos-connection-string' }
             { name: 'JWT_SECRET', secretRef: 'jwt-secret' }
+            { name: 'STORAGE_CONNECTION_STRING', secretRef: 'storage-connection-string' }
           ]
         }
       ]

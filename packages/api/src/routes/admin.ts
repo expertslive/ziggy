@@ -12,6 +12,7 @@ import type {
 import { requireAuth } from '../middleware/auth.js'
 import { signToken, hashPassword, comparePassword } from '../lib/auth.js'
 import { findAll, findById, upsert, deleteItem, getContainer } from '../lib/cosmos.js'
+import { uploadImage } from '../lib/storage.js'
 
 const admin = new Hono()
 
@@ -87,6 +88,39 @@ admin.post('/api/auth/setup', async (c) => {
 // ---------------------------------------------------------------------------
 
 admin.use('/api/admin/*', requireAuth)
+
+// ---------------------------------------------------------------------------
+// Image Upload
+// ---------------------------------------------------------------------------
+
+/** POST /api/admin/upload — upload an image to Azure Blob Storage */
+admin.post('/api/admin/upload', async (c) => {
+  const body = await c.req.parseBody()
+  const file = body['file']
+
+  if (!file || !(file instanceof File)) {
+    return c.json({ error: 'No file provided. Send a "file" field as multipart form data.' }, 400)
+  }
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/gif']
+  if (!allowedTypes.includes(file.type)) {
+    return c.json({ error: `Unsupported file type: ${file.type}` }, 400)
+  }
+
+  const maxSize = 10 * 1024 * 1024 // 10 MB
+  if (file.size > maxSize) {
+    return c.json({ error: 'File too large. Maximum size is 10 MB.' }, 400)
+  }
+
+  try {
+    const buffer = await file.arrayBuffer()
+    const url = await uploadImage(buffer, file.name, file.type)
+    return c.json({ url })
+  } catch (err) {
+    console.error('[admin/upload]', err)
+    return c.json({ error: 'Failed to upload image' }, 500)
+  }
+})
 
 // ---------------------------------------------------------------------------
 // Sponsors CRUD

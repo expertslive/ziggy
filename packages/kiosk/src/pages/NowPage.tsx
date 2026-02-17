@@ -112,7 +112,7 @@ export function NowPage() {
       {/* Current sessions */}
       {hasCurrentSessions ? (
         <div className="mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {current.map((session) => (
               <div key={session.id} className="space-y-2">
                 <SessionCard
@@ -143,7 +143,7 @@ export function NowPage() {
             <h2 className="text-xl font-bold text-el-light">{t('now.upNext')}</h2>
             <div className="flex-1 h-px bg-el-gray-light" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {upNext.map((session) => (
               <SessionCard
                 key={session.id}

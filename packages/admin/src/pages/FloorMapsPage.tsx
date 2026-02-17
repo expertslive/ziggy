@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFloorMaps, useCreateFloorMap, useUpdateFloorMap, useDeleteFloorMap } from '../lib/hooks';
+import { uploadImage } from '../lib/api';
 import { SlideOver } from '../components/SlideOver';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useToast } from '../components/Toast';
@@ -20,6 +22,7 @@ const emptyForm: FloorMapForm = {
 };
 
 export function FloorMapsPage() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const floorMaps = useFloorMaps();
   const createMut = useCreateFloorMap();
@@ -30,10 +33,14 @@ export function FloorMapsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FloorMapForm>(emptyForm);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [imageMode, setImageMode] = useState<'upload' | 'url'>('upload');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const openCreate = () => {
     setEditingId(null);
     setForm(emptyForm);
+    setImageMode('upload');
     setPanelOpen(true);
   };
 
@@ -45,6 +52,7 @@ export function FloorMapsPage() {
       imageUrl: map.imageUrl || '',
       sortOrder: map.sortOrder ?? 0,
     });
+    setImageMode(map.imageUrl ? 'url' : 'upload');
     setPanelOpen(true);
   };
 
@@ -75,6 +83,22 @@ export function FloorMapsPage() {
     setDeleteTarget(null);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { url } = await uploadImage(file);
+      setForm((prev) => ({ ...prev, imageUrl: url }));
+      toast('success', 'Image uploaded');
+    } catch {
+      toast('error', 'Failed to upload image');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const setField = <K extends keyof FloorMapForm>(key: K, value: FloorMapForm[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
@@ -93,7 +117,7 @@ export function FloorMapsPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-secondary">Floor Maps</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage venue floor maps (hotspot editor coming in Phase 5)</p>
+          <p className="mt-1 text-sm text-gray-500">Manage venue floor maps and hotspot regions</p>
         </div>
         <button
           onClick={openCreate}
@@ -150,6 +174,14 @@ export function FloorMapsPage() {
                 <td className="px-6 py-4 text-sm text-gray-600">{map.sortOrder}</td>
                 <td className="px-6 py-4 text-right">
                   <button
+                    onClick={() => navigate(`/floor-maps/${map.id}`)}
+                    disabled={!map.imageUrl}
+                    className="mr-2 text-sm font-medium text-primary hover:text-primary-dark disabled:cursor-not-allowed disabled:opacity-40"
+                    title={map.imageUrl ? 'Edit hotspot regions' : 'Upload an image first to edit hotspots'}
+                  >
+                    Edit Hotspots
+                  </button>
+                  <button
                     onClick={() => openEdit(map)}
                     className="mr-2 text-sm font-medium text-primary hover:text-primary-dark"
                   >
@@ -186,16 +218,62 @@ export function FloorMapsPage() {
             />
           </div>
 
+          {/* Image upload / URL */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">Image URL *</label>
-            <input
-              required
-              type="url"
-              value={form.imageUrl}
-              onChange={(e) => setField('imageUrl', e.target.value)}
-              className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="https://..."
-            />
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="block text-sm font-medium text-gray-700">Image *</label>
+              <button
+                type="button"
+                onClick={() => setImageMode(imageMode === 'upload' ? 'url' : 'upload')}
+                className="text-xs font-medium text-primary hover:text-primary-dark"
+              >
+                {imageMode === 'upload' ? 'Paste URL instead' : 'Upload file instead'}
+              </button>
+            </div>
+
+            {imageMode === 'upload' ? (
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border px-4 py-4 text-sm font-medium text-gray-500 hover:border-primary hover:text-primary disabled:opacity-50"
+                >
+                  {uploading ? (
+                    <>
+                      <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                      </svg>
+                      {form.imageUrl ? 'Replace image' : 'Upload image'}
+                    </>
+                  )}
+                </button>
+              </div>
+            ) : (
+              <input
+                type="url"
+                value={form.imageUrl}
+                onChange={(e) => setField('imageUrl', e.target.value)}
+                className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                placeholder="https://..."
+              />
+            )}
+
             {form.imageUrl && (
               <div className="mt-2">
                 <img

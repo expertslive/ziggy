@@ -33,7 +33,12 @@
     "sortedAZ": "{{count}} sprekers, A-Z gesorteerd"
   },
   "map": {
-    "title": "Plattegrond"
+    "title": "Plattegrond",
+    "noMaps": "Geen plattegronden beschikbaar.",
+    "tapRoom": "Tik op een ruimte voor details",
+    "currentSessions": "Huidige sessies",
+    "noCurrentSessions": "Geen sessies in deze ruimte op dit moment.",
+    "upcomingSessions": "Binnenkort"
   },
   "sponsors": {
     "title": "Sponsors"

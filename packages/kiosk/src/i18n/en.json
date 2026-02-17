@@ -33,7 +33,12 @@
     "sortedAZ": "{{count}} speakers, sorted A-Z"
   },
   "map": {
-    "title": "Floor Map"
+    "title": "Floor Map",
+    "noMaps": "No floor maps available.",
+    "tapRoom": "Tap a room for details",
+    "currentSessions": "Current Sessions",
+    "noCurrentSessions": "No sessions in this room right now.",
+    "upcomingSessions": "Coming Up"
   },
   "sponsors": {
     "title": "Sponsors"
