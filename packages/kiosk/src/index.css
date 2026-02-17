@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-el-red: #E30613;
+  --color-el-dark: #1A1A2E;
+  --color-el-darker: #0F0F1A;
+  --color-el-light: #F5F5F5;
+  --color-el-gray: #2A2A3E;
+  --color-el-gray-light: #3A3A4E;
+  --font-sans: 'Nunito', sans-serif;
+}
+
+/* Kiosk touch resets */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+html {
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+body {
+  overscroll-behavior: none;
+}
+
+/* Scrollable areas opt-in */
+.scrollable {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Modal slide-up animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

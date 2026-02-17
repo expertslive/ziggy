@@ -1,0 +1,25 @@
+{
+  "name": "ziggy",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev:api": "pnpm --filter @ziggy/api dev",
+    "dev:kiosk": "pnpm --filter @ziggy/kiosk dev",
+    "dev:admin": "pnpm --filter @ziggy/admin dev",
+    "build": "pnpm -r build",
+    "build:shared": "pnpm --filter @ziggy/shared build",
+    "build:api": "pnpm --filter @ziggy/api build",
+    "build:kiosk": "pnpm --filter @ziggy/kiosk build",
+    "build:admin": "pnpm --filter @ziggy/admin build",
+    "lint": "eslint packages/*/src/**/*.{ts,tsx}",
+    "format": "prettier --write \"packages/*/src/**/*.{ts,tsx,css}\"",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0"
+  }
+}

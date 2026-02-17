@@ -1,0 +1,44 @@
+{
+  "nav": {
+    "now": "Nu",
+    "agenda": "Agenda",
+    "speakers": "Sprekers",
+    "map": "Plattegrond",
+    "sponsors": "Sponsors",
+    "search": "Zoeken"
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Er is iets misgegaan. Probeer het opnieuw.",
+    "noResults": "Geen resultaten gevonden.",
+    "back": "Terug"
+  },
+  "now": {
+    "title": "Wat is er nu?",
+    "subtitle": "Bekijk de sessies die nu plaatsvinden.",
+    "upNext": "Binnenkort",
+    "noSessions": "Er zijn momenteel geen sessies.",
+    "timeRemaining": "Nog {{minutes}} min"
+  },
+  "agenda": {
+    "title": "Agenda",
+    "allDays": "Alle dagen",
+    "description": "Beschrijving",
+    "noSessions": "Geen sessies op deze dag."
+  },
+  "speakers": {
+    "title": "Sprekers",
+    "sessions": "Sessies"
+  },
+  "map": {
+    "title": "Plattegrond"
+  },
+  "sponsors": {
+    "title": "Sponsors"
+  },
+  "search": {
+    "title": "Zoeken",
+    "placeholder": "Zoek sessies, sprekers of stands...",
+    "minChars": "Typ minimaal 4 tekens om te zoeken."
+  }
+}

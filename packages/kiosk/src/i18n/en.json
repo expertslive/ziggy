@@ -1,0 +1,44 @@
+{
+  "nav": {
+    "now": "Now",
+    "agenda": "Agenda",
+    "speakers": "Speakers",
+    "map": "Map",
+    "sponsors": "Sponsors",
+    "search": "Search"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong. Please try again.",
+    "noResults": "No results found.",
+    "back": "Back"
+  },
+  "now": {
+    "title": "What's Happening Now",
+    "subtitle": "View the sessions currently taking place.",
+    "upNext": "Up Next",
+    "noSessions": "There are no sessions right now.",
+    "timeRemaining": "{{minutes}} min remaining"
+  },
+  "agenda": {
+    "title": "Agenda",
+    "allDays": "All days",
+    "description": "Description",
+    "noSessions": "No sessions on this day."
+  },
+  "speakers": {
+    "title": "Speakers",
+    "sessions": "Sessions"
+  },
+  "map": {
+    "title": "Floor Map"
+  },
+  "sponsors": {
+    "title": "Sponsors"
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search sessions, speakers, or booths...",
+    "minChars": "Type at least 4 characters to search."
+  }
+}
