@@ -173,7 +173,7 @@ export function AgendaPage() {
         </div>
       ) : (
         <div className="flex items-center justify-center h-48">
-          <p className="text-el-light/60 text-lg">{t('common.noResults')}</p>
+          <p className="text-el-light/60 text-lg">{t('agenda.noSessions')}</p>
         </div>
       )}
 
