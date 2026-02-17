@@ -18,7 +18,8 @@
     "subtitle": "Bekijk de sessies die nu plaatsvinden.",
     "upNext": "Binnenkort",
     "noSessions": "Er zijn momenteel geen sessies.",
-    "timeRemaining": "Nog {{minutes}} min"
+    "noSessionsNextAt": "Er zijn momenteel geen sessies. Volgende sessie om {{time}}.",
+    "timeRemaining": "Nog {{minutes}}"
   },
   "agenda": {
     "title": "Agenda",
@@ -28,7 +29,8 @@
   },
   "speakers": {
     "title": "Sprekers",
-    "sessions": "Sessies"
+    "sessions": "Sessies",
+    "sortedAZ": "{{count}} sprekers, A-Z gesorteerd"
   },
   "map": {
     "title": "Plattegrond"

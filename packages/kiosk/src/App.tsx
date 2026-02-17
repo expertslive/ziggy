@@ -7,10 +7,19 @@ import { SpeakersPage } from './pages/SpeakersPage';
 import { MapPage } from './pages/MapPage';
 import { SponsorsPage } from './pages/SponsorsPage';
 import { SearchPage } from './pages/SearchPage';
+import { useInactivityReset } from './hooks/useInactivityReset';
+import { useKioskStore } from './store/kiosk';
 
 export function App() {
+  const touch = useKioskStore((s) => s.touch);
+  useInactivityReset();
+
   return (
-    <div className="flex flex-col h-dvh bg-el-darker text-el-light font-sans">
+    <div
+      className="flex flex-col h-dvh bg-el-darker text-el-light font-sans"
+      onTouchStart={touch}
+      onClick={touch}
+    >
       <Header />
 
       <main className="flex-1 min-h-0">

@@ -18,7 +18,8 @@
     "subtitle": "View the sessions currently taking place.",
     "upNext": "Up Next",
     "noSessions": "There are no sessions right now.",
-    "timeRemaining": "{{minutes}} min remaining"
+    "noSessionsNextAt": "There are no sessions right now. Next session at {{time}}.",
+    "timeRemaining": "{{minutes}} remaining"
   },
   "agenda": {
     "title": "Agenda",
@@ -28,7 +29,8 @@
   },
   "speakers": {
     "title": "Speakers",
-    "sessions": "Sessions"
+    "sessions": "Sessions",
+    "sortedAZ": "{{count}} speakers, sorted A-Z"
   },
   "map": {
     "title": "Floor Map"
