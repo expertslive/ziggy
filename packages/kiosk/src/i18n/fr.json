@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "now": "En direct",
+    "agenda": "Programme",
+    "speakers": "Intervenants",
+    "map": "Plan",
+    "expo": "Expo",
+    "sponsors": "Sponsors",
+    "search": "Recherche"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite. Veuillez réessayer.",
+    "noResults": "Aucun résultat trouvé.",
+    "back": "Retour"
+  },
+  "now": {
+    "title": "En ce moment",
+    "subtitle": "Consultez les sessions en cours.",
+    "upNext": "À suivre",
+    "noSessions": "Il n'y a pas de sessions en ce moment.",
+    "noSessionsNextAt": "Il n'y a pas de sessions en ce moment. Prochaine session à {{time}}.",
+    "timeRemaining": "Encore {{minutes}}"
+  },
+  "agenda": {
+    "title": "Programme",
+    "allDays": "Tous les jours",
+    "description": "Description",
+    "noSessions": "Aucune session ce jour."
+  },
+  "speakers": {
+    "title": "Intervenants",
+    "sessions": "Sessions",
+    "sortedAZ": "{{count}} intervenants, triés de A à Z"
+  },
+  "map": {
+    "title": "Plan des salles",
+    "noMaps": "Aucun plan disponible.",
+    "tapRoom": "Appuyez sur une salle pour plus de détails",
+    "currentSessions": "Sessions en cours",
+    "noCurrentSessions": "Aucune session dans cette salle pour le moment.",
+    "upcomingSessions": "À venir"
+  },
+  "booths": {
+    "title": "Expo",
+    "noBooths": "Aucun exposant disponible.",
+    "count": "{{count}} exposants",
+    "boothNumber": "Stand {{number}}"
+  },
+  "sponsors": {
+    "title": "Sponsors"
+  },
+  "search": {
+    "title": "Recherche",
+    "placeholder": "Rechercher des sessions, intervenants ou stands...",
+    "minChars": "Saisissez au moins 4 caractères pour rechercher."
+  }
+}

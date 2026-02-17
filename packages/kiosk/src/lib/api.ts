@@ -185,3 +185,12 @@ export function fetchFloorMaps(slug: string): Promise<FloorMap[]> {
 export function fetchEventConfig(slug: string): Promise<EventConfig> {
   return fetchJson<EventConfig>(`/api/events/${slug}/config`);
 }
+
+export interface I18nOverrides {
+  language: string;
+  overrides: Record<string, string>;
+}
+
+export function fetchI18nOverrides(slug: string): Promise<I18nOverrides[]> {
+  return fetchJson<I18nOverrides[]>(`/api/events/${slug}/i18n-overrides`);
+}

@@ -38,6 +38,7 @@ export function Header() {
 
   const time = useClock();
   const logoUrl = config?.branding?.logoUrl;
+  const languages = config?.languages ?? ['nl', 'en'];
 
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-el-dark border-b border-el-gray shrink-0">
@@ -60,26 +61,19 @@ export function Header() {
 
       {/* Right: Language switcher */}
       <div className="flex items-center gap-2">
-        <button
-          onClick={() => changeLanguage('nl')}
-          className={`min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl text-sm font-bold transition-colors ${
-            i18n.language === 'nl'
-              ? 'bg-el-blue text-white'
-              : 'bg-el-gray text-el-light active:bg-el-gray-light'
-          }`}
-        >
-          NL
-        </button>
-        <button
-          onClick={() => changeLanguage('en')}
-          className={`min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl text-sm font-bold transition-colors ${
-            i18n.language === 'en'
-              ? 'bg-el-blue text-white'
-              : 'bg-el-gray text-el-light active:bg-el-gray-light'
-          }`}
-        >
-          EN
-        </button>
+        {languages.map((lang) => (
+          <button
+            key={lang}
+            onClick={() => changeLanguage(lang)}
+            className={`min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl text-sm font-bold transition-colors ${
+              i18n.language === lang
+                ? 'bg-el-blue text-white'
+                : 'bg-el-gray text-el-light active:bg-el-gray-light'
+            }`}
+          >
+            {lang.toUpperCase()}
+          </button>
+        ))}
       </div>
     </header>
   );

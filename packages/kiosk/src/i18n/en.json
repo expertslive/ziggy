@@ -4,6 +4,7 @@
     "agenda": "Agenda",
     "speakers": "Speakers",
     "map": "Map",
+    "expo": "Expo",
     "sponsors": "Sponsors",
     "search": "Search"
   },
@@ -39,6 +40,12 @@
     "currentSessions": "Current Sessions",
     "noCurrentSessions": "No sessions in this room right now.",
     "upcomingSessions": "Coming Up"
+  },
+  "booths": {
+    "title": "Expo",
+    "noBooths": "No exhibitor booths available.",
+    "count": "{{count}} exhibitors",
+    "boothNumber": "Booth {{number}}"
   },
   "sponsors": {
     "title": "Sponsors"

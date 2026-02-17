@@ -1,34 +1,59 @@
 # Ziggy — Experts Live Kiosk App
 
-A touch-screen kiosk web app for conference venues, allowing attendees to find sessions, speakers, workshops, rooms, sponsors, and navigate floor maps.
+A touch-screen kiosk web app for conference venues, allowing attendees to find sessions, speakers, expo booths, sponsors, and navigate interactive floor maps.
 
 Built for [Experts Live](https://www.intechnieuws.nl/experts-live-netherlands-2026/) events. Data sourced from the [run.events](https://run.events) platform.
 
-## Architecture
+## Features
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend (kiosk + admin) | React 19, TypeScript, Vite, Tailwind v4 |
-| Backend | Hono + Node.js (BFF/proxy) |
-| Database | Azure Cosmos DB |
-| File storage | Azure Blob Storage |
-| SPA hosting | Azure Static Web Apps |
-| API hosting | Azure Container Apps |
-| IaC | Bicep |
-| Monorepo | pnpm workspaces |
+### What's Happening Now
 
-## Project Structure
+The home screen shows sessions currently in progress with a live countdown, plus a preview of what's coming up next. The page auto-refreshes so kiosks always display the latest information.
 
-```
-ziggy/
-├── packages/
-│   ├── shared/     # TypeScript types, constants, utils
-│   ├── api/        # Hono backend (BFF proxy + admin API)
-│   ├── kiosk/      # Kiosk SPA (touch-optimized, attendee-facing)
-│   └── admin/      # Admin panel SPA (event config, sponsors, floor maps)
-├── infra/          # Bicep templates for Azure
-└── .github/        # CI/CD workflows
-```
+### Agenda
+
+Browse the full conference schedule organized by day. Tap any session to see details including description, speakers, room location, and time slot. Swipe or tap day tabs to switch between conference days.
+
+### Speakers
+
+A searchable grid of all speakers with photos. Tap a speaker to see their bio and the sessions they're presenting.
+
+### Interactive Floor Maps
+
+Zoomable venue maps with tappable room hotspots. Tap a room to see which session is currently running there and what's coming up next. Admins draw hotspot regions using a visual polygon editor.
+
+### Expo
+
+Browse exhibitor booths with logos, booth numbers, and descriptions. Tap for full details.
+
+### Sponsors
+
+Tiered sponsor display — Ultimate sponsors featured prominently, with Gold, Speaker Dinner, and other tiers displayed at appropriate sizes.
+
+### Search
+
+Full-text search across sessions, speakers, and booths with an on-screen virtual keyboard optimized for touch input.
+
+### Multi-language
+
+Supports Dutch, English, German, and French out of the box. Language switcher in the header. Admins can override any translation string per event.
+
+### Touch Optimized
+
+- 48px minimum tap targets
+- Press animations for tactile feedback
+- No hover states — designed for fingers, not mice
+- Kiosk-safe: no text selection, no pinch zoom, no context menus
+- Auto-resets to the home screen after 60 seconds of inactivity
+
+## Admin Panel
+
+Event organizers manage their kiosk configuration through a separate admin panel:
+
+- **Event config** — branding colors, logo, languages, timezone
+- **Sponsors** — add/edit/remove sponsors with logos, descriptions, tier assignment
+- **Floor maps** — upload venue images, draw tappable room hotspots with a visual editor
+- **Translations** — override any UI string per language
 
 ## Quick Start
 
@@ -53,11 +78,14 @@ pnpm dev:api
 
 # Start kiosk (in another terminal)
 pnpm dev:kiosk
+
+# Start admin panel (optional, in another terminal)
+pnpm dev:admin
 ```
 
 The kiosk app runs at `http://localhost:5173` and proxies API calls to `http://localhost:3001`.
 
-### All Commands
+### Commands
 
 | Command | Description |
 |---------|-------------|
@@ -66,55 +94,15 @@ The kiosk app runs at `http://localhost:5173` and proxies API calls to `http://l
 | `pnpm dev:admin` | Start admin dev server |
 | `pnpm build` | Build all packages |
 | `pnpm lint` | Lint all packages |
-| `pnpm format` | Format all packages |
 | `pnpm typecheck` | Type-check all packages |
 
-## Kiosk Features
+## Documentation
 
-- **Now** — current sessions with time remaining + "Up Next" preview
-- **Agenda** — day tabs, timeline, session cards with detail modal
-- **Speakers** — photo grid, tap for bio + their sessions
-- **Floor Map** — tappable room hotspots, room popover with current session
-- **Sponsors** — tiered display (platinum → silver), tap for details
-- **Search** — virtual keyboard, results stream as you type
-
-### Touch Optimizations
-
-- 48px minimum tap targets
-- Scale-down press animations
-- No hover states, kiosk CSS resets (no select/zoom/context menu)
-- Swipe gestures for day/map switching
-- Auto-reset to home after 60s inactivity
-
-## Data Flow
-
-```
-run.events API  ──(5-min cache)──▶  Hono API  ──▶  Kiosk SPA
-                                       ▲
-                                       │
-Admin Panel ──(CRUD)──▶ Cosmos DB ─────┘
-```
-
-- Session/speaker/booth data: fetched from run.events API, cached for 5 minutes
-- Sponsors, floor maps, event config: managed by admins, stored in Cosmos DB
-
-## Environment Variables
-
-### API (`packages/api/.env`)
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | API server port | `3001` |
-| `EVENT_SLUG` | Event slug for run.events | `experts-live-netherlands-2026` |
-| `RUN_EVENTS_API_KEY` | run.events API key | — |
-| `NODE_ENV` | Environment | `development` |
-
-### Kiosk (`packages/kiosk/.env`)
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VITE_API_URL` | API base URL (empty for proxy) | `` |
-| `VITE_EVENT_SLUG` | Event slug | `experts-live-netherlands-2026` |
+- [Architecture](docs/architecture.md) — tech stack, project structure, data flow
+- [API Reference](docs/api.md) — backend endpoints and environment variables
+- [Deployment](docs/deployment.md) — Azure infrastructure and CI/CD
+- [Azure Cost Estimate](docs/azure-costs.md) — monthly cost breakdown
+- [Roadmap](docs/roadmap.md) — implementation phases and progress
 
 ## License
 

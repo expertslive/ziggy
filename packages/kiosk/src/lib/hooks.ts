@@ -9,6 +9,7 @@ import {
   fetchSponsorTiers,
   fetchFloorMaps,
   fetchEventConfig,
+  fetchI18nOverrides,
 } from './api';
 import type {
   Agenda,
@@ -20,6 +21,7 @@ import type {
   SponsorTier,
   FloorMap,
   EventConfig,
+  I18nOverrides,
 } from './api';
 import { useKioskStore } from '../store/kiosk';
 
@@ -98,6 +100,15 @@ export function useEventConfig() {
   return useQuery<EventConfig>({
     queryKey: ['event-config', slug],
     queryFn: () => fetchEventConfig(slug),
+    staleTime: 300_000,
+  });
+}
+
+export function useI18nOverrides() {
+  const slug = useSlug();
+  return useQuery<I18nOverrides[]>({
+    queryKey: ['i18n-overrides', slug],
+    queryFn: () => fetchI18nOverrides(slug),
     staleTime: 300_000,
   });
 }

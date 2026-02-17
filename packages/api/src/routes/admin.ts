@@ -8,6 +8,7 @@ import type {
   SponsorTier,
   FloorMap,
   EventConfig,
+  I18nOverrides,
 } from '@ziggy/shared'
 import { requireAuth } from '../middleware/auth.js'
 import { signToken, hashPassword, comparePassword } from '../lib/auth.js'
@@ -364,6 +365,41 @@ admin.put('/api/admin/events/:slug/config', async (c) => {
   }
 
   const result = await upsert('events', config)
+  return c.json(result)
+})
+
+// ---------------------------------------------------------------------------
+// I18n Overrides
+// ---------------------------------------------------------------------------
+
+/** GET /api/admin/events/:slug/i18n-overrides */
+admin.get('/api/admin/events/:slug/i18n-overrides', async (c) => {
+  const slug = c.req.param('slug')
+  const overrides = await findAll<I18nOverrides>('i18n-overrides', 'eventSlug', slug)
+  return c.json(overrides)
+})
+
+/** PUT /api/admin/events/:slug/i18n-overrides/:lang */
+admin.put('/api/admin/events/:slug/i18n-overrides/:lang', async (c) => {
+  const slug = c.req.param('slug')
+  const lang = c.req.param('lang')
+  const body = await c.req.json<{ overrides: Record<string, string> }>()
+  const now = new Date().toISOString()
+
+  // Use a deterministic ID based on slug + language
+  const id = `${slug}_${lang}`
+
+  const existing = await findById<I18nOverrides>('i18n-overrides', id, slug)
+
+  const doc: I18nOverrides = {
+    id,
+    eventSlug: slug,
+    language: lang,
+    overrides: body.overrides ?? existing?.overrides ?? {},
+    updatedAt: now,
+  }
+
+  const result = await upsert('i18n-overrides', doc)
   return c.json(result)
 })
 

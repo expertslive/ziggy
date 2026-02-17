@@ -4,6 +4,7 @@
     "agenda": "Agenda",
     "speakers": "Sprekers",
     "map": "Plattegrond",
+    "expo": "Expo",
     "sponsors": "Sponsors",
     "search": "Zoeken"
   },
@@ -39,6 +40,12 @@
     "currentSessions": "Huidige sessies",
     "noCurrentSessions": "Geen sessies in deze ruimte op dit moment.",
     "upcomingSessions": "Binnenkort"
+  },
+  "booths": {
+    "title": "Expo",
+    "noBooths": "Geen stands beschikbaar.",
+    "count": "{{count}} exposanten",
+    "boothNumber": "Stand {{number}}"
   },
   "sponsors": {
     "title": "Sponsors"

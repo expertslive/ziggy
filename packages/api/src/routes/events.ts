@@ -7,6 +7,7 @@ import {
   type Sponsor,
   type SponsorTier,
   type EventConfig,
+  type I18nOverrides,
 } from '@ziggy/shared'
 import { getEnv } from '../env.js'
 import * as runEvents from '../lib/run-events.js'
@@ -197,6 +198,19 @@ events.get('/api/events/:slug/floor-maps', async (c) => {
   } catch {
     // Cosmos DB not available — return empty array
     return c.json([] as FloorMap[])
+  }
+})
+
+// GET /api/events/:slug/i18n-overrides
+events.get('/api/events/:slug/i18n-overrides', async (c) => {
+  const slug = c.req.param('slug')
+
+  try {
+    const overrides = await findAll<I18nOverrides>('i18n-overrides', 'eventSlug', slug)
+    return c.json(overrides)
+  } catch {
+    // Cosmos DB not available — return empty array
+    return c.json([] as I18nOverrides[])
   }
 })
 

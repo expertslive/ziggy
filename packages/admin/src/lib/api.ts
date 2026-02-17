@@ -125,3 +125,14 @@ export function fetchEventConfig() {
 export function updateEventConfig(data: any) {
   return fetchJson(`/api/admin/events/${slug}/config`, { method: 'PUT', body: JSON.stringify(data) });
 }
+
+// I18n Overrides
+export function fetchI18nOverrides() {
+  return fetchJson<any[]>(`/api/admin/events/${slug}/i18n-overrides`);
+}
+export function updateI18nOverrides(lang: string, overrides: Record<string, string>) {
+  return fetchJson(`/api/admin/events/${slug}/i18n-overrides/${lang}`, {
+    method: 'PUT',
+    body: JSON.stringify({ overrides }),
+  });
+}
