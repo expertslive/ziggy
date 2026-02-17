@@ -48,7 +48,7 @@ export function SearchPage() {
                 handleClear();
                 touch();
               }}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-el-gray-light text-el-light/60 active:bg-el-red active:text-white text-sm"
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-el-gray-light text-el-light/60 active:bg-el-blue active:text-white text-sm"
             >
               &#x2715;
             </button>

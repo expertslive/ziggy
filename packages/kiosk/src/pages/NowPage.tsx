@@ -34,7 +34,7 @@ function TimeRemainingBadge({ session }: { session: AgendaSession }) {
   const remaining = useTimeRemaining(session);
 
   return (
-    <span className="inline-block text-xs font-bold rounded-full px-3 py-1 bg-el-red/20 text-el-red">
+    <span className="inline-block text-xs font-bold rounded-full px-3 py-1 bg-el-blue/20 text-el-blue">
       {t('now.timeRemaining', { minutes: remaining })}
     </span>
   );

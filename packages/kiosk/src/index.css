@@ -1,12 +1,14 @@
 @import "tailwindcss";
 
 @theme {
+  --color-el-blue: #0082C8;
+  --color-el-navy: #1B2A5B;
   --color-el-red: #E30613;
-  --color-el-dark: #1A1A2E;
-  --color-el-darker: #0F0F1A;
+  --color-el-dark: #0F1629;
+  --color-el-darker: #0A0F1E;
   --color-el-light: #F5F5F5;
-  --color-el-gray: #2A2A3E;
-  --color-el-gray-light: #3A3A4E;
+  --color-el-gray: #1C2844;
+  --color-el-gray-light: #2A3A5A;
   --font-sans: 'Nunito', sans-serif;
 }
 

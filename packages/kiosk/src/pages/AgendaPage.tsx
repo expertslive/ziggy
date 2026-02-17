@@ -72,7 +72,7 @@ export function AgendaPage() {
               }}
               className={`px-5 py-3 rounded-xl text-sm font-bold whitespace-nowrap transition-colors ${
                 index === selectedDayIndex
-                  ? 'bg-el-red text-white'
+                  ? 'bg-el-blue text-white'
                   : 'bg-el-gray text-el-light/70 active:bg-el-gray-light'
               }`}
             >
@@ -88,7 +88,7 @@ export function AgendaPage() {
           <div key={timeslot.startTimeGroup}>
             {/* Time header */}
             <div className="flex items-center gap-3 mb-3">
-              <span className="text-lg font-bold text-el-red">
+              <span className="text-lg font-bold text-el-blue">
                 {timeslot.startTimeGroup}
               </span>
               <span className="text-sm text-el-light/40">—</span>

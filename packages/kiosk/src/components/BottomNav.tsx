@@ -82,7 +82,7 @@ export function BottomNav() {
           className={({ isActive }) =>
             `flex-1 flex flex-col items-center justify-center gap-1.5 min-h-[80px] py-3 transition-colors ${
               isActive
-                ? 'text-el-red bg-el-gray/40 border-t-2 border-el-red'
+                ? 'text-el-blue bg-el-gray/40 border-t-2 border-el-blue'
                 : 'text-el-light/60 active:text-el-light active:bg-el-gray/20 border-t-2 border-transparent'
             }`
           }

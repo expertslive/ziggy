@@ -97,7 +97,7 @@ function SponsorDetailModal({
           <h2 className="text-2xl font-bold text-el-light">{sponsor.name}</h2>
 
           {sponsor.boothNumber && (
-            <span className="px-3 py-1 rounded-full bg-el-red/20 text-el-red text-sm font-semibold">
+            <span className="px-3 py-1 rounded-full bg-el-blue/20 text-el-blue text-sm font-semibold">
               Booth {sponsor.boothNumber}
             </span>
           )}

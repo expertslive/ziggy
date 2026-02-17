@@ -32,9 +32,9 @@ export interface EventBranding {
 }
 
 export const DEFAULT_BRANDING: EventBranding = {
-  primaryColor: '#E30613',
-  secondaryColor: '#1A1A2E',
-  backgroundColor: '#0F0F1A',
+  primaryColor: '#0082C8',
+  secondaryColor: '#1B2A5B',
+  backgroundColor: '#0F1629',
   textColor: '#FFFFFF',
   fontFamily: 'Nunito',
 }

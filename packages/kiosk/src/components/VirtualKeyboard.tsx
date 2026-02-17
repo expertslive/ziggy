@@ -79,7 +79,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onClear }: VirtualKey
         ))}
         <button
           onClick={handleBackspace}
-          className="flex-[1.5] max-w-[90px] h-12 bg-el-gray-light rounded-lg text-el-light font-bold text-sm active:scale-[0.95] active:bg-el-red transition-transform flex items-center justify-center"
+          className="flex-[1.5] max-w-[90px] h-12 bg-el-gray-light rounded-lg text-el-light font-bold text-sm active:scale-[0.95] active:bg-el-blue transition-transform flex items-center justify-center"
           aria-label="Backspace"
         >
           &#x232B;
@@ -90,7 +90,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onClear }: VirtualKey
       <div className="flex justify-center gap-1.5">
         <button
           onClick={handleClear}
-          className="flex-[1.5] max-w-[120px] h-12 bg-el-gray-light rounded-lg text-el-light font-bold text-sm active:scale-[0.95] active:bg-el-red transition-transform"
+          className="flex-[1.5] max-w-[120px] h-12 bg-el-gray-light rounded-lg text-el-light font-bold text-sm active:scale-[0.95] active:bg-el-blue transition-transform"
         >
           Clear
         </button>

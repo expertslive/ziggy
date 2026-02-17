@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useKioskStore } from '../store/kiosk';
+import { useEventConfig } from '../lib/hooks';
 
 function useClock(): string {
   const [time, setTime] = useState(() => formatTime(new Date()));
@@ -27,6 +28,7 @@ export function Header() {
   const { i18n } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
   const setLanguage = useKioskStore((s) => s.setLanguage);
+  const { data: config } = useEventConfig();
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -35,15 +37,20 @@ export function Header() {
   };
 
   const time = useClock();
+  const logoUrl = config?.branding?.logoUrl;
 
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-el-dark border-b border-el-gray shrink-0">
       {/* Left: Logo */}
       <div className="flex items-center gap-2">
-        <span className="text-2xl font-extrabold tracking-tight">
-          <span className="text-el-red">Experts</span>
-          <span className="text-el-light"> Live</span>
-        </span>
+        {logoUrl ? (
+          <img src={logoUrl} alt={config?.name || 'Experts Live'} className="h-10 w-auto" />
+        ) : (
+          <span className="text-2xl font-extrabold tracking-tight">
+            <span className="text-el-navy">Experts</span>
+            <span className="text-el-blue"> Live</span>
+          </span>
+        )}
       </div>
 
       {/* Center: Clock */}
@@ -57,7 +64,7 @@ export function Header() {
           onClick={() => changeLanguage('nl')}
           className={`min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl text-sm font-bold transition-colors ${
             i18n.language === 'nl'
-              ? 'bg-el-red text-white'
+              ? 'bg-el-blue text-white'
               : 'bg-el-gray text-el-light active:bg-el-gray-light'
           }`}
         >
@@ -67,7 +74,7 @@ export function Header() {
           onClick={() => changeLanguage('en')}
           className={`min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl text-sm font-bold transition-colors ${
             i18n.language === 'en'
-              ? 'bg-el-red text-white'
+              ? 'bg-el-blue text-white'
               : 'bg-el-gray text-el-light active:bg-el-gray-light'
           }`}
         >

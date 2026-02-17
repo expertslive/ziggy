@@ -39,10 +39,10 @@ function AdminLayout({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="flex w-64 flex-col border-r border-border bg-white">
         <div className="flex h-16 items-center gap-3 border-b border-border px-6">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white">
-            Z
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary text-sm font-bold text-white">
+            EL
           </div>
-          <span className="text-lg font-bold text-secondary">Ziggy Admin</span>
+          <span className="text-lg font-bold text-secondary">Experts Live Admin</span>
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-4">

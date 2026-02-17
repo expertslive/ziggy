@@ -182,8 +182,8 @@ function FloorMapViewer({
               <polygon
                 key={hotspot.id}
                 points={hotspot.points.map(([x, y]) => `${x},${y}`).join(' ')}
-                fill="rgba(227, 6, 19, 0.25)"
-                stroke="#E30613"
+                fill="rgba(0, 130, 200, 0.25)"
+                stroke="#0082C8"
                 strokeWidth="0.003"
                 className="cursor-pointer"
                 onClick={() => handleHotspotTap(hotspot)}
@@ -275,7 +275,7 @@ export function MapPage() {
                 }}
                 className={`shrink-0 px-5 py-3 rounded-xl text-base font-bold transition-colors active:scale-[0.98] ${
                   isActive
-                    ? 'bg-el-red text-el-light'
+                    ? 'bg-el-blue text-el-light'
                     : 'bg-el-gray text-el-light/60'
                 }`}
               >
