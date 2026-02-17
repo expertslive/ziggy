@@ -98,6 +98,7 @@ The kiosk app runs at `http://localhost:5173` and proxies API calls to `http://l
 
 ## Documentation
 
+- [Admin Guide](docs/admin-guide.md) — how to configure events, manage sponsors, draw floor map hotspots, and override translations
 - [Architecture](docs/architecture.md) — tech stack, project structure, data flow
 - [API Reference](docs/api.md) — backend endpoints and environment variables
 - [Deployment](docs/deployment.md) — Azure infrastructure and CI/CD
