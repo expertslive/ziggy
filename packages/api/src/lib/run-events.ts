@@ -1,10 +1,13 @@
 import {
   RUN_EVENTS_API_BASE,
-  type RunEventsAgenda,
+  type RunEventsAgendaItem,
   type RunEventsSpeaker,
   type RunEventsBooth,
   type RunEventsPartnership,
-  type RunEventsSession,
+  type Agenda,
+  type AgendaDay,
+  type AgendaTimeslot,
+  type AgendaSession,
 } from '@ziggy/shared'
 import * as cache from './cache.js'
 
@@ -40,22 +43,128 @@ async function request<T>(
 }
 
 /**
- * Fetch the full agenda for an event.
+ * Transform flat agenda items into structured days/timeslots.
+ */
+function transformAgenda(items: RunEventsAgendaItem[]): Agenda {
+  const timeZone = items[0]?.timeZone || 'Europe/Amsterdam'
+
+  // Group by date (extract date portion from startDate)
+  const dayMap = new Map<string, RunEventsAgendaItem[]>()
+  for (const item of items) {
+    const date = item.startDate.substring(0, 10) // "2026-06-01"
+    const existing = dayMap.get(date)
+    if (existing) {
+      existing.push(item)
+    } else {
+      dayMap.set(date, [item])
+    }
+  }
+
+  // Sort dates and build structured days
+  const sortedDates = [...dayMap.keys()].sort()
+  const days: AgendaDay[] = sortedDates.map((date) => {
+    const dayItems = dayMap.get(date)!
+
+    // Group by startTimeGroup within the day
+    const timeslotMap = new Map<string, RunEventsAgendaItem[]>()
+    for (const item of dayItems) {
+      const group = item.startTimeGroup
+      const existing = timeslotMap.get(group)
+      if (existing) {
+        existing.push(item)
+      } else {
+        timeslotMap.set(group, [item])
+      }
+    }
+
+    // Sort timeslots by time
+    const sortedGroups = [...timeslotMap.keys()].sort()
+    const timeslots: AgendaTimeslot[] = sortedGroups.map((group) => {
+      const groupItems = timeslotMap.get(group)!
+
+      // Find the earliest start and latest end for this timeslot
+      const startDate = groupItems.reduce(
+        (min, item) => (item.startDate < min ? item.startDate : min),
+        groupItems[0].startDate,
+      )
+      const endDate = groupItems.reduce(
+        (max, item) => (item.endDate > max ? item.endDate : max),
+        groupItems[0].endDate,
+      )
+
+      const sessions: AgendaSession[] = groupItems.map((item) => ({
+        id: item.id,
+        guid: item.guid,
+        title: item.title,
+        description: item.description,
+        roomName: item.roomName,
+        roomGuid: item.roomGuid,
+        startDate: item.startDate,
+        endDate: item.endDate,
+        startTimeGroup: item.startTimeGroup,
+        elementType: item.elementType,
+        elementTypeName: item.elementTypeName,
+        color: item.color,
+        icon: item.icon,
+        labels: item.labels || [],
+        speakers: item.speakers || [],
+      }))
+
+      return {
+        startTimeGroup: group,
+        startDate,
+        endDate,
+        sessions,
+      }
+    })
+
+    return { date, timeslots }
+  })
+
+  return { days, timeZone }
+}
+
+/**
+ * Fetch the full agenda and transform into structured format.
  * Results are cached by slug.
  */
-export async function fetchAgenda(apiKey: string, slug: string): Promise<RunEventsAgenda> {
+export async function fetchAgenda(apiKey: string, slug: string): Promise<Agenda> {
   const cacheKey = `agenda:${slug}`
-  const cached = cache.get<RunEventsAgenda>(cacheKey)
+  const cached = cache.get<Agenda>(cacheKey)
   if (cached) return cached
 
-  const data = await request<RunEventsAgenda>(apiKey, 'POST', `/v2/events/${slug}/agenda`)
-  cache.set(cacheKey, data)
-  return data
+  const items = await request<RunEventsAgendaItem[]>(
+    apiKey,
+    'POST',
+    `/v2/events/${slug}/agenda`,
+  )
+  const agenda = transformAgenda(items)
+  cache.set(cacheKey, agenda)
+  return agenda
+}
+
+/**
+ * Fetch raw agenda items (for "now" computation and search).
+ */
+export async function fetchRawAgenda(
+  apiKey: string,
+  slug: string,
+): Promise<RunEventsAgendaItem[]> {
+  const cacheKey = `agenda-raw:${slug}`
+  const cached = cache.get<RunEventsAgendaItem[]>(cacheKey)
+  if (cached) return cached
+
+  const items = await request<RunEventsAgendaItem[]>(
+    apiKey,
+    'POST',
+    `/v2/events/${slug}/agenda`,
+  )
+  cache.set(cacheKey, items)
+  return items
 }
 
 /**
  * Fetch all speakers for an event.
- * Results are cached by slug.
  */
 export async function fetchSpeakers(apiKey: string, slug: string): Promise<RunEventsSpeaker[]> {
   const cacheKey = `speakers:${slug}`
@@ -69,7 +178,6 @@ export async function fetchSpeakers(apiKey: string, slug: string): Promise<RunEv
 
 /**
  * Fetch all booths for an event.
- * Results are cached by slug.
  */
 export async function fetchBooths(apiKey: string, slug: string): Promise<RunEventsBooth[]> {
   const cacheKey = `booths:${slug}`
@@ -83,7 +191,6 @@ export async function fetchBooths(apiKey: string, slug: string): Promise<RunEven
 
 /**
  * Fetch all partnerships for an event.
- * Results are cached by slug.
  */
 export async function fetchPartnerships(
   apiKey: string,
@@ -103,16 +210,14 @@ export async function fetchPartnerships(
 }
 
 /**
- * Search the agenda for an event.
- * This uses GET (unlike most run.events endpoints) and is NOT cached
- * since search queries vary widely.
+ * Search the agenda. Uses GET and is NOT cached.
  */
 export async function searchAgenda(
   apiKey: string,
   slug: string,
   query: string,
-): Promise<RunEventsSession[]> {
-  return request<RunEventsSession[]>(apiKey, 'GET', `/v2/events/${slug}/agenda/search`, {
+): Promise<RunEventsAgendaItem[]> {
+  return request<RunEventsAgendaItem[]>(apiKey, 'GET', `/v2/events/${slug}/agenda/search`, {
     q: query,
   })
 }

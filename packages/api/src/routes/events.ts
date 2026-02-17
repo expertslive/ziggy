@@ -2,8 +2,7 @@ import { Hono } from 'hono'
 import {
   DEFAULT_BRANDING,
   MIN_SEARCH_LENGTH,
-  type EventConfig,
-  type RunEventsSession,
+  type RunEventsAgendaItem,
   type FloorMap,
   type Sponsor,
 } from '@ziggy/shared'
@@ -12,19 +11,13 @@ import * as runEvents from '../lib/run-events.js'
 
 const events = new Hono()
 
-/**
- * Middleware-like helper: validates that the slug matches the configured event
- * and returns the API key. Returns null and sends a 404 if the slug is invalid.
- */
 function getEventApiKey(slug: string): string | null {
   const env = getEnv()
   if (slug !== env.eventSlug) return null
   return env.runEventsApiKey
 }
 
-// ---------------------------------------------------------------------------
 // GET /api/events/:slug/config
-// ---------------------------------------------------------------------------
 events.get('/api/events/:slug/config', (c) => {
   const slug = c.req.param('slug')
   const env = getEnv()
@@ -33,7 +26,7 @@ events.get('/api/events/:slug/config', (c) => {
     return c.json({ error: 'Event not found' }, 404)
   }
 
-  const config: Omit<EventConfig, 'id' | 'apiKey' | 'createdAt' | 'updatedAt' | 'startDate' | 'endDate'> = {
+  return c.json({
     slug: env.eventSlug,
     name: 'Experts Live Netherlands 2026',
     timezone: 'Europe/Amsterdam',
@@ -41,14 +34,10 @@ events.get('/api/events/:slug/config', (c) => {
     defaultLanguage: 'nl',
     branding: DEFAULT_BRANDING,
     days: [],
-  }
-
-  return c.json(config)
+  })
 })
 
-// ---------------------------------------------------------------------------
-// GET /api/events/:slug/agenda
-// ---------------------------------------------------------------------------
+// GET /api/events/:slug/agenda — structured agenda (days/timeslots/sessions)
 events.get('/api/events/:slug/agenda', async (c) => {
   const slug = c.req.param('slug')
   const apiKey = getEventApiKey(slug)
@@ -63,51 +52,50 @@ events.get('/api/events/:slug/agenda', async (c) => {
   }
 })
 
-// ---------------------------------------------------------------------------
-// GET /api/events/:slug/sessions/now
-// ---------------------------------------------------------------------------
+// GET /api/events/:slug/sessions/now — sessions happening right now
 events.get('/api/events/:slug/sessions/now', async (c) => {
   const slug = c.req.param('slug')
   const apiKey = getEventApiKey(slug)
   if (!apiKey) return c.json({ error: 'Event not found' }, 404)
 
   try {
-    const agenda = await runEvents.fetchAgenda(apiKey, slug)
+    const items = await runEvents.fetchRawAgenda(apiKey, slug)
+    const eventTimezone = items[0]?.timeZone || 'Europe/Amsterdam'
 
-    // Compute current time in the event timezone
-    const eventTimezone = 'Europe/Amsterdam'
+    // Get current time in event timezone
     const now = new Date()
-    const nowInTz = new Date(now.toLocaleString('en-US', { timeZone: eventTimezone }))
+    const nowStr = now.toLocaleString('sv-SE', { timeZone: eventTimezone }) // "2026-06-01 14:30:00"
+    const nowIso = nowStr.replace(' ', 'T') // "2026-06-01T14:30:00"
 
-    const currentSessions: RunEventsSession[] = []
+    const current: RunEventsAgendaItem[] = []
+    const upcoming: RunEventsAgendaItem[] = []
 
-    for (const day of agenda.days) {
-      for (const timeslot of day.timeslots) {
-        for (const session of timeslot.sessions) {
-          const startsAt = new Date(
-            new Date(session.startsAt).toLocaleString('en-US', { timeZone: eventTimezone }),
-          )
-          const endsAt = new Date(
-            new Date(session.endsAt).toLocaleString('en-US', { timeZone: eventTimezone }),
-          )
+    for (const item of items) {
+      // Only include actual sessions
+      if (item.elementType !== 1) continue
 
-          if (startsAt <= nowInTz && nowInTz <= endsAt) {
-            currentSessions.push(session)
-          }
-        }
+      if (item.startDate <= nowIso && nowIso < item.endDate) {
+        current.push(item)
+      } else if (item.startDate > nowIso) {
+        upcoming.push(item)
       }
     }
 
-    return c.json(currentSessions)
+    // Sort upcoming by start time and take the next timeslot
+    upcoming.sort((a, b) => a.startDate.localeCompare(b.startDate))
+    const nextTimeGroup = upcoming[0]?.startTimeGroup
+    const upNext = nextTimeGroup
+      ? upcoming.filter((s) => s.startTimeGroup === nextTimeGroup)
+      : []
+
+    return c.json({ current, upNext, timeZone: eventTimezone })
   } catch (err) {
     console.error('[events/sessions/now]', err)
     return c.json({ error: 'Failed to fetch current sessions' }, 502)
   }
 })
 
-// ---------------------------------------------------------------------------
 // GET /api/events/:slug/speakers
-// ---------------------------------------------------------------------------
 events.get('/api/events/:slug/speakers', async (c) => {
   const slug = c.req.param('slug')
   const apiKey = getEventApiKey(slug)
@@ -122,9 +110,7 @@ events.get('/api/events/:slug/speakers', async (c) => {
   }
 })
 
-// ---------------------------------------------------------------------------
 // GET /api/events/:slug/booths
-// ---------------------------------------------------------------------------
 events.get('/api/events/:slug/booths', async (c) => {
   const slug = c.req.param('slug')
   const apiKey = getEventApiKey(slug)
@@ -139,9 +125,7 @@ events.get('/api/events/:slug/booths', async (c) => {
   }
 })
 
-// ---------------------------------------------------------------------------
 // GET /api/events/:slug/search?q=
-// ---------------------------------------------------------------------------
 events.get('/api/events/:slug/search', async (c) => {
   const slug = c.req.param('slug')
   const apiKey = getEventApiKey(slug)
@@ -164,9 +148,7 @@ events.get('/api/events/:slug/search', async (c) => {
   }
 })
 
-// ---------------------------------------------------------------------------
-// GET /api/events/:slug/sponsors (placeholder - Cosmos DB later)
-// ---------------------------------------------------------------------------
+// GET /api/events/:slug/sponsors (placeholder — Cosmos DB later)
 events.get('/api/events/:slug/sponsors', (c) => {
   const slug = c.req.param('slug')
   const env = getEnv()
@@ -176,9 +158,7 @@ events.get('/api/events/:slug/sponsors', (c) => {
   return c.json(sponsors)
 })
 
-// ---------------------------------------------------------------------------
-// GET /api/events/:slug/floor-maps (placeholder - Cosmos DB later)
-// ---------------------------------------------------------------------------
+// GET /api/events/:slug/floor-maps (placeholder — Cosmos DB later)
 events.get('/api/events/:slug/floor-maps', (c) => {
   const slug = c.req.param('slug')
   const env = getEnv()

@@ -1,30 +1,55 @@
-/** run.events API response types */
+/** run.events API response types — matches actual API responses */
 
-export interface RunEventsSession {
-  id: string
-  title: string
-  description?: string
-  abstract?: string
-  aiSummary?: string
-  publicNote?: string
-  startsAt: string
-  endsAt: string
-  room?: string
-  roomId?: string
-  track?: string
-  level?: string
-  labels?: string[]
-  speakers?: RunEventsSpeakerRef[]
-  materials?: RunEventsMaterial[]
+/** A label attached to sessions or speakers */
+export interface RunEventsLabel {
+  id: number
+  entityId: number
+  image: string | null
+  name: string
+  color: string
+  showInElement: boolean
 }
 
+/** Speaker reference as returned within agenda items */
 export interface RunEventsSpeakerRef {
-  id: string
-  firstName: string
-  lastName: string
-  fullName: string
-  tagline?: string
-  profilePicture?: string
+  id: number
+  uniqueId: number
+  image: string
+  name: string
+  tagline: string | null
+  company: string | null
+  isFeatured: boolean
+  eventId: number
+  biography: string | null
+  labels: RunEventsLabel[] | null
+}
+
+/** A single agenda element (session or non-content block) */
+export interface RunEventsAgendaItem {
+  id: number
+  guid: string
+  eventId: number
+  roomName: string
+  roomGuid: string
+  /** 1 = Session, 2 = NonContent */
+  elementType: number
+  sessionId: number | null
+  nonContentBlockId: number | null
+  title: string
+  description: string | null
+  /** ISO datetime without timezone, e.g. "2026-06-01T08:30:00" */
+  startDate: string
+  /** ISO datetime without timezone */
+  endDate: string
+  /** Time group for display, e.g. "08:30" */
+  startTimeGroup: string
+  timeZone: string
+  icon: string | null
+  color: string | null
+  labels: RunEventsLabel[] | null
+  speakers: RunEventsSpeakerRef[] | null
+  materials: RunEventsMaterial[] | null
+  elementTypeName: string
 }
 
 export interface RunEventsMaterial {
@@ -33,51 +58,23 @@ export interface RunEventsMaterial {
   type?: string
 }
 
+/** Speaker as returned by the /speakers endpoint */
 export interface RunEventsSpeaker {
-  id: string
-  firstName: string
-  middleName?: string
-  lastName: string
-  fullName: string
-  tagline?: string
-  biography?: string
-  aiSummary?: string
-  profilePicture?: string
-  socialMedia?: RunEventsSocialMedia[]
-  sessions?: RunEventsSessionRef[]
-  labels?: string[]
+  id: number
+  uniqueId: number
+  image: string
+  name: string
+  tagline: string | null
+  company: string | null
+  isFeatured: boolean
+  eventId: number
+  biography: string
+  labels: RunEventsLabel[]
 }
 
-export interface RunEventsSocialMedia {
-  type: string
-  url: string
-}
-
-export interface RunEventsSessionRef {
-  id: string
-  title: string
-  startsAt: string
-  endsAt: string
-  room?: string
-}
-
-export interface RunEventsTimeslot {
-  startsAt: string
-  endsAt: string
-  sessions: RunEventsSession[]
-}
-
-export interface RunEventsAgendaDay {
-  date: string
-  timeslots: RunEventsTimeslot[]
-}
-
-export interface RunEventsAgenda {
-  days: RunEventsAgendaDay[]
-}
-
+/** Booth as returned by the /booths endpoint */
 export interface RunEventsBooth {
-  id: string
+  id: number
   name: string
   description?: string
   boothNumber?: string
@@ -85,31 +82,60 @@ export interface RunEventsBooth {
   organization?: string
   logoUrl?: string
   website?: string
-  labels?: string[]
-  resources?: RunEventsBoothResource[]
+  labels?: RunEventsLabel[]
 }
 
-export interface RunEventsBoothResource {
-  name: string
-  url: string
-  type?: string
-}
-
+/** Partnership as returned by the /partnerships endpoint */
 export interface RunEventsPartnership {
-  id: string
+  id: number
   organizationName: string
   level?: string
   description?: string
   logoUrl?: string
   website?: string
   boothNumber?: string
-  contacts?: RunEventsPartnerContact[]
-  sessions?: RunEventsSessionRef[]
-  labels?: string[]
+  labels?: RunEventsLabel[]
 }
 
-export interface RunEventsPartnerContact {
-  name: string
-  email?: string
-  role?: string
+// ---------------------------------------------------------------------------
+// Transformed types (what our API serves to the kiosk)
+// ---------------------------------------------------------------------------
+
+/** A session in our transformed agenda format */
+export interface AgendaSession {
+  id: number
+  guid: string
+  title: string
+  description: string | null
+  roomName: string
+  roomGuid: string
+  startDate: string
+  endDate: string
+  startTimeGroup: string
+  elementType: number
+  elementTypeName: string
+  color: string | null
+  icon: string | null
+  labels: RunEventsLabel[]
+  speakers: RunEventsSpeakerRef[]
+}
+
+/** A timeslot grouping sessions by startTimeGroup */
+export interface AgendaTimeslot {
+  startTimeGroup: string
+  startDate: string
+  endDate: string
+  sessions: AgendaSession[]
+}
+
+/** A single day in the transformed agenda */
+export interface AgendaDay {
+  date: string
+  timeslots: AgendaTimeslot[]
+}
+
+/** The structured agenda our API returns */
+export interface Agenda {
+  days: AgendaDay[]
+  timeZone: string
 }

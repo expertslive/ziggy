@@ -5,12 +5,7 @@ import { useAgenda } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { SessionCard } from '../components/SessionCard';
-import type { Session, AgendaDay } from '../lib/api';
-
-function formatTime(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', hour12: false });
-}
+import type { AgendaSession } from '../lib/api';
 
 function formatDayLabel(dateStr: string, language: string): string {
   const d = new Date(dateStr + 'T00:00:00');
@@ -27,7 +22,7 @@ export function AgendaPage() {
   const touch = useKioskStore((s) => s.touch);
   const { data: agenda, isLoading, error } = useAgenda();
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [selectedSession, setSelectedSession] = useState<AgendaSession | null>(null);
 
   if (isLoading) {
     return (
@@ -59,7 +54,7 @@ export function AgendaPage() {
     );
   }
 
-  const currentDay: AgendaDay = days[selectedDayIndex] ?? days[0];
+  const currentDay = days[selectedDayIndex] ?? days[0];
 
   return (
     <PageContainer>
@@ -90,14 +85,16 @@ export function AgendaPage() {
       {/* Timeline */}
       <div className="space-y-6">
         {currentDay.timeslots.map((timeslot) => (
-          <div key={`${timeslot.startsAt}-${timeslot.endsAt}`}>
+          <div key={timeslot.startTimeGroup}>
             {/* Time header */}
             <div className="flex items-center gap-3 mb-3">
               <span className="text-lg font-bold text-el-red">
-                {formatTime(timeslot.startsAt)}
+                {timeslot.startTimeGroup}
               </span>
               <span className="text-sm text-el-light/40">—</span>
-              <span className="text-sm text-el-light/40">{formatTime(timeslot.endsAt)}</span>
+              <span className="text-sm text-el-light/40">
+                {timeslot.endDate.substring(11, 16)}
+              </span>
               <div className="flex-1 h-px bg-el-gray-light" />
             </div>
 

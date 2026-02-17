@@ -8,70 +8,86 @@ async function fetchJson<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-// Types matching run.events API responses (proxied through our Hono API)
+// Types matching the actual run.events API responses (via our Hono backend)
+
+export interface Label {
+  id: number;
+  entityId: number;
+  image: string | null;
+  name: string;
+  color: string;
+  showInElement: boolean;
+}
 
 export interface SpeakerRef {
-  id: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  tagline?: string;
-  profilePicture?: string;
+  id: number;
+  uniqueId: number;
+  image: string;
+  name: string;
+  tagline: string | null;
+  company: string | null;
+  isFeatured: boolean;
+  eventId: number;
+  biography: string | null;
+  labels: Label[] | null;
 }
 
-export interface Session {
-  id: string;
+export interface AgendaSession {
+  id: number;
+  guid: string;
   title: string;
-  description?: string;
-  abstract?: string;
-  startsAt: string;
-  endsAt: string;
-  room?: string;
-  roomId?: string;
-  track?: string;
-  level?: string;
-  labels?: string[];
-  speakers?: SpeakerRef[];
+  description: string | null;
+  roomName: string;
+  roomGuid: string;
+  startDate: string;
+  endDate: string;
+  startTimeGroup: string;
+  elementType: number;
+  elementTypeName: string;
+  color: string | null;
+  icon: string | null;
+  labels: Label[];
+  speakers: SpeakerRef[];
 }
 
-export interface Timeslot {
-  startsAt: string;
-  endsAt: string;
-  sessions: Session[];
+export interface AgendaTimeslot {
+  startTimeGroup: string;
+  startDate: string;
+  endDate: string;
+  sessions: AgendaSession[];
 }
 
 export interface AgendaDay {
   date: string;
-  timeslots: Timeslot[];
+  timeslots: AgendaTimeslot[];
 }
 
 export interface Agenda {
   days: AgendaDay[];
+  timeZone: string;
+}
+
+export interface NowResponse {
+  current: AgendaSession[];
+  upNext: AgendaSession[];
+  timeZone: string;
 }
 
 export interface Speaker {
-  id: string;
-  firstName: string;
-  middleName?: string;
-  lastName: string;
-  fullName: string;
-  tagline?: string;
-  biography?: string;
-  profilePicture?: string;
-  sessions?: SessionRef[];
-  labels?: string[];
-}
-
-export interface SessionRef {
-  id: string;
-  title: string;
-  startsAt: string;
-  endsAt: string;
-  room?: string;
+  id: number;
+  uniqueId: number;
+  image: string;
+  name: string;
+  tagline: string | null;
+  company: string | null;
+  isFeatured: boolean;
+  eventId: number;
+  biography: string;
+  labels: Label[];
 }
 
 export interface Booth {
-  id: string;
+  id: number;
   name: string;
   description?: string;
   boothNumber?: string;
@@ -129,8 +145,8 @@ export function fetchAgenda(slug: string): Promise<Agenda> {
   return fetchJson<Agenda>(`/api/events/${slug}/agenda`);
 }
 
-export function fetchNowSessions(slug: string): Promise<Session[]> {
-  return fetchJson<Session[]>(`/api/events/${slug}/sessions/now`);
+export function fetchNowSessions(slug: string): Promise<NowResponse> {
+  return fetchJson<NowResponse>(`/api/events/${slug}/sessions/now`);
 }
 
 export function fetchSpeakers(slug: string): Promise<Speaker[]> {
@@ -141,9 +157,9 @@ export function fetchBooths(slug: string): Promise<Booth[]> {
   return fetchJson<Booth[]>(`/api/events/${slug}/booths`);
 }
 
-export function fetchSearch(slug: string, query: string): Promise<Session[]> {
+export function fetchSearch(slug: string, query: string): Promise<AgendaSession[]> {
   const encoded = encodeURIComponent(query);
-  return fetchJson<Session[]>(`/api/events/${slug}/search?q=${encoded}`);
+  return fetchJson<AgendaSession[]>(`/api/events/${slug}/search?q=${encoded}`);
 }
 
 export function fetchSponsors(slug: string): Promise<Sponsor[]> {

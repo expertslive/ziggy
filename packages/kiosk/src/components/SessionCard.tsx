@@ -1,16 +1,13 @@
-import type { Session } from '../lib/api';
+import type { AgendaSession } from '../lib/api';
 
 interface SessionCardProps {
-  session: Session;
+  session: AgendaSession;
   onTap: () => void;
 }
 
-function formatTime(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', hour12: false });
-}
-
 export function SessionCard({ session, onTap }: SessionCardProps) {
+  const visibleLabels = session.labels.filter((l) => l.showInElement);
+
   return (
     <button
       onClick={onTap}
@@ -20,20 +17,26 @@ export function SessionCard({ session, onTap }: SessionCardProps) {
         {session.title}
       </h3>
 
-      {session.room && (
-        <div className="flex items-center gap-1.5 mb-2">
-          <span className="text-xs text-el-light/50">&#x1F4CD;</span>
-          <span className="text-sm text-el-light/60">{session.room}</span>
+      <div className="flex items-center gap-1.5 mb-2">
+        <span className="text-xs text-el-light/50">&#x1F4CD;</span>
+        <span className="text-sm text-el-light/60">{session.roomName}</span>
+      </div>
+
+      {visibleLabels.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {visibleLabels.map((label) => (
+            <span
+              key={label.id}
+              className="inline-block text-xs rounded-full px-2.5 py-0.5"
+              style={{ backgroundColor: label.color + '30', color: label.color }}
+            >
+              {label.name}
+            </span>
+          ))}
         </div>
       )}
 
-      {session.track && (
-        <span className="inline-block text-xs bg-el-red/20 text-el-red rounded-full px-2.5 py-0.5 mb-2">
-          {session.track}
-        </span>
-      )}
-
-      {session.speakers && session.speakers.length > 0 && (
+      {session.speakers.length > 0 && (
         <div className="flex items-center gap-2 mt-1">
           <div className="flex -space-x-2">
             {session.speakers.slice(0, 3).map((speaker) => (
@@ -41,28 +44,28 @@ export function SessionCard({ session, onTap }: SessionCardProps) {
                 key={speaker.id}
                 className="w-7 h-7 rounded-full bg-el-gray-light border-2 border-el-gray overflow-hidden"
               >
-                {speaker.profilePicture ? (
+                {speaker.image ? (
                   <img
-                    src={speaker.profilePicture}
-                    alt={speaker.fullName}
+                    src={speaker.image}
+                    alt={speaker.name}
                     className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-xs text-el-light/60">
-                    {speaker.firstName[0]}
+                    {speaker.name[0]}
                   </div>
                 )}
               </div>
             ))}
           </div>
           <span className="text-xs text-el-light/50 truncate">
-            {session.speakers.map((s) => s.fullName).join(', ')}
+            {session.speakers.map((s) => s.name).join(', ')}
           </span>
         </div>
       )}
 
       <div className="text-xs text-el-light/40 mt-2">
-        {formatTime(session.startsAt)} — {formatTime(session.endsAt)}
+        {session.startTimeGroup} — {session.endDate.substring(11, 16)}
       </div>
     </button>
   );

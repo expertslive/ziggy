@@ -1,20 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import { useKioskStore } from '../store/kiosk';
-import type { Session } from '../lib/api';
+import type { AgendaSession } from '../lib/api';
 
 interface SessionDetailModalProps {
-  session: Session;
+  session: AgendaSession;
   onClose: () => void;
-}
-
-function formatTime(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
 export function SessionDetailModal({ session, onClose }: SessionDetailModalProps) {
   const { t } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
+  const visibleLabels = session.labels.filter((l) => l.showInElement);
 
   return (
     <div
@@ -36,19 +32,23 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
             </h2>
             <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-el-light/60">
               <span>
-                {formatTime(session.startsAt)} — {formatTime(session.endsAt)}
+                {session.startTimeGroup} — {session.endDate.substring(11, 16)}
               </span>
-              {session.room && (
-                <>
-                  <span className="text-el-light/30">|</span>
-                  <span>&#x1F4CD; {session.room}</span>
-                </>
-              )}
+              <span className="text-el-light/30">|</span>
+              <span>&#x1F4CD; {session.roomName}</span>
             </div>
-            {session.track && (
-              <span className="inline-block text-xs bg-el-red/20 text-el-red rounded-full px-2.5 py-0.5 mt-2">
-                {session.track}
-              </span>
+            {visibleLabels.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {visibleLabels.map((label) => (
+                  <span
+                    key={label.id}
+                    className="inline-block text-xs rounded-full px-2.5 py-0.5"
+                    style={{ backgroundColor: label.color + '30', color: label.color }}
+                  >
+                    {label.name}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
           <button
@@ -65,7 +65,7 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
         {/* Scrollable content */}
         <div className="scrollable p-6 space-y-5">
           {/* Speakers */}
-          {session.speakers && session.speakers.length > 0 && (
+          {session.speakers.length > 0 && (
             <div>
               <h3 className="text-sm font-bold text-el-light/50 uppercase tracking-wide mb-3">
                 {t('speakers.title')}
@@ -74,23 +74,25 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
                 {session.speakers.map((speaker) => (
                   <div key={speaker.id} className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-el-gray-light overflow-hidden shrink-0">
-                      {speaker.profilePicture ? (
+                      {speaker.image ? (
                         <img
-                          src={speaker.profilePicture}
-                          alt={speaker.fullName}
+                          src={speaker.image}
+                          alt={speaker.name}
                           className="w-full h-full object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-lg text-el-light/60">
-                          {speaker.firstName[0]}
-                          {speaker.lastName[0]}
+                          {speaker.name[0]}
                         </div>
                       )}
                     </div>
                     <div>
-                      <p className="text-base font-bold text-el-light">{speaker.fullName}</p>
+                      <p className="text-base font-bold text-el-light">{speaker.name}</p>
                       {speaker.tagline && (
                         <p className="text-sm text-el-light/50">{speaker.tagline}</p>
+                      )}
+                      {speaker.company && (
+                        <p className="text-xs text-el-light/40">{speaker.company}</p>
                       )}
                     </div>
                   </div>
@@ -99,29 +101,15 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
             </div>
           )}
 
-          {/* Description / Abstract */}
-          {(session.description || session.abstract) && (
+          {/* Description */}
+          {session.description && (
             <div>
               <h3 className="text-sm font-bold text-el-light/50 uppercase tracking-wide mb-2">
-                {t('agenda.description', 'Description')}
+                {t('agenda.description')}
               </h3>
               <p className="text-base text-el-light/80 leading-relaxed whitespace-pre-line">
-                {session.description || session.abstract}
+                {session.description}
               </p>
-            </div>
-          )}
-
-          {/* Labels */}
-          {session.labels && session.labels.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {session.labels.map((label) => (
-                <span
-                  key={label}
-                  className="text-xs bg-el-gray text-el-light/60 rounded-full px-3 py-1"
-                >
-                  {label}
-                </span>
-              ))}
             </div>
           )}
         </div>

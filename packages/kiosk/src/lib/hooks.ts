@@ -9,7 +9,16 @@ import {
   fetchFloorMaps,
   fetchEventConfig,
 } from './api';
-import type { Agenda, Session, Speaker, Booth, Sponsor, FloorMap, EventConfig } from './api';
+import type {
+  Agenda,
+  NowResponse,
+  Speaker,
+  Booth,
+  AgendaSession,
+  Sponsor,
+  FloorMap,
+  EventConfig,
+} from './api';
 import { useKioskStore } from '../store/kiosk';
 
 function useSlug(): string {
@@ -26,7 +35,7 @@ export function useAgenda() {
 
 export function useNowSessions() {
   const slug = useSlug();
-  return useQuery<Session[]>({
+  return useQuery<NowResponse>({
     queryKey: ['now-sessions', slug],
     queryFn: () => fetchNowSessions(slug),
     refetchInterval: 30_000,
@@ -51,7 +60,7 @@ export function useBooths() {
 
 export function useSearch(query: string) {
   const slug = useSlug();
-  return useQuery<Session[]>({
+  return useQuery<AgendaSession[]>({
     queryKey: ['search', slug, query],
     queryFn: () => fetchSearch(slug, query),
     enabled: query.length >= 4,
