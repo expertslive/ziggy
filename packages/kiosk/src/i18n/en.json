@@ -26,7 +26,10 @@
     "title": "Agenda",
     "allDays": "All days",
     "description": "Description",
-    "noSessions": "No sessions on this day."
+    "noSessions": "No sessions on this day.",
+    "filter": {
+      "clear": "Clear filters"
+    }
   },
   "speakers": {
     "title": "Speakers",

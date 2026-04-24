@@ -26,7 +26,10 @@
     "title": "Programme",
     "allDays": "Tous les jours",
     "description": "Description",
-    "noSessions": "Aucune session ce jour."
+    "noSessions": "Aucune session ce jour.",
+    "filter": {
+      "clear": "Effacer les filtres"
+    }
   },
   "speakers": {
     "title": "Intervenants",

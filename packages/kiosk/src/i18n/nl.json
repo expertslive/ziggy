@@ -26,7 +26,10 @@
     "title": "Agenda",
     "allDays": "Alle dagen",
     "description": "Beschrijving",
-    "noSessions": "Geen sessies op deze dag."
+    "noSessions": "Geen sessies op deze dag.",
+    "filter": {
+      "clear": "Filters wissen"
+    }
   },
   "speakers": {
     "title": "Sprekers",

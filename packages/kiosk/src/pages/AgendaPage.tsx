@@ -43,6 +43,9 @@ export function AgendaPage() {
   const setSelectedDayIndex = useKioskStore((s) => s.setSelectedDayIndex);
   const openSessionId = useKioskStore((s) => s.openSessionId);
   const openSession = useKioskStore((s) => s.openSession);
+  const agendaLabelFilter = useKioskStore((s) => s.agendaLabelFilter);
+  const toggleLabelFilter = useKioskStore((s) => s.toggleLabelFilter);
+  const clearLabelFilter = useKioskStore((s) => s.clearLabelFilter);
   const now = useClockTick(30_000);
 
   // Build the list of day tabs by merging event config days with agenda data.
@@ -119,6 +122,30 @@ export function AgendaPage() {
 
   const currentDay = days[activeDayIndex] ?? days[0];
 
+  const labels = useMemo(() => {
+    const map = new Map<string, { name: string; color: string }>();
+    for (const slot of currentDay.timeslots) {
+      for (const s of slot.sessions) {
+        for (const l of s.labels) {
+          if (!map.has(l.name)) map.set(l.name, { name: l.name, color: l.color });
+        }
+      }
+    }
+    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
+  }, [currentDay]);
+
+  const filteredTimeslots = useMemo(() => {
+    if (agendaLabelFilter.length === 0) return currentDay.timeslots;
+    return currentDay.timeslots
+      .map((slot) => ({
+        ...slot,
+        sessions: slot.sessions.filter((s) =>
+          s.labels.some((l) => agendaLabelFilter.includes(l.name)),
+        ),
+      }))
+      .filter((slot) => slot.sessions.length > 0);
+  }, [currentDay, agendaLabelFilter]);
+
   return (
     <PageContainer>
       <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
@@ -145,10 +172,48 @@ export function AgendaPage() {
         </div>
       )}
 
+      {/* Label filter chips */}
+      {labels.length > 0 && (
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+          {labels.map((l) => {
+            const active = agendaLabelFilter.includes(l.name);
+            const color = l.color || '#3b82f6';
+            return (
+              <button
+                key={l.name}
+                onClick={() => {
+                  toggleLabelFilter(l.name);
+                  touch();
+                }}
+                className="px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors"
+                style={{
+                  backgroundColor: active ? color : 'transparent',
+                  color: active ? '#fff' : 'rgba(255,255,255,0.7)',
+                  border: `1px solid ${color}`,
+                }}
+              >
+                {l.name}
+              </button>
+            );
+          })}
+          {agendaLabelFilter.length > 0 && (
+            <button
+              onClick={() => {
+                clearLabelFilter();
+                touch();
+              }}
+              className="px-3 py-2 rounded-full text-xs font-bold whitespace-nowrap bg-el-gray text-el-light/80"
+            >
+              {t('agenda.filter.clear')}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Timeline */}
-      {currentDay.timeslots.length > 0 ? (
+      {filteredTimeslots.length > 0 ? (
         <div className="space-y-6">
-          {currentDay.timeslots.map((timeslot) => (
+          {filteredTimeslots.map((timeslot) => (
             <div key={timeslot.startTimeGroup}>
               {/* Time header */}
               <div className="flex items-center gap-3 mb-3">
