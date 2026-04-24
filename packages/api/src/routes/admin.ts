@@ -1,6 +1,7 @@
 /** Admin CRUD routes */
 
 import { Hono } from 'hono'
+import type { Context } from 'hono'
 import type {
   Admin,
   LoginRequest,
@@ -12,10 +13,19 @@ import type {
 } from '@ziggy/shared'
 import { DEFAULT_BRANDING } from '@ziggy/shared'
 import { requireAuth } from '../middleware/auth.js'
+import { loginRateLimiter } from '../middleware/rate-limit.js'
 import { signToken, hashPassword, comparePassword } from '../lib/auth.js'
 import { findAll, findById, upsert, deleteItem, getContainer } from '../lib/cosmos.js'
 import { uploadImage } from '../lib/storage.js'
 import { getEnv } from '../env.js'
+
+function clientIp(c: Context): string {
+  return (
+    c.req.header('x-forwarded-for')?.split(',')[0].trim() ||
+    c.req.header('x-real-ip') ||
+    'unknown'
+  )
+}
 
 const admin = new Hono()
 
@@ -30,6 +40,12 @@ admin.post('/api/auth/login', async (c) => {
     return c.json({ error: 'Email and password are required' }, 400)
   }
 
+  const ip = clientIp(c)
+  const emailRaw = (body.email || '').toLowerCase()
+  if (!loginRateLimiter.check(ip, emailRaw)) {
+    return c.json({ error: 'Too many attempts. Try again in 15 minutes.' }, 429)
+  }
+
   // Look up admin by email (email is partition key for admins container)
   const container = getContainer('admins')
   const { resources } = await container.items
@@ -41,14 +57,17 @@ admin.post('/api/auth/login', async (c) => {
 
   const adminUser = resources[0]
   if (!adminUser) {
+    loginRateLimiter.recordFailure(ip, emailRaw)
     return c.json({ error: 'Invalid email or password' }, 401)
   }
 
   const valid = await comparePassword(body.password, adminUser.passwordHash)
   if (!valid) {
+    loginRateLimiter.recordFailure(ip, emailRaw)
     return c.json({ error: 'Invalid email or password' }, 401)
   }
 
+  loginRateLimiter.recordSuccess(ip, emailRaw)
   const token = signToken(adminUser)
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 
@@ -72,12 +91,23 @@ admin.post('/api/auth/setup', async (c) => {
     .query<Admin>({ query: 'SELECT * FROM c' })
     .fetchAll()
 
+  const body = await c.req.json<LoginRequest>()
+
+  const ip = clientIp(c)
+  const emailRaw = (body.email || '').toLowerCase()
+  if (!loginRateLimiter.check(ip, emailRaw)) {
+    return c.json({ error: 'Too many attempts. Try again in 15 minutes.' }, 429)
+  }
+
   if (resources.length > 0) {
+    // NOTE: do NOT recordFailure here — this is not a brute-force-able path,
+    // and counting it would let an attacker DoS the rate-limit bucket even
+    // though setup is already safely disabled.
     return c.json({ error: 'Admin already exists. Setup is disabled.' }, 403)
   }
 
-  const body = await c.req.json<LoginRequest>()
   if (!body.email || !body.password) {
+    loginRateLimiter.recordFailure(ip, emailRaw)
     return c.json({ error: 'Email and password are required' }, 400)
   }
 
@@ -91,10 +121,12 @@ admin.post('/api/auth/setup', async (c) => {
   try {
     await upsert('admins', newAdmin)
   } catch {
-    // Race: another request created the bootstrap admin first.
+    // Race: another request created the bootstrap admin first. Not a
+    // brute-force attempt — skip recording.
     return c.json({ error: 'Admin already exists.' }, 409)
   }
 
+  loginRateLimiter.recordSuccess(ip, emailRaw)
   const token = signToken(newAdmin)
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 
