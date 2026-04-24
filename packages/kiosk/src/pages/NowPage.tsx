@@ -76,8 +76,15 @@ function NextSessionTime({ sessions }: { sessions: AgendaSession[] }) {
 export function NowPage() {
   const { t } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
+  const openSessionId = useKioskStore((s) => s.openSessionId);
+  const openSession = useKioskStore((s) => s.openSession);
   const { data, isLoading } = useNowSessions();
-  const [selectedSession, setSelectedSession] = useState<AgendaSession | null>(null);
+
+  const selectedSession = useMemo<AgendaSession | null>(() => {
+    if (openSessionId == null || !data) return null;
+    const all = [...data.current, ...data.upNext];
+    return all.find((s) => s.id === openSessionId) ?? null;
+  }, [openSessionId, data]);
 
   if (isLoading) {
     return (
@@ -109,7 +116,7 @@ export function NowPage() {
                 <SessionCard
                   session={session}
                   onTap={() => {
-                    setSelectedSession(session);
+                    openSession(session.id);
                     touch();
                   }}
                 />
@@ -140,7 +147,7 @@ export function NowPage() {
                 key={session.id}
                 session={session}
                 onTap={() => {
-                  setSelectedSession(session);
+                  openSession(session.id);
                   touch();
                 }}
               />
@@ -153,7 +160,7 @@ export function NowPage() {
       {selectedSession && (
         <SessionDetailModal
           session={selectedSession}
-          onClose={() => setSelectedSession(null)}
+          onClose={() => openSession(null)}
         />
       )}
     </PageContainer>

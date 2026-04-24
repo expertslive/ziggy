@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '../components/PageContainer';
 import { useAgenda, useEventConfig } from '../lib/hooks';
@@ -38,8 +38,10 @@ export function AgendaPage() {
   const touch = useKioskStore((s) => s.touch);
   const { data: agenda, isLoading: agendaLoading } = useAgenda();
   const { data: config } = useEventConfig();
-  const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
-  const [selectedSession, setSelectedSession] = useState<AgendaSession | null>(null);
+  const selectedDayIndex = useKioskStore((s) => s.selectedDayIndex);
+  const setSelectedDayIndex = useKioskStore((s) => s.setSelectedDayIndex);
+  const openSessionId = useKioskStore((s) => s.openSessionId);
+  const openSession = useKioskStore((s) => s.openSession);
 
   // Build the list of day tabs by merging event config days with agenda data.
   // The event config defines which days exist and their labels (e.g. "Workshops", "Sessions").
@@ -80,6 +82,18 @@ export function AgendaPage() {
   // Resolve the active tab index: use explicit selection, or auto-select today's tab
   const timezone = config?.timezone || agenda?.timeZone || 'Europe/Amsterdam';
   const activeDayIndex = selectedDayIndex ?? getInitialDayIndex(days, timezone);
+
+  // Lookup the selected session from its id across all timeslots on all days
+  const selectedSession = useMemo<AgendaSession | null>(() => {
+    if (openSessionId == null) return null;
+    for (const day of days) {
+      for (const ts of day.timeslots) {
+        const found = ts.sessions.find((s) => s.id === openSessionId);
+        if (found) return found;
+      }
+    }
+    return null;
+  }, [openSessionId, days]);
 
   if (agendaLoading) {
     return (
@@ -153,7 +167,7 @@ export function AgendaPage() {
                     key={session.id}
                     session={session}
                     onTap={() => {
-                      setSelectedSession(session);
+                      openSession(session.id);
                       touch();
                     }}
                   />
@@ -172,7 +186,7 @@ export function AgendaPage() {
       {selectedSession && (
         <SessionDetailModal
           session={selectedSession}
-          onClose={() => setSelectedSession(null)}
+          onClose={() => openSession(null)}
         />
       )}
     </PageContainer>

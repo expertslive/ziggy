@@ -208,10 +208,11 @@ function FloorMapViewer({
 export function MapPage() {
   const { t, i18n } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
+  const selectedMapId = useKioskStore((s) => s.selectedMapId);
+  const setSelectedMap = useKioskStore((s) => s.setSelectedMap);
   const lang = i18n.language;
   const { data: maps, isLoading, error } = useFloorMaps();
   const { data: nowData } = useNowSessions();
-  const [activeMapIndex, setActiveMapIndex] = useState(0);
 
   if (isLoading) {
     return (
@@ -252,6 +253,12 @@ export function MapPage() {
 
   // Use maps in API order (sortOrder handled server-side)
   const sortedMaps = maps;
+  const activeMapIndex = selectedMapId
+    ? Math.max(
+        0,
+        sortedMaps.findIndex((m) => m.id === selectedMapId),
+      )
+    : 0;
   const activeMap = sortedMaps[activeMapIndex] ?? sortedMaps[0];
 
   return (
@@ -270,7 +277,7 @@ export function MapPage() {
               <button
                 key={map.id}
                 onClick={() => {
-                  setActiveMapIndex(index);
+                  setSelectedMap(map.id);
                   touch();
                 }}
                 className={`shrink-0 px-5 py-3 rounded-xl text-base font-bold transition-colors active:scale-[0.98] ${

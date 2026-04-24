@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SessionCard } from '../components/SessionCard';
 import { SessionDetailModal } from '../components/SessionDetailModal';
@@ -10,16 +10,23 @@ import type { AgendaSession } from '../lib/api';
 export function SearchPage() {
   const { t } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
-  const [query, setQuery] = useState('');
+  const query = useKioskStore((s) => s.searchQuery);
+  const setQuery = useKioskStore((s) => s.setSearchQuery);
+  const openSessionId = useKioskStore((s) => s.openSessionId);
+  const openSession = useKioskStore((s) => s.openSession);
   const { data: results, isLoading } = useSearch(query);
-  const [selectedSession, setSelectedSession] = useState<AgendaSession | null>(null);
+
+  const selectedSession = useMemo<AgendaSession | null>(() => {
+    if (openSessionId == null || !results) return null;
+    return results.find((s) => s.id === openSessionId) ?? null;
+  }, [openSessionId, results]);
 
   const handleKeyPress = (key: string) => {
-    setQuery((prev) => prev + key);
+    setQuery(query + key);
   };
 
   const handleBackspace = () => {
-    setQuery((prev) => prev.slice(0, -1));
+    setQuery(query.slice(0, -1));
   };
 
   const handleClear = () => {
@@ -79,7 +86,7 @@ export function SearchPage() {
                 key={session.id}
                 session={session}
                 onTap={() => {
-                  setSelectedSession(session);
+                  openSession(session.id);
                   touch();
                 }}
               />
@@ -101,7 +108,7 @@ export function SearchPage() {
       {selectedSession && (
         <SessionDetailModal
           session={selectedSession}
-          onClose={() => setSelectedSession(null)}
+          onClose={() => openSession(null)}
         />
       )}
     </div>

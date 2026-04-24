@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '../components/PageContainer';
 import { SpeakerDetailModal } from '../components/SpeakerDetailModal';
@@ -9,14 +9,20 @@ import type { Speaker } from '../lib/api';
 export function SpeakersPage() {
   const { t } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
+  const openSpeakerId = useKioskStore((s) => s.openSpeakerId);
+  const openSpeaker = useKioskStore((s) => s.openSpeaker);
   const { data: speakers, isLoading, error } = useSpeakers();
-  const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
 
   // Sort speakers A-Z by name
   const sortedSpeakers = useMemo(() => {
     if (!speakers) return [];
     return [...speakers].sort((a, b) => a.name.localeCompare(b.name));
   }, [speakers]);
+
+  const selectedSpeaker = useMemo<Speaker | null>(() => {
+    if (openSpeakerId == null || !speakers) return null;
+    return speakers.find((s) => s.uniqueId === openSpeakerId) ?? null;
+  }, [openSpeakerId, speakers]);
 
   if (isLoading) {
     return (
@@ -60,7 +66,7 @@ export function SpeakersPage() {
           <button
             key={speaker.uniqueId}
             onClick={() => {
-              setSelectedSpeaker(speaker);
+              openSpeaker(speaker.uniqueId);
               touch();
             }}
             className="flex flex-col items-center text-center bg-el-gray rounded-xl p-4 active:scale-[0.98] transition-transform"
@@ -97,7 +103,7 @@ export function SpeakersPage() {
       {selectedSpeaker && (
         <SpeakerDetailModal
           speaker={selectedSpeaker}
-          onClose={() => setSelectedSpeaker(null)}
+          onClose={() => openSpeaker(null)}
         />
       )}
     </PageContainer>

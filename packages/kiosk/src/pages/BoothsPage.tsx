@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageContainer } from '../components/PageContainer';
@@ -114,8 +114,14 @@ function BoothDetailModal({ booth, onClose }: { booth: Booth; onClose: () => voi
 export function BoothsPage() {
   const { t } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
+  const openBoothId = useKioskStore((s) => s.openBoothId);
+  const openBooth = useKioskStore((s) => s.openBooth);
   const { data: booths, isLoading, error } = useBooths();
-  const [selectedBooth, setSelectedBooth] = useState<Booth | null>(null);
+
+  const selectedBooth = useMemo<Booth | null>(() => {
+    if (openBoothId == null || !booths) return null;
+    return booths.find((b) => b.id === openBoothId) ?? null;
+  }, [openBoothId, booths]);
 
   if (isLoading) {
     return (
@@ -159,7 +165,7 @@ export function BoothsPage() {
             key={booth.id}
             booth={booth}
             onTap={() => {
-              setSelectedBooth(booth);
+              openBooth(booth.id);
               touch();
             }}
           />
@@ -170,7 +176,7 @@ export function BoothsPage() {
         {selectedBooth && (
           <BoothDetailModal
             booth={selectedBooth}
-            onClose={() => setSelectedBooth(null)}
+            onClose={() => openBooth(null)}
           />
         )}
       </AnimatePresence>
