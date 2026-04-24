@@ -1,43 +1,43 @@
 /** Azure Blob Storage upload helper */
 
-import { BlobServiceClient } from '@azure/storage-blob'
+import { BlobServiceClient, type BlockBlobParallelUploadOptions } from '@azure/storage-blob'
 import { getEnv } from '../env.js'
+import { type AllowedImageType, extensionFor } from './magic-bytes.js'
 
-const CONTAINER_NAME = 'images'
+const CONTAINER = 'images'
 
-let blobService: BlobServiceClient | null = null
-
-function getClient(): BlobServiceClient {
-  if (!blobService) {
-    const env = getEnv()
-    if (!env.storageConnectionString) {
-      throw new Error('STORAGE_CONNECTION_STRING is not set')
-    }
-    blobService = BlobServiceClient.fromConnectionString(env.storageConnectionString)
+let _client: BlobServiceClient | null = null
+function client(): BlobServiceClient {
+  if (_client) return _client
+  const env = getEnv()
+  if (!env.storageConnectionString) {
+    throw new Error('STORAGE_CONNECTION_STRING is not set')
   }
-  return blobService
+  _client = BlobServiceClient.fromConnectionString(env.storageConnectionString)
+  return _client
 }
 
 /**
- * Upload a file buffer to Azure Blob Storage.
+ * Upload a validated image buffer to Azure Blob Storage.
+ * Blob name is a random UUID plus extension derived from the sniffed type —
+ * the user-supplied filename is never used.
  * Returns the public URL of the uploaded blob.
  */
 export async function uploadImage(
   buffer: ArrayBuffer,
-  fileName: string,
-  contentType: string,
+  type: AllowedImageType,
 ): Promise<string> {
-  const client = getClient()
-  const containerClient = client.getContainerClient(CONTAINER_NAME)
-
-  // Generate a unique blob name with timestamp prefix
-  const ext = fileName.split('.').pop() || 'bin'
-  const blobName = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`
-
-  const blockBlobClient = containerClient.getBlockBlobClient(blobName)
-  await blockBlobClient.uploadData(buffer, {
-    blobHTTPHeaders: { blobContentType: contentType },
-  })
-
-  return blockBlobClient.url
+  const container = client().getContainerClient(CONTAINER)
+  const blobName = `${crypto.randomUUID()}${extensionFor(type)}`
+  const blob = container.getBlockBlobClient(blobName)
+  const options: BlockBlobParallelUploadOptions = {
+    blobHTTPHeaders: {
+      blobContentType: type,
+      blobCacheControl: 'public, max-age=31536000, immutable',
+      blobContentDisposition: 'inline',
+    },
+    metadata: { 'x-content-type-options': 'nosniff' },
+  }
+  await blob.uploadData(Buffer.from(buffer), options)
+  return blob.url
 }

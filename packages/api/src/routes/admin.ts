@@ -17,6 +17,7 @@ import { loginRateLimiter } from '../middleware/rate-limit.js'
 import { signToken, hashPassword, comparePassword } from '../lib/auth.js'
 import { findAll, findById, upsert, deleteItem, getContainer } from '../lib/cosmos.js'
 import { uploadImage } from '../lib/storage.js'
+import { detectImageType } from '../lib/magic-bytes.js'
 import { getEnv } from '../env.js'
 import {
   SponsorSchema,
@@ -174,22 +175,22 @@ admin.post('/api/admin/upload', async (c) => {
     return c.json({ error: 'No file provided. Send a "file" field as multipart form data.' }, 400)
   }
 
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/gif']
-  if (!allowedTypes.includes(file.type)) {
-    return c.json({ error: `Unsupported file type: ${file.type}` }, 400)
+  const maxSize = 25 * 1024 * 1024
+  if (file.size > maxSize) {
+    return c.json({ error: 'File too large. Maximum size is 25 MB.' }, 400)
   }
 
-  const maxSize = 25 * 1024 * 1024 // 25 MB
-  if (file.size > maxSize) {
-    return c.json({ error: 'File too large. Maximum size is 10 MB.' }, 400)
+  const buffer = await file.arrayBuffer()
+  const detected = detectImageType(buffer)
+  if (!detected) {
+    return c.json({ error: 'Unsupported file type. Only JPEG, PNG, WebP accepted.' }, 400)
   }
 
   try {
-    const buffer = await file.arrayBuffer()
-    const url = await uploadImage(buffer, file.name, file.type)
+    const url = await uploadImage(buffer, detected)
     return c.json({ url })
-  } catch (err) {
-    console.error('[admin/upload]', err)
+  } catch {
+    console.error('[admin/upload] failed')
     return c.json({ error: 'Failed to upload image' }, 500)
   }
 })
