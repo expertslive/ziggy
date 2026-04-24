@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '../components/PageContainer';
 import { useAgenda, useEventConfig } from '../lib/hooks';
@@ -146,6 +146,21 @@ export function AgendaPage() {
       .filter((slot) => slot.sessions.length > 0);
   }, [currentDay, agendaLabelFilter]);
 
+  const timeslotRefs = useRef<Map<string, HTMLElement | null>>(new Map());
+
+  const liveTimeslot = useMemo(() => {
+    return filteredTimeslots.find((slot) =>
+      slot.sessions.some((s) => {
+        const start = new Date(s.startDate);
+        const end = new Date(s.endDate);
+        return now >= start && now < end;
+      }),
+    );
+  }, [filteredTimeslots, now]);
+
+  const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: timezone });
+  const showJumpToNow = currentDay.date === todayStr && !!liveTimeslot;
+
   return (
     <PageContainer>
       <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
@@ -214,7 +229,12 @@ export function AgendaPage() {
       {filteredTimeslots.length > 0 ? (
         <div className="space-y-6">
           {filteredTimeslots.map((timeslot) => (
-            <div key={timeslot.startTimeGroup}>
+            <div
+              key={timeslot.startTimeGroup}
+              ref={(el) => {
+                timeslotRefs.current.set(timeslot.startTimeGroup, el);
+              }}
+            >
               {/* Time header */}
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-lg font-bold text-el-blue">
@@ -256,6 +276,20 @@ export function AgendaPage() {
           session={selectedSession}
           onClose={() => openSession(null)}
         />
+      )}
+
+      {showJumpToNow && liveTimeslot && (
+        <button
+          className="fixed bottom-24 right-6 bg-el-blue text-white rounded-full px-5 py-3 shadow-lg font-bold active:scale-95 transition-transform z-20"
+          onClick={() => {
+            timeslotRefs.current
+              .get(liveTimeslot.startTimeGroup)
+              ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            touch();
+          }}
+        >
+          {t('agenda.jumpToNow')} ↓
+        </button>
       )}
     </PageContainer>
   );

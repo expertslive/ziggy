@@ -27,6 +27,7 @@
     "allDays": "Alle Tage",
     "description": "Beschreibung",
     "noSessions": "Keine Sitzungen an diesem Tag.",
+    "jumpToNow": "Zu jetzt springen",
     "filter": {
       "clear": "Filter löschen"
     }

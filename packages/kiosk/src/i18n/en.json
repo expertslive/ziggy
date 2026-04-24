@@ -27,6 +27,7 @@
     "allDays": "All days",
     "description": "Description",
     "noSessions": "No sessions on this day.",
+    "jumpToNow": "Jump to now",
     "filter": {
       "clear": "Clear filters"
     }

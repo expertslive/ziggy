@@ -27,6 +27,7 @@
     "allDays": "Alle dagen",
     "description": "Beschrijving",
     "noSessions": "Geen sessies op deze dag.",
+    "jumpToNow": "Ga naar nu",
     "filter": {
       "clear": "Filters wissen"
     }
