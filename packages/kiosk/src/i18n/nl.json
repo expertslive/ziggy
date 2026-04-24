@@ -60,7 +60,12 @@
   "search": {
     "title": "Zoeken",
     "placeholder": "Zoek sessies, sprekers of stands...",
-    "minChars": "Typ minimaal 4 tekens om te zoeken."
+    "minChars": "Typ minimaal 4 tekens om te zoeken.",
+    "sectionSessions": "Sessies",
+    "sectionSpeakers": "Sprekers",
+    "sectionBooths": "Stands",
+    "keepTyping": "Blijf typen voor sessies (minimaal 4 tekens)",
+    "showAll": "Toon alle {{count}}"
   },
   "reconnecting": "Verbinding herstellen…",
   "warmup": {

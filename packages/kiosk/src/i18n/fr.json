@@ -60,7 +60,12 @@
   "search": {
     "title": "Recherche",
     "placeholder": "Rechercher des sessions, intervenants ou stands...",
-    "minChars": "Saisissez au moins 4 caractères pour rechercher."
+    "minChars": "Saisissez au moins 4 caractères pour rechercher.",
+    "sectionSessions": "Sessions",
+    "sectionSpeakers": "Intervenants",
+    "sectionBooths": "Stands",
+    "keepTyping": "Continuez à taper pour les sessions (min. 4 caractères)",
+    "showAll": "Afficher les {{count}}"
   },
   "reconnecting": "Reconnexion…",
   "warmup": {

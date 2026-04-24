@@ -60,7 +60,12 @@
   "search": {
     "title": "Search",
     "placeholder": "Search sessions, speakers, or booths...",
-    "minChars": "Type at least 4 characters to search."
+    "minChars": "Type at least 4 characters to search.",
+    "sectionSessions": "Sessions",
+    "sectionSpeakers": "Speakers",
+    "sectionBooths": "Booths",
+    "keepTyping": "Keep typing for sessions (need ≥4 characters)",
+    "showAll": "Show all {{count}}"
   },
   "reconnecting": "Reconnecting to event data…",
   "warmup": {

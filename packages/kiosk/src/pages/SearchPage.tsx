@@ -1,11 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AnimatePresence } from 'framer-motion';
 import { SessionCard } from '../components/SessionCard';
 import { SessionDetailModal } from '../components/SessionDetailModal';
+import { SpeakerCard } from '../components/SpeakerCard';
+import { SpeakerDetailModal } from '../components/SpeakerDetailModal';
+import { BoothCard } from '../components/BoothCard';
+import { BoothDetailModal } from '../components/BoothDetailModal';
 import { VirtualKeyboard } from '../components/VirtualKeyboard';
-import { useSearch } from '../lib/hooks';
+import { useSearch, useSpeakers, useBooths } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
-import type { AgendaSession } from '../lib/api';
+import type { AgendaSession, Speaker, Booth } from '../lib/api';
+
+const INITIAL_LIMIT = 6;
 
 export function SearchPage() {
   const { t } = useTranslation();
@@ -14,15 +21,70 @@ export function SearchPage() {
   const setQuery = useKioskStore((s) => s.setSearchQuery);
   const openSessionId = useKioskStore((s) => s.openSessionId);
   const openSession = useKioskStore((s) => s.openSession);
-  const { data: results, isLoading } = useSearch(query);
+  const openSpeakerId = useKioskStore((s) => s.openSpeakerId);
+  const openSpeaker = useKioskStore((s) => s.openSpeaker);
+  const openBoothId = useKioskStore((s) => s.openBoothId);
+  const openBooth = useKioskStore((s) => s.openBooth);
+
+  const sessionsQ = useSearch(query);
+  const speakersQ = useSpeakers();
+  const boothsQ = useBooths();
+
+  const [expandSessions, setExpandSessions] = useState(false);
+  const [expandSpeakers, setExpandSpeakers] = useState(false);
+  const [expandBooths, setExpandBooths] = useState(false);
+
+  const q = query.trim().toLowerCase();
+
+  const speakers = useMemo<Speaker[]>(() => {
+    if (!q || !speakersQ.data) return [];
+    return speakersQ.data.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.company?.toLowerCase().includes(q) ||
+        s.tagline?.toLowerCase().includes(q),
+    );
+  }, [speakersQ.data, q]);
+
+  const booths = useMemo<Booth[]>(() => {
+    if (!q || !boothsQ.data) return [];
+    return boothsQ.data.filter(
+      (b) =>
+        b.name.toLowerCase().includes(q) ||
+        b.organization?.toLowerCase().includes(q) ||
+        b.boothNumber?.toLowerCase().includes(q),
+    );
+  }, [boothsQ.data, q]);
+
+  const sessions: AgendaSession[] = sessionsQ.data ?? [];
+  const hasAny = sessions.length > 0 || speakers.length > 0 || booths.length > 0;
+  const showKeepTyping =
+    q.length > 0 && q.length < 4 && speakers.length === 0 && booths.length === 0;
 
   const selectedSession = useMemo<AgendaSession | null>(() => {
-    if (openSessionId == null || !results) return null;
-    return results.find((s) => s.id === openSessionId) ?? null;
-  }, [openSessionId, results]);
+    if (openSessionId == null) return null;
+    return sessions.find((s) => s.id === openSessionId) ?? null;
+  }, [openSessionId, sessions]);
+
+  const selectedSpeaker = useMemo<Speaker | null>(() => {
+    if (openSpeakerId == null || !speakersQ.data) return null;
+    return speakersQ.data.find((s) => s.uniqueId === openSpeakerId) ?? null;
+  }, [openSpeakerId, speakersQ.data]);
+
+  const selectedBooth = useMemo<Booth | null>(() => {
+    if (openBoothId == null || !boothsQ.data) return null;
+    return boothsQ.data.find((b) => b.id === openBoothId) ?? null;
+  }, [openBoothId, boothsQ.data]);
+
+  const resetExpansion = () => {
+    setExpandSessions(false);
+    setExpandSpeakers(false);
+    setExpandBooths(false);
+  };
 
   const handleKeyPress = (key: string) => {
     setQuery(query + key);
+    resetExpansion();
   };
 
   const handleBackspace = () => {
@@ -31,11 +93,8 @@ export function SearchPage() {
 
   const handleClear = () => {
     setQuery('');
+    resetExpansion();
   };
-
-  const showMinChars = query.length > 0 && query.length < 4;
-  const showResults = query.length >= 4;
-  const hasResults = results && results.length > 0;
 
   return (
     <div className="flex flex-col h-full">
@@ -64,34 +123,112 @@ export function SearchPage() {
       </div>
 
       {/* Results area (scrollable, fills available space) */}
-      <div className="flex-1 min-h-0 scrollable px-6 py-3">
-        {showMinChars && (
-          <p className="text-el-light/50 text-sm">{t('search.minChars')}</p>
+      <div className="flex-1 min-h-0 scrollable px-6 py-3 space-y-6">
+        {showKeepTyping && (
+          <p className="text-el-light/50 text-sm">{t('search.keepTyping')}</p>
         )}
 
-        {showResults && isLoading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-pulse text-el-light/60">{t('common.loading')}</div>
-          </div>
-        )}
-
-        {showResults && !isLoading && !hasResults && (
+        {q.length > 0 && !hasAny && !showKeepTyping && (
           <p className="text-el-light/50 text-sm">{t('common.noResults')}</p>
         )}
 
-        {showResults && hasResults && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {results.map((session) => (
-              <SessionCard
-                key={session.id}
-                session={session}
-                onTap={() => {
-                  openSession(session.id);
+        {sessions.length > 0 && (
+          <section>
+            <h2 className="text-xl font-bold text-el-light mb-3">
+              {t('search.sectionSessions')} ({sessions.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {sessions
+                .slice(0, expandSessions ? sessions.length : INITIAL_LIMIT)
+                .map((session) => (
+                  <SessionCard
+                    key={session.id}
+                    session={session}
+                    onTap={() => {
+                      openSession(session.id);
+                      touch();
+                    }}
+                  />
+                ))}
+            </div>
+            {sessions.length > INITIAL_LIMIT && !expandSessions && (
+              <button
+                className="mt-3 text-el-blue font-bold"
+                onClick={() => {
+                  setExpandSessions(true);
                   touch();
                 }}
-              />
-            ))}
-          </div>
+              >
+                {t('search.showAll', { count: sessions.length })}
+              </button>
+            )}
+          </section>
+        )}
+
+        {speakers.length > 0 && (
+          <section>
+            <h2 className="text-xl font-bold text-el-light mb-3">
+              {t('search.sectionSpeakers')} ({speakers.length})
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {speakers
+                .slice(0, expandSpeakers ? speakers.length : INITIAL_LIMIT)
+                .map((speaker) => (
+                  <SpeakerCard
+                    key={speaker.uniqueId}
+                    speaker={speaker}
+                    onTap={() => {
+                      openSpeaker(speaker.uniqueId);
+                      touch();
+                    }}
+                  />
+                ))}
+            </div>
+            {speakers.length > INITIAL_LIMIT && !expandSpeakers && (
+              <button
+                className="mt-3 text-el-blue font-bold"
+                onClick={() => {
+                  setExpandSpeakers(true);
+                  touch();
+                }}
+              >
+                {t('search.showAll', { count: speakers.length })}
+              </button>
+            )}
+          </section>
+        )}
+
+        {booths.length > 0 && (
+          <section>
+            <h2 className="text-xl font-bold text-el-light mb-3">
+              {t('search.sectionBooths')} ({booths.length})
+            </h2>
+            <div className="space-y-3">
+              {booths
+                .slice(0, expandBooths ? booths.length : INITIAL_LIMIT)
+                .map((booth) => (
+                  <BoothCard
+                    key={booth.id}
+                    booth={booth}
+                    onTap={() => {
+                      openBooth(booth.id);
+                      touch();
+                    }}
+                  />
+                ))}
+            </div>
+            {booths.length > INITIAL_LIMIT && !expandBooths && (
+              <button
+                className="mt-3 text-el-blue font-bold"
+                onClick={() => {
+                  setExpandBooths(true);
+                  touch();
+                }}
+              >
+                {t('search.showAll', { count: booths.length })}
+              </button>
+            )}
+          </section>
         )}
       </div>
 
@@ -104,13 +241,27 @@ export function SearchPage() {
         />
       </div>
 
-      {/* Session detail modal */}
+      {/* Modals */}
       {selectedSession && (
         <SessionDetailModal
           session={selectedSession}
           onClose={() => openSession(null)}
         />
       )}
+      {selectedSpeaker && (
+        <SpeakerDetailModal
+          speaker={selectedSpeaker}
+          onClose={() => openSpeaker(null)}
+        />
+      )}
+      <AnimatePresence>
+        {selectedBooth && (
+          <BoothDetailModal
+            booth={selectedBooth}
+            onClose={() => openBooth(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

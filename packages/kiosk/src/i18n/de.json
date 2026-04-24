@@ -60,7 +60,12 @@
   "search": {
     "title": "Suche",
     "placeholder": "Sitzungen, Referenten oder Stände suchen...",
-    "minChars": "Geben Sie mindestens 4 Zeichen ein, um zu suchen."
+    "minChars": "Geben Sie mindestens 4 Zeichen ein, um zu suchen.",
+    "sectionSessions": "Sitzungen",
+    "sectionSpeakers": "Sprecher",
+    "sectionBooths": "Stände",
+    "keepTyping": "Weitertippen für Sitzungen (mindestens 4 Zeichen)",
+    "showAll": "Alle {{count}} anzeigen"
   },
   "reconnecting": "Verbindung wird wiederhergestellt…",
   "warmup": {
