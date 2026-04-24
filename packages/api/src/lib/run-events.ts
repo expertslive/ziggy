@@ -36,8 +36,7 @@ async function request<T>(
   })
 
   if (!response.ok) {
-    const body = await response.text().catch(() => 'Unknown error')
-    throw new Error(`run.events API error ${response.status} for ${method} ${path}: ${body}`)
+    throw new Error(`run.events API error ${response.status} for ${method} ${path}`)
   }
 
   return response.json() as Promise<T>
