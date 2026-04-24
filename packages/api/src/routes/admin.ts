@@ -7,9 +7,10 @@ import type {
   Sponsor,
   SponsorTier,
   FloorMap,
-  EventConfig,
+  AdminEventConfig,
   I18nOverrides,
 } from '@ziggy/shared'
+import { DEFAULT_BRANDING } from '@ziggy/shared'
 import { requireAuth } from '../middleware/auth.js'
 import { signToken, hashPassword, comparePassword } from '../lib/auth.js'
 import { findAll, findById, upsert, deleteItem, getContainer } from '../lib/cosmos.js'
@@ -329,7 +330,7 @@ admin.delete('/api/admin/events/:slug/floor-maps/:id', async (c) => {
 /** GET /api/admin/events/:slug/config */
 admin.get('/api/admin/events/:slug/config', async (c) => {
   const slug = c.req.param('slug')
-  const config = await findById<EventConfig>('events', slug, slug)
+  const config = await findById<AdminEventConfig>('events', slug, slug)
   if (!config) return c.json({ error: 'Event config not found' }, 404)
   return c.json(config)
 })
@@ -337,29 +338,22 @@ admin.get('/api/admin/events/:slug/config', async (c) => {
 /** PUT /api/admin/events/:slug/config */
 admin.put('/api/admin/events/:slug/config', async (c) => {
   const slug = c.req.param('slug')
-  const body = await c.req.json<Partial<EventConfig>>()
+  const body = await c.req.json<Partial<AdminEventConfig>>()
 
-  const existing = await findById<EventConfig>('events', slug, slug)
+  const existing = await findById<AdminEventConfig>('events', slug, slug)
   const now = new Date().toISOString()
 
-  const config: EventConfig = {
+  const config: AdminEventConfig = {
     id: slug,
     slug,
     name: body.name ?? existing?.name ?? '',
-    apiKey: body.apiKey ?? existing?.apiKey ?? '',
     timezone: body.timezone ?? existing?.timezone ?? 'Europe/Amsterdam',
-    startDate: body.startDate ?? existing?.startDate ?? '',
-    endDate: body.endDate ?? existing?.endDate ?? '',
+    startDate: body.startDate ?? existing?.startDate,
+    endDate: body.endDate ?? existing?.endDate,
     days: body.days ?? existing?.days ?? [],
     languages: body.languages ?? existing?.languages ?? ['en'],
     defaultLanguage: body.defaultLanguage ?? existing?.defaultLanguage ?? 'en',
-    branding: body.branding ?? existing?.branding ?? {
-      primaryColor: '#0082C8',
-      secondaryColor: '#1B2A5B',
-      backgroundColor: '#0F1629',
-      textColor: '#FFFFFF',
-      fontFamily: 'Nunito',
-    },
+    branding: body.branding ?? existing?.branding ?? DEFAULT_BRANDING,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   }
