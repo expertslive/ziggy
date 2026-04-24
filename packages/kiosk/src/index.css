@@ -72,3 +72,15 @@ body {
     filter: drop-shadow(0 0 14px #ffcc00);
   }
 }
+
+/* High-contrast theme — variable overrides apply to all bg-el-* / text-el-* utilities */
+[data-theme='high-contrast'] {
+  --color-el-blue: #ffcc00;
+  --color-el-navy: #000000;
+  --color-el-red: #ff6666;
+  --color-el-dark: #000000;
+  --color-el-darker: #000000;
+  --color-el-light: #ffffff;
+  --color-el-gray: #1a1a1a;
+  --color-el-gray-light: #333333;
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useKioskStore } from '../store/kiosk';
 import { useEventConfig } from '../lib/hooks';
+import { AccessibilityMenu } from './AccessibilityMenu';
 
 function useClock(): string {
   const [time, setTime] = useState(() => formatTime(new Date()));
@@ -61,6 +62,7 @@ export function Header() {
 
       {/* Right: Language switcher */}
       <div className="flex items-center gap-2">
+        <AccessibilityMenu />
         {languages.map((lang) => (
           <button
             key={lang}

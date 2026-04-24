@@ -69,6 +69,11 @@
     "keepTyping": "Continuez à taper pour les sessions (min. 4 caractères)",
     "showAll": "Afficher les {{count}}"
   },
+  "a11y": {
+    "title": "Affichage",
+    "fontSize": "Taille du texte",
+    "highContrast": "Contraste élevé"
+  },
   "reconnecting": "Reconnexion…",
   "warmup": {
     "title": "Préparation…",

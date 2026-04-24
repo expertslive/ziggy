@@ -69,6 +69,11 @@
     "keepTyping": "Blijf typen voor sessies (minimaal 4 tekens)",
     "showAll": "Toon alle {{count}}"
   },
+  "a11y": {
+    "title": "Weergave",
+    "fontSize": "Tekstgrootte",
+    "highContrast": "Hoog contrast"
+  },
   "reconnecting": "Verbinding herstellen…",
   "warmup": {
     "title": "Opwarmen…",

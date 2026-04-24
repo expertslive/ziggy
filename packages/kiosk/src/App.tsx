@@ -20,11 +20,15 @@ const InfoPage = lazy(() => import('./pages/InfoPage').then(m => ({ default: m.I
 
 export function App() {
   const touch = useKioskStore((s) => s.touch);
+  const fontScale = useKioskStore((s) => s.fontScale);
+  const theme = useKioskStore((s) => s.theme);
   useInactivityReset();
 
   return (
     <div
       className="flex flex-col h-dvh bg-el-darker text-el-light font-sans"
+      data-theme={theme}
+      style={{ fontSize: `${fontScale * 18}px` }}
       onTouchStart={touch}
       onClick={touch}
     >

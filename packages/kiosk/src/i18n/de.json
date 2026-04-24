@@ -69,6 +69,11 @@
     "keepTyping": "Weitertippen für Sitzungen (mindestens 4 Zeichen)",
     "showAll": "Alle {{count}} anzeigen"
   },
+  "a11y": {
+    "title": "Anzeige",
+    "fontSize": "Schriftgröße",
+    "highContrast": "Hoher Kontrast"
+  },
   "reconnecting": "Verbindung wird wiederhergestellt…",
   "warmup": {
     "title": "Aufwärmen…",

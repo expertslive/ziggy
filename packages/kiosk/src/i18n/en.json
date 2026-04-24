@@ -69,6 +69,11 @@
     "keepTyping": "Keep typing for sessions (need ≥4 characters)",
     "showAll": "Show all {{count}}"
   },
+  "a11y": {
+    "title": "Display",
+    "fontSize": "Font size",
+    "highContrast": "High contrast"
+  },
   "reconnecting": "Reconnecting to event data…",
   "warmup": {
     "title": "Warming up…",
