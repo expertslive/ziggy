@@ -133,14 +133,25 @@ export async function fetchAgenda(apiKey: string, slug: string): Promise<Agenda>
   const cached = cache.get<Agenda>(cacheKey)
   if (cached) return cached
 
-  const items = await request<RunEventsAgendaItem[]>(
-    apiKey,
-    'POST',
-    `/v2/events/${slug}/agenda`,
-  )
-  const agenda = transformAgenda(items)
-  cache.set(cacheKey, agenda)
-  return agenda
+  try {
+    const items = await request<RunEventsAgendaItem[]>(
+      apiKey,
+      'POST',
+      `/v2/events/${slug}/agenda`,
+    )
+    const agenda = transformAgenda(items)
+    cache.set(cacheKey, agenda)
+    return agenda
+  } catch (err) {
+    const stale = cache.getOrStale<Agenda>(cacheKey)
+    if (stale) {
+      console.warn(
+        `[run-events] serving stale agenda for ${slug}: ${(err as Error).message}`,
+      )
+      return stale
+    }
+    throw err
+  }
 }
 
 /**
@@ -154,13 +165,24 @@ export async function fetchRawAgenda(
   const cached = cache.get<RunEventsAgendaItem[]>(cacheKey)
   if (cached) return cached
 
-  const items = await request<RunEventsAgendaItem[]>(
-    apiKey,
-    'POST',
-    `/v2/events/${slug}/agenda`,
-  )
-  cache.set(cacheKey, items)
-  return items
+  try {
+    const items = await request<RunEventsAgendaItem[]>(
+      apiKey,
+      'POST',
+      `/v2/events/${slug}/agenda`,
+    )
+    cache.set(cacheKey, items)
+    return items
+  } catch (err) {
+    const stale = cache.getOrStale<RunEventsAgendaItem[]>(cacheKey)
+    if (stale) {
+      console.warn(
+        `[run-events] serving stale raw agenda for ${slug}: ${(err as Error).message}`,
+      )
+      return stale
+    }
+    throw err
+  }
 }
 
 /**
@@ -171,9 +193,20 @@ export async function fetchSpeakers(apiKey: string, slug: string): Promise<RunEv
   const cached = cache.get<RunEventsSpeaker[]>(cacheKey)
   if (cached) return cached
 
-  const data = await request<RunEventsSpeaker[]>(apiKey, 'POST', `/v2/events/${slug}/speakers`)
-  cache.set(cacheKey, data)
-  return data
+  try {
+    const data = await request<RunEventsSpeaker[]>(apiKey, 'POST', `/v2/events/${slug}/speakers`)
+    cache.set(cacheKey, data)
+    return data
+  } catch (err) {
+    const stale = cache.getOrStale<RunEventsSpeaker[]>(cacheKey)
+    if (stale) {
+      console.warn(
+        `[run-events] serving stale speakers for ${slug}: ${(err as Error).message}`,
+      )
+      return stale
+    }
+    throw err
+  }
 }
 
 /**
@@ -184,9 +217,20 @@ export async function fetchBooths(apiKey: string, slug: string): Promise<RunEven
   const cached = cache.get<RunEventsBooth[]>(cacheKey)
   if (cached) return cached
 
-  const data = await request<RunEventsBooth[]>(apiKey, 'POST', `/v2/events/${slug}/booths`)
-  cache.set(cacheKey, data)
-  return data
+  try {
+    const data = await request<RunEventsBooth[]>(apiKey, 'POST', `/v2/events/${slug}/booths`)
+    cache.set(cacheKey, data)
+    return data
+  } catch (err) {
+    const stale = cache.getOrStale<RunEventsBooth[]>(cacheKey)
+    if (stale) {
+      console.warn(
+        `[run-events] serving stale booths for ${slug}: ${(err as Error).message}`,
+      )
+      return stale
+    }
+    throw err
+  }
 }
 
 /**
@@ -200,13 +244,24 @@ export async function fetchPartnerships(
   const cached = cache.get<RunEventsPartnership[]>(cacheKey)
   if (cached) return cached
 
-  const data = await request<RunEventsPartnership[]>(
-    apiKey,
-    'POST',
-    `/v2/events/${slug}/partnerships`,
-  )
-  cache.set(cacheKey, data)
-  return data
+  try {
+    const data = await request<RunEventsPartnership[]>(
+      apiKey,
+      'POST',
+      `/v2/events/${slug}/partnerships`,
+    )
+    cache.set(cacheKey, data)
+    return data
+  } catch (err) {
+    const stale = cache.getOrStale<RunEventsPartnership[]>(cacheKey)
+    if (stale) {
+      console.warn(
+        `[run-events] serving stale partnerships for ${slug}: ${(err as Error).message}`,
+      )
+      return stale
+    }
+    throw err
+  }
 }
 
 /**

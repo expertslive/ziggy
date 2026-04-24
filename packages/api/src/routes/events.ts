@@ -12,6 +12,7 @@ import {
 } from '@ziggy/shared'
 import { getEnv } from '../env.js'
 import * as runEvents from '../lib/run-events.js'
+import * as cache from '../lib/cache.js'
 import { findAll, findById } from '../lib/cosmos.js'
 
 const events = new Hono()
@@ -74,8 +75,14 @@ events.get('/api/events/:slug/agenda', async (c) => {
   const apiKey = getEventApiKey(slug)
   if (!apiKey) return c.json({ error: 'Event not found' }, 404)
 
+  const cacheKey = `agenda:${slug}`
+  const hadLive = cache.get(cacheKey) !== undefined
   try {
     const agenda = await runEvents.fetchAgenda(apiKey, slug)
+    const hasLiveNow = cache.get(cacheKey) !== undefined
+    if (!hadLive && !hasLiveNow && cache.hasLastGood(cacheKey)) {
+      c.header('X-Stale', 'true')
+    }
     return c.json(agenda)
   } catch (err) {
     console.error('[events/agenda]', err)
@@ -89,8 +96,14 @@ events.get('/api/events/:slug/sessions/now', async (c) => {
   const apiKey = getEventApiKey(slug)
   if (!apiKey) return c.json({ error: 'Event not found' }, 404)
 
+  const cacheKey = `agenda-raw:${slug}`
+  const hadLive = cache.get(cacheKey) !== undefined
   try {
     const items = await runEvents.fetchRawAgenda(apiKey, slug)
+    const hasLiveNow = cache.get(cacheKey) !== undefined
+    if (!hadLive && !hasLiveNow && cache.hasLastGood(cacheKey)) {
+      c.header('X-Stale', 'true')
+    }
     const eventTimezone = items[0]?.timeZone || 'Europe/Amsterdam'
 
     // Get current time in event timezone
@@ -132,8 +145,14 @@ events.get('/api/events/:slug/speakers', async (c) => {
   const apiKey = getEventApiKey(slug)
   if (!apiKey) return c.json({ error: 'Event not found' }, 404)
 
+  const cacheKey = `speakers:${slug}`
+  const hadLive = cache.get(cacheKey) !== undefined
   try {
     const speakers = await runEvents.fetchSpeakers(apiKey, slug)
+    const hasLiveNow = cache.get(cacheKey) !== undefined
+    if (!hadLive && !hasLiveNow && cache.hasLastGood(cacheKey)) {
+      c.header('X-Stale', 'true')
+    }
     return c.json(speakers)
   } catch (err) {
     console.error('[events/speakers]', err)
@@ -147,8 +166,14 @@ events.get('/api/events/:slug/booths', async (c) => {
   const apiKey = getEventApiKey(slug)
   if (!apiKey) return c.json({ error: 'Event not found' }, 404)
 
+  const cacheKey = `booths:${slug}`
+  const hadLive = cache.get(cacheKey) !== undefined
   try {
     const booths = await runEvents.fetchBooths(apiKey, slug)
+    const hasLiveNow = cache.get(cacheKey) !== undefined
+    if (!hadLive && !hasLiveNow && cache.hasLastGood(cacheKey)) {
+      c.header('X-Stale', 'true')
+    }
     return c.json(booths)
   } catch (err) {
     console.error('[events/booths]', err)
