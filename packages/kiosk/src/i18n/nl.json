@@ -50,6 +50,9 @@
   "sponsors": {
     "title": "Sponsors"
   },
+  "session": {
+    "live": "LIVE"
+  },
   "search": {
     "title": "Zoeken",
     "placeholder": "Zoek sessies, sprekers of stands...",

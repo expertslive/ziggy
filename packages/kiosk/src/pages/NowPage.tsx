@@ -5,6 +5,7 @@ import { SessionCard } from '../components/SessionCard';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { useNowSessions } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
+import { useClockTick } from '../lib/clock';
 import type { AgendaSession } from '../lib/api';
 
 function useTimeRemaining(session: AgendaSession): string {
@@ -79,6 +80,7 @@ export function NowPage() {
   const openSessionId = useKioskStore((s) => s.openSessionId);
   const openSession = useKioskStore((s) => s.openSession);
   const { data, isLoading } = useNowSessions();
+  const now = useClockTick(30_000);
 
   const selectedSession = useMemo<AgendaSession | null>(() => {
     if (openSessionId == null || !data) return null;
@@ -115,6 +117,7 @@ export function NowPage() {
               <div key={session.id} className="space-y-2">
                 <SessionCard
                   session={session}
+                  now={now}
                   onTap={() => {
                     openSession(session.id);
                     touch();
@@ -146,6 +149,7 @@ export function NowPage() {
               <SessionCard
                 key={session.id}
                 session={session}
+                now={now}
                 onTap={() => {
                   openSession(session.id);
                   touch();

@@ -50,6 +50,9 @@
   "sponsors": {
     "title": "Sponsors"
   },
+  "session": {
+    "live": "LIVE"
+  },
   "search": {
     "title": "Recherche",
     "placeholder": "Rechercher des sessions, intervenants ou stands...",

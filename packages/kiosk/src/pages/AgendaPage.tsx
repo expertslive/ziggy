@@ -5,6 +5,7 @@ import { useAgenda, useEventConfig } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { SessionCard } from '../components/SessionCard';
+import { useClockTick } from '../lib/clock';
 import type { AgendaSession, AgendaDay } from '../lib/api';
 
 interface DayTab {
@@ -42,6 +43,7 @@ export function AgendaPage() {
   const setSelectedDayIndex = useKioskStore((s) => s.setSelectedDayIndex);
   const openSessionId = useKioskStore((s) => s.openSessionId);
   const openSession = useKioskStore((s) => s.openSession);
+  const now = useClockTick(30_000);
 
   // Build the list of day tabs by merging event config days with agenda data.
   // The event config defines which days exist and their labels (e.g. "Workshops", "Sessions").
@@ -166,6 +168,7 @@ export function AgendaPage() {
                   <SessionCard
                     key={session.id}
                     session={session}
+                    now={now}
                     onTap={() => {
                       openSession(session.id);
                       touch();

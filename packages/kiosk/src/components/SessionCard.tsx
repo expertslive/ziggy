@@ -1,18 +1,35 @@
+import { useTranslation } from 'react-i18next';
 import type { AgendaSession } from '../lib/api';
 
 interface SessionCardProps {
   session: AgendaSession;
+  now?: Date;
   onTap: () => void;
 }
 
-export function SessionCard({ session, onTap }: SessionCardProps) {
+export function SessionCard({ session, now, onTap }: SessionCardProps) {
+  const { t } = useTranslation();
   const visibleLabels = session.labels.filter((l) => l.showInElement);
+
+  const current = now ?? new Date();
+  const start = new Date(session.startDate);
+  const end = new Date(session.endDate);
+  const isLive = current >= start && current < end;
+  const isPast = current >= end;
 
   return (
     <button
       onClick={onTap}
-      className="w-full text-left bg-el-gray rounded-xl p-4 active:scale-[0.98] transition-transform"
+      className={`relative w-full text-left bg-el-gray rounded-xl p-4 active:scale-[0.98] transition-transform ${
+        isPast ? 'opacity-40' : ''
+      }`}
     >
+      {isLive && (
+        <span className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse z-10">
+          {t('session.live')}
+        </span>
+      )}
+
       <h3 className="text-base font-bold text-el-light leading-tight mb-2 line-clamp-2">
         {session.title}
       </h3>
