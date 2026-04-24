@@ -15,6 +15,7 @@ import { requireAuth } from '../middleware/auth.js'
 import { signToken, hashPassword, comparePassword } from '../lib/auth.js'
 import { findAll, findById, upsert, deleteItem, getContainer } from '../lib/cosmos.js'
 import { uploadImage } from '../lib/storage.js'
+import { getEnv } from '../env.js'
 
 const admin = new Hono()
 
@@ -56,6 +57,16 @@ admin.post('/api/auth/login', async (c) => {
 
 /** POST /api/auth/setup — bootstrap first admin (only if zero admins exist) */
 admin.post('/api/auth/setup', async (c) => {
+  const env = getEnv()
+  if (!env.setupToken) {
+    return c.json({ error: 'Setup disabled' }, 503)
+  }
+
+  const providedToken = c.req.header('X-Setup-Token') || ''
+  if (providedToken !== env.setupToken) {
+    return c.json({ error: 'Invalid setup token' }, 401)
+  }
+
   const container = getContainer('admins')
   const { resources } = await container.items
     .query<Admin>({ query: 'SELECT * FROM c' })
@@ -71,13 +82,18 @@ admin.post('/api/auth/setup', async (c) => {
   }
 
   const newAdmin: Admin = {
-    id: crypto.randomUUID(),
+    id: 'bootstrap',
     email: body.email,
     passwordHash: await hashPassword(body.password),
     createdAt: new Date().toISOString(),
   }
 
-  await upsert('admins', newAdmin)
+  try {
+    await upsert('admins', newAdmin)
+  } catch {
+    // Race: another request created the bootstrap admin first.
+    return c.json({ error: 'Admin already exists.' }, 409)
+  }
 
   const token = signToken(newAdmin)
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()

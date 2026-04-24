@@ -8,6 +8,7 @@ export interface EnvConfig {
   cosmosConnectionString: string
   jwtSecret: string
   storageConnectionString: string
+  setupToken: string
 }
 
 export function getEnv(): EnvConfig {
@@ -20,5 +21,6 @@ export function getEnv(): EnvConfig {
     jwtSecret:
       process.env.JWT_SECRET || crypto.randomUUID() + crypto.randomUUID(),
     storageConnectionString: process.env.STORAGE_CONNECTION_STRING || '',
+    setupToken: process.env.SETUP_TOKEN || '',
   }
 }
