@@ -32,6 +32,7 @@ async function request<T>(
       ApiKey: apiKey,
       'Content-Type': 'application/json',
     },
+    signal: AbortSignal.timeout(10_000),
   })
 
   if (!response.ok) {

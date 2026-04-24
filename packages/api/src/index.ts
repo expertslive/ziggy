@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
+import { bodyLimit } from 'hono/body-limit'
 import { serve } from '@hono/node-server'
 import { getEnv } from './env.js'
 import health from './routes/health.js'
@@ -42,6 +43,17 @@ if (env.nodeEnv === 'production') {
     }),
   )
 }
+
+// Body size limit for admin writes (1 MB). Upload route has its own larger
+// limit handled in-route, so exempt it here.
+app.use('/api/admin/*', async (c, next) => {
+  if (c.req.path === '/api/admin/upload') return next()
+  const lim = bodyLimit({
+    maxSize: 1024 * 1024,
+    onError: (c) => c.json({ error: 'Request body too large' }, 413),
+  })
+  return lim(c, next)
+})
 
 // ---------------------------------------------------------------------------
 // Routes

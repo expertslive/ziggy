@@ -18,6 +18,13 @@ import { signToken, hashPassword, comparePassword } from '../lib/auth.js'
 import { findAll, findById, upsert, deleteItem, getContainer } from '../lib/cosmos.js'
 import { uploadImage } from '../lib/storage.js'
 import { getEnv } from '../env.js'
+import {
+  SponsorSchema,
+  SponsorTierSchema,
+  FloorMapSchema,
+  EventConfigSchema,
+  I18nOverridesSchema,
+} from '../schemas/admin.js'
 
 function clientIp(c: Context): string {
   return (
@@ -25,6 +32,21 @@ function clientIp(c: Context): string {
     c.req.header('x-real-ip') ||
     'unknown'
   )
+}
+
+/**
+ * The admin zod schemas model i18n records as objects with one optional key
+ * per supported language, so the derived `.data` type is
+ * `Record<string, string | undefined>`. Our shared types use
+ * `Record<string, string>` (omit keys you don't have). Drop undefined values
+ * before persisting so the two shapes line up.
+ */
+function stripUndefined(rec: Record<string, string | undefined>): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const [k, v] of Object.entries(rec)) {
+    if (v !== undefined) out[k] = v
+  }
+  return out
 }
 
 const admin = new Hono()
@@ -186,19 +208,24 @@ admin.get('/api/admin/events/:slug/sponsors', async (c) => {
 /** POST /api/admin/events/:slug/sponsors */
 admin.post('/api/admin/events/:slug/sponsors', async (c) => {
   const slug = c.req.param('slug')
-  const body = await c.req.json<Partial<Sponsor>>()
+  const body = await c.req.json()
+  const parsed = SponsorSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+  const data = parsed.data
   const now = new Date().toISOString()
 
   const sponsor: Sponsor = {
     id: crypto.randomUUID(),
     eventSlug: slug,
-    name: body.name || '',
-    tierId: body.tierId || '',
-    description: body.description || {},
-    logoUrl: body.logoUrl || '',
-    website: body.website,
-    boothNumber: body.boothNumber,
-    sortOrder: body.sortOrder ?? 0,
+    name: data.name,
+    tierId: data.tierId,
+    description: stripUndefined(data.description),
+    logoUrl: data.logoUrl,
+    website: data.website,
+    boothNumber: data.boothNumber,
+    sortOrder: data.sortOrder,
     createdAt: now,
     updatedAt: now,
   }
@@ -214,10 +241,24 @@ admin.put('/api/admin/events/:slug/sponsors/:id', async (c) => {
   const existing = await findById<Sponsor>('sponsors', id, slug)
   if (!existing) return c.json({ error: 'Sponsor not found' }, 404)
 
-  const body = await c.req.json<Partial<Sponsor>>()
+  const body = await c.req.json()
+  const parsed = SponsorSchema.partial().safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+  const patch = parsed.data
+
   const updated: Sponsor = {
     ...existing,
-    ...body,
+    ...(patch.name !== undefined && { name: patch.name }),
+    ...(patch.tierId !== undefined && { tierId: patch.tierId }),
+    ...(patch.logoUrl !== undefined && { logoUrl: patch.logoUrl }),
+    ...(patch.website !== undefined && { website: patch.website }),
+    ...(patch.boothNumber !== undefined && { boothNumber: patch.boothNumber }),
+    ...(patch.description !== undefined && {
+      description: stripUndefined(patch.description),
+    }),
+    ...(patch.sortOrder !== undefined && { sortOrder: patch.sortOrder }),
     id,
     eventSlug: slug,
     updatedAt: new Date().toISOString(),
@@ -254,16 +295,21 @@ admin.get('/api/admin/events/:slug/sponsor-tiers', async (c) => {
 /** POST /api/admin/events/:slug/sponsor-tiers */
 admin.post('/api/admin/events/:slug/sponsor-tiers', async (c) => {
   const slug = c.req.param('slug')
-  const body = await c.req.json<Partial<SponsorTier>>()
+  const body = await c.req.json()
+  const parsed = SponsorTierSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+  const data = parsed.data
   const now = new Date().toISOString()
 
   const tier: SponsorTier = {
     id: crypto.randomUUID(),
     eventSlug: slug,
-    name: body.name || '',
-    label: body.label || {},
-    sortOrder: body.sortOrder ?? 0,
-    displaySize: body.displaySize || 'medium',
+    name: data.name,
+    label: stripUndefined(data.label),
+    sortOrder: data.sortOrder,
+    displaySize: data.displaySize,
     createdAt: now,
     updatedAt: now,
   }
@@ -279,10 +325,19 @@ admin.put('/api/admin/events/:slug/sponsor-tiers/:id', async (c) => {
   const existing = await findById<SponsorTier>('sponsor-tiers', id, slug)
   if (!existing) return c.json({ error: 'Sponsor tier not found' }, 404)
 
-  const body = await c.req.json<Partial<SponsorTier>>()
+  const body = await c.req.json()
+  const parsed = SponsorTierSchema.partial().safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+  const patch = parsed.data
+
   const updated: SponsorTier = {
     ...existing,
-    ...body,
+    ...(patch.name !== undefined && { name: patch.name }),
+    ...(patch.label !== undefined && { label: stripUndefined(patch.label) }),
+    ...(patch.sortOrder !== undefined && { sortOrder: patch.sortOrder }),
+    ...(patch.displaySize !== undefined && { displaySize: patch.displaySize }),
     id,
     eventSlug: slug,
     updatedAt: new Date().toISOString(),
@@ -319,17 +374,27 @@ admin.get('/api/admin/events/:slug/floor-maps', async (c) => {
 /** POST /api/admin/events/:slug/floor-maps */
 admin.post('/api/admin/events/:slug/floor-maps', async (c) => {
   const slug = c.req.param('slug')
-  const body = await c.req.json<Partial<FloorMap>>()
+  const body = await c.req.json()
+  const parsed = FloorMapSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+  const data = parsed.data
   const now = new Date().toISOString()
 
   const floorMap: FloorMap = {
     id: crypto.randomUUID(),
     eventSlug: slug,
-    name: body.name || '',
-    label: body.label || {},
-    imageUrl: body.imageUrl || '',
-    sortOrder: body.sortOrder ?? 0,
-    hotspots: body.hotspots || [],
+    name: data.name,
+    label: stripUndefined(data.label),
+    imageUrl: data.imageUrl,
+    sortOrder: data.sortOrder,
+    hotspots: data.hotspots.map((h) => ({
+      id: h.id,
+      roomName: h.roomName,
+      label: stripUndefined(h.label),
+      points: h.points,
+    })),
     createdAt: now,
     updatedAt: now,
   }
@@ -345,10 +410,27 @@ admin.put('/api/admin/events/:slug/floor-maps/:id', async (c) => {
   const existing = await findById<FloorMap>('floor-maps', id, slug)
   if (!existing) return c.json({ error: 'Floor map not found' }, 404)
 
-  const body = await c.req.json<Partial<FloorMap>>()
+  const body = await c.req.json()
+  const parsed = FloorMapSchema.partial().safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+  const patch = parsed.data
+
   const updated: FloorMap = {
     ...existing,
-    ...body,
+    ...(patch.name !== undefined && { name: patch.name }),
+    ...(patch.label !== undefined && { label: stripUndefined(patch.label) }),
+    ...(patch.imageUrl !== undefined && { imageUrl: patch.imageUrl }),
+    ...(patch.sortOrder !== undefined && { sortOrder: patch.sortOrder }),
+    ...(patch.hotspots !== undefined && {
+      hotspots: patch.hotspots.map((h) => ({
+        id: h.id,
+        roomName: h.roomName,
+        label: stripUndefined(h.label),
+        points: h.points,
+      })),
+    }),
     id,
     eventSlug: slug,
     updatedAt: new Date().toISOString(),
@@ -386,22 +468,32 @@ admin.get('/api/admin/events/:slug/config', async (c) => {
 /** PUT /api/admin/events/:slug/config */
 admin.put('/api/admin/events/:slug/config', async (c) => {
   const slug = c.req.param('slug')
-  const body = await c.req.json<Partial<AdminEventConfig>>()
+  const body = await c.req.json()
+  const parsed = EventConfigSchema.partial().safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+  const patch = parsed.data
 
   const existing = await findById<AdminEventConfig>('events', slug, slug)
   const now = new Date().toISOString()
 
+  const normalizedDays = patch.days?.map((d) => ({
+    date: d.date,
+    label: stripUndefined(d.label),
+  }))
+
   const config: AdminEventConfig = {
     id: slug,
     slug,
-    name: body.name ?? existing?.name ?? '',
-    timezone: body.timezone ?? existing?.timezone ?? 'Europe/Amsterdam',
-    startDate: body.startDate ?? existing?.startDate,
-    endDate: body.endDate ?? existing?.endDate,
-    days: body.days ?? existing?.days ?? [],
-    languages: body.languages ?? existing?.languages ?? ['en'],
-    defaultLanguage: body.defaultLanguage ?? existing?.defaultLanguage ?? 'en',
-    branding: body.branding ?? existing?.branding ?? DEFAULT_BRANDING,
+    name: patch.name ?? existing?.name ?? '',
+    timezone: patch.timezone ?? existing?.timezone ?? 'Europe/Amsterdam',
+    startDate: patch.startDate ?? existing?.startDate,
+    endDate: patch.endDate ?? existing?.endDate,
+    days: normalizedDays ?? existing?.days ?? [],
+    languages: patch.languages ?? existing?.languages ?? ['en'],
+    defaultLanguage: patch.defaultLanguage ?? existing?.defaultLanguage ?? 'en',
+    branding: patch.branding ?? existing?.branding ?? DEFAULT_BRANDING,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   }
@@ -425,19 +517,22 @@ admin.get('/api/admin/events/:slug/i18n-overrides', async (c) => {
 admin.put('/api/admin/events/:slug/i18n-overrides/:lang', async (c) => {
   const slug = c.req.param('slug')
   const lang = c.req.param('lang')
-  const body = await c.req.json<{ overrides: Record<string, string> }>()
+  const body = await c.req.json()
+  const parsed = I18nOverridesSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+  const data = parsed.data
   const now = new Date().toISOString()
 
   // Use a deterministic ID based on slug + language
   const id = `${slug}_${lang}`
 
-  const existing = await findById<I18nOverrides>('i18n-overrides', id, slug)
-
   const doc: I18nOverrides = {
     id,
     eventSlug: slug,
     language: lang,
-    overrides: body.overrides ?? existing?.overrides ?? {},
+    overrides: data.overrides,
     updatedAt: now,
   }
 

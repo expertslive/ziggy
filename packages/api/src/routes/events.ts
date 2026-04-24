@@ -169,6 +169,9 @@ events.get('/api/events/:slug/search', async (c) => {
       400,
     )
   }
+  if (query.length > 100) {
+    return c.json({ error: 'Query too long (max 100 characters)' }, 400)
+  }
 
   try {
     const results = await runEvents.searchAgenda(apiKey, slug, query)
