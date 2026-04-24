@@ -84,13 +84,13 @@
     "title": "Praktische Infos",
     "wifi": {
       "title": "WiFi",
-      "ssid": "ExpertsLive2026",
-      "password": "FILLED_AT_BUILD_TIME"
+      "ssid": "ExpertsLive",
+      "password": "ExpertsLive2026"
     },
     "venue": {
       "title": "Veranstaltungsort",
-      "name": "FILLED_AT_BUILD_TIME",
-      "address": "FILLED_AT_BUILD_TIME"
+      "name": "Experts Live Netherlands 2026",
+      "address": "Blokhoeve 1\n3438 LC Nieuwegein"
     },
     "schedule": {
       "title": "Zeitplan",
@@ -100,19 +100,19 @@
     },
     "emergency": {
       "title": "Notfall",
-      "location": "FILLED_AT_BUILD_TIME",
-      "phone": "FILLED_AT_BUILD_TIME"
+      "location": "Brenda Kager",
+      "phone": "+31 6 4143 3385"
     },
     "facilities": {
       "title": "Einrichtungen",
-      "toilets": "FILLED_AT_BUILD_TIME",
-      "cloakroom": "FILLED_AT_BUILD_TIME"
+      "toilets": "Siehe Beschilderung",
+      "cloakroom": "Am Haupteingang"
     },
     "contact": {
       "title": "Kontakt",
-      "name": "FILLED_AT_BUILD_TIME",
-      "email": "FILLED_AT_BUILD_TIME",
-      "phone": "FILLED_AT_BUILD_TIME"
+      "name": "Brenda Kager",
+      "email": "",
+      "phone": "+31 6 4143 3385"
     }
   }
 }

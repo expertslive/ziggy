@@ -84,13 +84,13 @@
     "title": "Praktische info",
     "wifi": {
       "title": "WiFi",
-      "ssid": "ExpertsLive2026",
-      "password": "FILLED_AT_BUILD_TIME"
+      "ssid": "ExpertsLive",
+      "password": "ExpertsLive2026"
     },
     "venue": {
       "title": "Locatie",
-      "name": "FILLED_AT_BUILD_TIME",
-      "address": "FILLED_AT_BUILD_TIME"
+      "name": "Experts Live Netherlands 2026",
+      "address": "Blokhoeve 1\n3438 LC Nieuwegein"
     },
     "schedule": {
       "title": "Schema",
@@ -100,19 +100,19 @@
     },
     "emergency": {
       "title": "Noodgeval",
-      "location": "FILLED_AT_BUILD_TIME",
-      "phone": "FILLED_AT_BUILD_TIME"
+      "location": "Brenda Kager",
+      "phone": "+31 6 4143 3385"
     },
     "facilities": {
       "title": "Faciliteiten",
-      "toilets": "FILLED_AT_BUILD_TIME",
-      "cloakroom": "FILLED_AT_BUILD_TIME"
+      "toilets": "Zie bewegwijzering",
+      "cloakroom": "Bij de hoofdingang"
     },
     "contact": {
       "title": "Contact",
-      "name": "FILLED_AT_BUILD_TIME",
-      "email": "FILLED_AT_BUILD_TIME",
-      "phone": "FILLED_AT_BUILD_TIME"
+      "name": "Brenda Kager",
+      "email": "",
+      "phone": "+31 6 4143 3385"
     }
   }
 }
