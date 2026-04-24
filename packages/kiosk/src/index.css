@@ -58,3 +58,17 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Hotspot highlight pulse (map deep-link target) */
+.hotspot-pulse {
+  filter: drop-shadow(0 0 6px #ffcc00);
+  animation: hotspot-pulse 2s ease-in-out infinite;
+}
+@keyframes hotspot-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px #ffcc00);
+  }
+  50% {
+    filter: drop-shadow(0 0 14px #ffcc00);
+  }
+}

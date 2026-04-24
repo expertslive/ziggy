@@ -43,7 +43,8 @@
     "tapRoom": "Appuyez sur une salle pour plus de détails",
     "currentSessions": "Sessions en cours",
     "noCurrentSessions": "Aucune session dans cette salle pour le moment.",
-    "upcomingSessions": "À venir"
+    "upcomingSessions": "À venir",
+    "showOnMap": "Voir sur le plan"
   },
   "booths": {
     "title": "Expo",

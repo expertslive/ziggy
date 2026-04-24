@@ -1,5 +1,8 @@
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useKioskStore } from '../store/kiosk'
+import { useFloorMaps } from '../lib/hooks'
 import type { Booth } from '../lib/api'
 
 interface BoothDetailModalProps {
@@ -9,6 +12,13 @@ interface BoothDetailModalProps {
 
 export function BoothDetailModal({ booth, onClose }: BoothDetailModalProps) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
+  const setSelectedMap = useKioskStore((s) => s.setSelectedMap)
+  const { data: floorMaps } = useFloorMaps()
+
+  const matchingMap = (floorMaps ?? []).find((m) =>
+    m.hotspots?.some((h) => h.id === booth.floorMapHotspotId),
+  )
 
   return (
     <motion.div
@@ -46,6 +56,19 @@ export function BoothDetailModal({ booth, onClose }: BoothDetailModalProps) {
             <span className="px-3 py-1 rounded-full bg-el-blue/20 text-el-blue text-sm font-semibold">
               {t('booths.boothNumber', { number: booth.boothNumber })}
             </span>
+          )}
+
+          {matchingMap && booth.floorMapHotspotId && (
+            <button
+              onClick={() => {
+                setSelectedMap(matchingMap.id, booth.floorMapHotspotId!)
+                onClose()
+                navigate('/map')
+              }}
+              className="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-el-blue text-white text-sm font-bold active:bg-el-blue/80"
+            >
+              &#x1F5FA; {t('map.showOnMap')}
+            </button>
           )}
 
           {booth.location && (

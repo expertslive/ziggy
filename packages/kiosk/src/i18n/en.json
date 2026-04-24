@@ -43,7 +43,8 @@
     "tapRoom": "Tap a room for details",
     "currentSessions": "Current Sessions",
     "noCurrentSessions": "No sessions in this room right now.",
-    "upcomingSessions": "Coming Up"
+    "upcomingSessions": "Coming Up",
+    "showOnMap": "Show on map"
   },
   "booths": {
     "title": "Expo",

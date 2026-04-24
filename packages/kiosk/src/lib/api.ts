@@ -120,6 +120,7 @@ export interface FloorMap {
     roomName: string;
     label: Record<string, string>;
     points: [number, number][];
+    roomGuid?: string;
   }>;
 }
 

@@ -43,7 +43,8 @@
     "tapRoom": "Tik op een ruimte voor details",
     "currentSessions": "Huidige sessies",
     "noCurrentSessions": "Geen sessies in deze ruimte op dit moment.",
-    "upcomingSessions": "Binnenkort"
+    "upcomingSessions": "Binnenkort",
+    "showOnMap": "Toon op plattegrond"
   },
   "booths": {
     "title": "Expo",

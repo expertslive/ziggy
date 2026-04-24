@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '../components/PageContainer';
 import { useFloorMaps, useNowSessions } from '../lib/hooks';
@@ -131,9 +131,13 @@ function SessionMiniCard({ session }: { session: AgendaSession }) {
 function FloorMapViewer({
   map,
   nowData,
+  highlightId,
+  onHighlightCleared,
 }: {
   map: FloorMap;
   nowData: { current: AgendaSession[]; upNext: AgendaSession[] } | undefined;
+  highlightId: string | null;
+  onHighlightCleared: () => void;
 }) {
   const { t } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
@@ -178,17 +182,27 @@ function FloorMapViewer({
             viewBox="0 0 1 1"
             preserveAspectRatio="none"
           >
-            {map.hotspots.map((hotspot) => (
-              <polygon
-                key={hotspot.id}
-                points={hotspot.points.map(([x, y]) => `${x},${y}`).join(' ')}
-                fill="rgba(0, 130, 200, 0.25)"
-                stroke="#0082C8"
-                strokeWidth="0.003"
-                className="cursor-pointer"
-                onClick={() => handleHotspotTap(hotspot)}
-              />
-            ))}
+            {map.hotspots.map((hotspot) => {
+              const isHighlighted = hotspot.id === highlightId;
+              return (
+                <polygon
+                  key={hotspot.id}
+                  points={hotspot.points.map(([x, y]) => `${x},${y}`).join(' ')}
+                  fill={
+                    isHighlighted
+                      ? 'rgba(255, 204, 0, 0.35)'
+                      : 'rgba(0, 130, 200, 0.25)'
+                  }
+                  stroke={isHighlighted ? '#ffcc00' : '#0082C8'}
+                  strokeWidth="0.003"
+                  className={`cursor-pointer ${isHighlighted ? 'hotspot-pulse' : ''}`}
+                  onClick={() => {
+                    handleHotspotTap(hotspot);
+                    onHighlightCleared();
+                  }}
+                />
+              );
+            })}
           </svg>
         )}
       </div>
@@ -210,9 +224,27 @@ export function MapPage() {
   const touch = useKioskStore((s) => s.touch);
   const selectedMapId = useKioskStore((s) => s.selectedMapId);
   const setSelectedMap = useKioskStore((s) => s.setSelectedMap);
+  const mapHighlightId = useKioskStore((s) => s.mapHighlightId);
+  const setMapHighlight = useKioskStore((s) => s.setMapHighlight);
   const lang = i18n.language;
   const { data: maps, isLoading, error } = useFloorMaps();
   const { data: nowData } = useNowSessions();
+
+  // Auto-select the map containing the highlighted hotspot if needed.
+  useEffect(() => {
+    if (!mapHighlightId) return;
+    if (!maps || maps.length === 0) return;
+    const activeContains = maps
+      .find((m) => m.id === selectedMapId)
+      ?.hotspots.some((h) => h.id === mapHighlightId);
+    if (activeContains) return;
+    const targetMap = maps.find((m) =>
+      m.hotspots.some((h) => h.id === mapHighlightId),
+    );
+    if (targetMap && targetMap.id !== selectedMapId) {
+      setSelectedMap(targetMap.id, mapHighlightId);
+    }
+  }, [mapHighlightId, maps, selectedMapId, setSelectedMap]);
 
   if (isLoading) {
     return (
@@ -297,6 +329,8 @@ export function MapPage() {
         key={activeMap.id}
         map={activeMap}
         nowData={nowData}
+        highlightId={mapHighlightId}
+        onHighlightCleared={() => setMapHighlight(null)}
       />
     </PageContainer>
   );

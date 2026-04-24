@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useKioskStore } from '../store/kiosk';
+import { useFloorMaps } from '../lib/hooks';
 import type { AgendaSession } from '../lib/api';
 
 interface SessionDetailModalProps {
@@ -9,8 +11,18 @@ interface SessionDetailModalProps {
 
 export function SessionDetailModal({ session, onClose }: SessionDetailModalProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const touch = useKioskStore((s) => s.touch);
+  const setSelectedMap = useKioskStore((s) => s.setSelectedMap);
+  const { data: floorMaps } = useFloorMaps();
   const visibleLabels = session.labels.filter((l) => l.showInElement);
+
+  const matchingMap = (floorMaps ?? []).find((m) =>
+    m.hotspots?.some((h) => h.roomGuid === session.roomGuid),
+  );
+  const matchingHotspot = matchingMap?.hotspots.find(
+    (h) => h.roomGuid === session.roomGuid,
+  );
 
   return (
     <div
@@ -42,6 +54,19 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
               <span className="text-el-light/30">|</span>
               <span>&#x1F4CD; {session.roomName}</span>
             </div>
+            {matchingMap && matchingHotspot && (
+              <button
+                onClick={() => {
+                  setSelectedMap(matchingMap.id, matchingHotspot.id);
+                  onClose();
+                  navigate('/map');
+                  touch();
+                }}
+                className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-el-blue/20 text-el-blue text-xs font-bold active:bg-el-blue/30"
+              >
+                &#x1F5FA; {t('map.showOnMap')}
+              </button>
+            )}
             {visibleLabels.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {visibleLabels.map((label) => (
