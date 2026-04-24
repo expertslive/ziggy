@@ -54,5 +54,6 @@
     "title": "Search",
     "placeholder": "Search sessions, speakers, or booths...",
     "minChars": "Type at least 4 characters to search."
-  }
+  },
+  "reconnecting": "Reconnecting to event data…"
 }

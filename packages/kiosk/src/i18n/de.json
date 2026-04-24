@@ -54,5 +54,6 @@
     "title": "Suche",
     "placeholder": "Sitzungen, Referenten oder Stände suchen...",
     "minChars": "Geben Sie mindestens 4 Zeichen ein, um zu suchen."
-  }
+  },
+  "reconnecting": "Verbindung wird wiederhergestellt…"
 }

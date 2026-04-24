@@ -4,6 +4,7 @@ import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { I18nOverrideLoader } from './components/I18nOverrideLoader';
+import { ReconnectingBanner } from './components/ReconnectingBanner';
 import { useInactivityReset } from './hooks/useInactivityReset';
 import { useKioskStore } from './store/kiosk';
 
@@ -25,6 +26,7 @@ export function App() {
       onTouchStart={touch}
       onClick={touch}
     >
+      <ReconnectingBanner />
       <I18nOverrideLoader />
       <Header />
 

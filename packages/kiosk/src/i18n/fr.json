@@ -54,5 +54,6 @@
     "title": "Recherche",
     "placeholder": "Rechercher des sessions, intervenants ou stands...",
     "minChars": "Saisissez au moins 4 caractères pour rechercher."
-  }
+  },
+  "reconnecting": "Reconnexion…"
 }
