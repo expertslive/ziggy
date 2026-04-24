@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { bodyLimit } from 'hono/body-limit'
+import { secureHeaders } from 'hono/secure-headers'
 import { serve } from '@hono/node-server'
 import { getEnv } from './env.js'
 import health from './routes/health.js'
@@ -43,6 +44,17 @@ if (env.nodeEnv === 'production') {
     }),
   )
 }
+
+// Security headers (applied after CORS so CORS headers are set first)
+app.use(
+  '*',
+  secureHeaders({
+    xFrameOptions: 'DENY',
+    xContentTypeOptions: 'nosniff',
+    referrerPolicy: 'strict-origin-when-cross-origin',
+    strictTransportSecurity: 'max-age=31536000; includeSubDomains',
+  }),
+)
 
 // Body size limit for admin writes (1 MB). Upload route has its own larger
 // limit handled in-route, so exempt it here.
