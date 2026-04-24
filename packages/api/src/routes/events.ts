@@ -6,7 +6,8 @@ import {
   type FloorMap,
   type Sponsor,
   type SponsorTier,
-  type EventConfig,
+  type AdminEventConfig,
+  type PublicEventConfig,
   type I18nOverrides,
 } from '@ziggy/shared'
 import { getEnv } from '../env.js'
@@ -28,9 +29,20 @@ events.get('/api/events/:slug/config', async (c) => {
 
   // Try Cosmos DB first
   try {
-    const config = await findById<EventConfig>('events', slug, slug)
+    const config = await findById<AdminEventConfig>('events', slug, slug)
     if (config) {
-      return c.json(config)
+      const publicConfig: PublicEventConfig = {
+        slug: config.slug,
+        name: config.name,
+        timezone: config.timezone,
+        languages: config.languages,
+        defaultLanguage: config.defaultLanguage,
+        branding: config.branding,
+        days: config.days,
+        startDate: config.startDate,
+        endDate: config.endDate,
+      }
+      return c.json(publicConfig)
     }
   } catch {
     // Cosmos DB not available — fall through to defaults
@@ -41,7 +53,7 @@ events.get('/api/events/:slug/config', async (c) => {
     return c.json({ error: 'Event not found' }, 404)
   }
 
-  return c.json({
+  const defaults: PublicEventConfig = {
     slug: env.eventSlug,
     name: 'Experts Live Netherlands 2026',
     timezone: 'Europe/Amsterdam',
@@ -52,7 +64,8 @@ events.get('/api/events/:slug/config', async (c) => {
       { date: '2026-06-01', label: { nl: 'Workshops - 1 juni', en: 'Workshops - June 1' } },
       { date: '2026-06-02', label: { nl: 'Sessies - 2 juni', en: 'Sessions - June 2' } },
     ],
-  })
+  }
+  return c.json(defaults)
 })
 
 // GET /api/events/:slug/agenda — structured agenda (days/timeslots/sessions)
