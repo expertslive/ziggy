@@ -222,6 +222,27 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'JWT_SECRET', secretRef: 'jwt-secret' }
             { name: 'STORAGE_CONNECTION_STRING', secretRef: 'storage-connection-string' }
           ]
+          probes: [
+            {
+              type: 'Startup'
+              httpGet: {
+                path: '/api/warmup'
+                port: 3001
+              }
+              initialDelaySeconds: 5
+              periodSeconds: 10
+              failureThreshold: 30
+            }
+            {
+              type: 'Readiness'
+              httpGet: {
+                path: '/api/health'
+                port: 3001
+              }
+              periodSeconds: 30
+              timeoutSeconds: 5
+            }
+          ]
         }
       ]
       scale: {

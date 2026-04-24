@@ -8,6 +8,7 @@ import { getEnv } from './env.js'
 import health from './routes/health.js'
 import events from './routes/events.js'
 import admin from './routes/admin.js'
+import warmup from './routes/warmup.js'
 
 const app = new Hono()
 
@@ -74,6 +75,7 @@ app.use('/api/admin/*', async (c, next) => {
 app.route('/', health)
 app.route('/', events)
 app.route('/', admin)
+app.route('/', warmup)
 
 // ---------------------------------------------------------------------------
 // Start server
