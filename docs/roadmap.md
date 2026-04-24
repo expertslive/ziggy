@@ -58,3 +58,5 @@
 - [ ] Analytics dashboard (most viewed sessions, popular search terms)
 - [ ] Offline mode with service worker
 - [ ] Multi-event support in a single deployment
+- [ ] Admin UI for linking booths to floor-map hotspots (API side done — PUT `/api/admin/events/:slug/booth-overrides/:boothId` — BoothsPage in admin still pending since booths live in run.events)
+- [ ] Admin editor UI for picking a `roomGuid` per hotspot from the live run.events agenda (API schema already accepts `roomGuid`; currently populated via direct PUT)

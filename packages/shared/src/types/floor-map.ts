@@ -17,6 +17,8 @@ export interface Hotspot {
   id: string
   roomName: string
   roomId?: string
+  /** run.events session.roomGuid — used for kiosk deep-linking */
+  roomGuid?: string
   label: Record<string, string>
   /** Normalized 0-1 polygon coordinates [[x,y], [x,y], ...] */
   points: [number, number][]

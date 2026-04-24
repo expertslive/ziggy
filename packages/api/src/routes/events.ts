@@ -9,6 +9,7 @@ import {
   type AdminEventConfig,
   type PublicEventConfig,
   type I18nOverrides,
+  type BoothOverride,
 } from '@ziggy/shared'
 import { getEnv } from '../env.js'
 import * as runEvents from '../lib/run-events.js'
@@ -169,12 +170,21 @@ events.get('/api/events/:slug/booths', async (c) => {
   const cacheKey = `booths:${slug}`
   const hadLive = cache.get(cacheKey) !== undefined
   try {
-    const booths = await runEvents.fetchBooths(apiKey, slug)
+    const [booths, overrides] = await Promise.all([
+      runEvents.fetchBooths(apiKey, slug),
+      findAll<BoothOverride>('booth-overrides', 'eventSlug', slug).catch(() => [] as BoothOverride[]),
+    ])
+    const overrideMap = new Map(overrides.map((o) => [o.boothId, o]))
+    const merged = booths.map((b) => ({
+      ...b,
+      floorMapHotspotId: overrideMap.get(String(b.id))?.floorMapHotspotId,
+    }))
+
     const hasLiveNow = cache.get(cacheKey) !== undefined
     if (!hadLive && !hasLiveNow && cache.hasLastGood(cacheKey)) {
       c.header('X-Stale', 'true')
     }
-    return c.json(booths)
+    return c.json(merged)
   } catch (err) {
     console.error('[events/booths]', err)
     return c.json({ error: 'Failed to fetch booths' }, 502)

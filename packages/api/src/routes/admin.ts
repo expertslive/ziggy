@@ -10,6 +10,7 @@ import type {
   FloorMap,
   AdminEventConfig,
   I18nOverrides,
+  BoothOverride,
 } from '@ziggy/shared'
 import { DEFAULT_BRANDING } from '@ziggy/shared'
 import { requireAuth } from '../middleware/auth.js'
@@ -25,6 +26,7 @@ import {
   FloorMapSchema,
   EventConfigSchema,
   I18nOverridesSchema,
+  BoothOverrideSchema,
 } from '../schemas/admin.js'
 
 function clientIp(c: Context): string {
@@ -393,6 +395,7 @@ admin.post('/api/admin/events/:slug/floor-maps', async (c) => {
     hotspots: data.hotspots.map((h) => ({
       id: h.id,
       roomName: h.roomName,
+      ...(h.roomGuid !== undefined && { roomGuid: h.roomGuid }),
       label: stripUndefined(h.label),
       points: h.points,
     })),
@@ -428,6 +431,7 @@ admin.put('/api/admin/events/:slug/floor-maps/:id', async (c) => {
       hotspots: patch.hotspots.map((h) => ({
         id: h.id,
         roomName: h.roomName,
+        ...(h.roomGuid !== undefined && { roomGuid: h.roomGuid }),
         label: stripUndefined(h.label),
         points: h.points,
       })),
@@ -538,6 +542,38 @@ admin.put('/api/admin/events/:slug/i18n-overrides/:lang', async (c) => {
   }
 
   const result = await upsert('i18n-overrides', doc)
+  return c.json(result)
+})
+
+// ---------------------------------------------------------------------------
+// Booth overrides (kiosk-local booth metadata — e.g. floor-map hotspot link)
+// ---------------------------------------------------------------------------
+
+/** GET /api/admin/events/:slug/booth-overrides */
+admin.get('/api/admin/events/:slug/booth-overrides', async (c) => {
+  const slug = c.req.param('slug')
+  const items = await findAll<BoothOverride>('booth-overrides', 'eventSlug', slug)
+  return c.json(items)
+})
+
+/** PUT /api/admin/events/:slug/booth-overrides/:boothId */
+admin.put('/api/admin/events/:slug/booth-overrides/:boothId', async (c) => {
+  const slug = c.req.param('slug')
+  const boothId = c.req.param('boothId')
+  const body = await c.req.json()
+  const parsed = BoothOverrideSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+  const now = new Date().toISOString()
+  const doc: BoothOverride = {
+    id: `${slug}:${boothId}`,
+    eventSlug: slug,
+    boothId,
+    floorMapHotspotId: parsed.data.floorMapHotspotId,
+    updatedAt: now,
+  }
+  const result = await upsert('booth-overrides', doc)
   return c.json(result)
 })
 

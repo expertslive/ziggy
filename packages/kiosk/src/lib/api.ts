@@ -95,6 +95,8 @@ export interface Booth {
   organization?: string;
   logoUrl?: string;
   website?: string;
+  /** kiosk-local; merged from booth-overrides cosmos container */
+  floorMapHotspotId?: string;
 }
 
 export interface Sponsor {
