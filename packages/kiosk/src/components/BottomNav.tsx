@@ -75,6 +75,16 @@ const NAV_ITEMS: NavItem[] = [
       </svg>
     ),
   },
+  {
+    to: '/info',
+    labelKey: 'nav.info',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <circle cx="12" cy="12" r="10" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v.01M12 11v5" />
+      </svg>
+    ),
+  },
 ];
 
 export function BottomNav() {

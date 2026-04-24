@@ -6,7 +6,8 @@
     "map": "Lageplan",
     "expo": "Expo",
     "sponsors": "Sponsoren",
-    "search": "Suche"
+    "search": "Suche",
+    "info": "Info"
   },
   "common": {
     "loading": "Wird geladen...",
@@ -73,5 +74,40 @@
     "title": "Aufwärmen…",
     "subtitle": "Die Veranstaltungsdaten werden geladen.",
     "retry": "Erneut versuchen"
+  },
+  "info": {
+    "title": "Praktische Infos",
+    "wifi": {
+      "title": "WiFi",
+      "ssid": "ExpertsLive2026",
+      "password": "FILLED_AT_BUILD_TIME"
+    },
+    "venue": {
+      "title": "Veranstaltungsort",
+      "name": "FILLED_AT_BUILD_TIME",
+      "address": "FILLED_AT_BUILD_TIME"
+    },
+    "schedule": {
+      "title": "Zeitplan",
+      "doorsOpen": "Einlass: 08:30",
+      "lunch": "Mittagessen: 12:30–13:30",
+      "drinks": "Umtrunk: 17:00"
+    },
+    "emergency": {
+      "title": "Notfall",
+      "location": "FILLED_AT_BUILD_TIME",
+      "phone": "FILLED_AT_BUILD_TIME"
+    },
+    "facilities": {
+      "title": "Einrichtungen",
+      "toilets": "FILLED_AT_BUILD_TIME",
+      "cloakroom": "FILLED_AT_BUILD_TIME"
+    },
+    "contact": {
+      "title": "Kontakt",
+      "name": "FILLED_AT_BUILD_TIME",
+      "email": "FILLED_AT_BUILD_TIME",
+      "phone": "FILLED_AT_BUILD_TIME"
+    }
   }
 }

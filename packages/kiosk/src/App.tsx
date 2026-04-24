@@ -16,6 +16,7 @@ const MapPage = lazy(() => import('./pages/MapPage').then(m => ({ default: m.Map
 const BoothsPage = lazy(() => import('./pages/BoothsPage').then(m => ({ default: m.BoothsPage })));
 const SponsorsPage = lazy(() => import('./pages/SponsorsPage').then(m => ({ default: m.SponsorsPage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
+const InfoPage = lazy(() => import('./pages/InfoPage').then(m => ({ default: m.InfoPage })));
 
 export function App() {
   const touch = useKioskStore((s) => s.touch);
@@ -47,6 +48,7 @@ export function App() {
             <Route path="/expo" element={<ErrorBoundary><BoothsPage /></ErrorBoundary>} />
             <Route path="/sponsors" element={<ErrorBoundary><SponsorsPage /></ErrorBoundary>} />
             <Route path="/search" element={<ErrorBoundary><SearchPage /></ErrorBoundary>} />
+            <Route path="/info" element={<ErrorBoundary><InfoPage /></ErrorBoundary>} />
           </Routes>
         </Suspense>
       </main>
