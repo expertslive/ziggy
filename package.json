@@ -21,5 +21,10 @@
     "eslint": "^9.0.0",
     "prettier": "^3.4.0",
     "typescript": "^5.7.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-xml-parser": "^5.5.6"
+    }
   }
 }
