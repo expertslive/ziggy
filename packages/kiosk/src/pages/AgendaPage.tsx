@@ -36,7 +36,7 @@ export function AgendaPage() {
   const { t } = useTranslation();
   const language = useKioskStore((s) => s.language);
   const touch = useKioskStore((s) => s.touch);
-  const { data: agenda, isLoading: agendaLoading, error: agendaError } = useAgenda();
+  const { data: agenda, isLoading: agendaLoading } = useAgenda();
   const { data: config } = useEventConfig();
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
   const [selectedSession, setSelectedSession] = useState<AgendaSession | null>(null);
@@ -88,15 +88,6 @@ export function AgendaPage() {
         <div className="flex items-center justify-center h-48">
           <div className="animate-pulse text-el-light/60 text-lg">{t('common.loading')}</div>
         </div>
-      </PageContainer>
-    );
-  }
-
-  if (agendaError || !agenda) {
-    return (
-      <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
-        <p className="text-el-red text-lg">{t('common.error')}</p>
       </PageContainer>
     );
   }

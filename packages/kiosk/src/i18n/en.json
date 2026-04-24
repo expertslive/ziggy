@@ -55,5 +55,10 @@
     "placeholder": "Search sessions, speakers, or booths...",
     "minChars": "Type at least 4 characters to search."
   },
-  "reconnecting": "Reconnecting to event data…"
+  "reconnecting": "Reconnecting to event data…",
+  "warmup": {
+    "title": "Warming up…",
+    "subtitle": "The event data is loading.",
+    "retry": "Retry"
+  }
 }

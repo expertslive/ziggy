@@ -55,5 +55,10 @@
     "placeholder": "Rechercher des sessions, intervenants ou stands...",
     "minChars": "Saisissez au moins 4 caractères pour rechercher."
   },
-  "reconnecting": "Reconnexion…"
+  "reconnecting": "Reconnexion…",
+  "warmup": {
+    "title": "Préparation…",
+    "subtitle": "Les données de l'événement se chargent.",
+    "retry": "Réessayer"
+  }
 }

@@ -76,7 +76,7 @@ function NextSessionTime({ sessions }: { sessions: AgendaSession[] }) {
 export function NowPage() {
   const { t } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
-  const { data, isLoading, error } = useNowSessions();
+  const { data, isLoading } = useNowSessions();
   const [selectedSession, setSelectedSession] = useState<AgendaSession | null>(null);
 
   if (isLoading) {
@@ -91,16 +91,7 @@ export function NowPage() {
     );
   }
 
-  if (error || !data) {
-    return (
-      <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-2">{t('now.title')}</h1>
-        <p className="text-el-red text-lg">{t('common.error')}</p>
-      </PageContainer>
-    );
-  }
-
-  const { current, upNext } = data;
+  const { current, upNext } = data ?? { current: [], upNext: [] };
   const hasCurrentSessions = current.length > 0;
   const hasUpNext = upNext.length > 0;
 

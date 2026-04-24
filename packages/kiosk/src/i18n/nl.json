@@ -55,5 +55,10 @@
     "placeholder": "Zoek sessies, sprekers of stands...",
     "minChars": "Typ minimaal 4 tekens om te zoeken."
   },
-  "reconnecting": "Verbinding herstellen…"
+  "reconnecting": "Verbinding herstellen…",
+  "warmup": {
+    "title": "Opwarmen…",
+    "subtitle": "Evenementgegevens worden geladen.",
+    "retry": "Opnieuw proberen"
+  }
 }
