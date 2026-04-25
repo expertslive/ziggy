@@ -88,7 +88,18 @@ export function SearchPage() {
         <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">{t('search.title')}</h1>
         <div className="flex items-center gap-3 bg-el-gray rounded-xl px-4 py-3">
           <span className="text-el-light/40 text-lg">&#x1F50D;</span>
-          <div className="flex-1 text-base text-el-light min-h-[24px]">
+          {/* iPhone: native text input */}
+          <input
+            type="search"
+            inputMode="search"
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); touch() }}
+            placeholder={t('search.placeholder')}
+            className="sm:hidden flex-1 bg-transparent text-base text-el-light placeholder:text-el-light/30 outline-none"
+          />
+
+          {/* Kiosk: read-only display of typed query */}
+          <div className="hidden sm:flex flex-1 text-base text-el-light min-h-[24px]">
             {query || (
               <span className="text-el-light/30">{t('search.placeholder')}</span>
             )}
@@ -185,23 +196,23 @@ export function SearchPage() {
 
       </div>
 
-      {/* Virtual keyboard (pinned to bottom) */}
-      {keyboardOpen ? (
-        <div className="shrink-0">
+      {/* Virtual keyboard (pinned to bottom) — kiosk only */}
+      <div className="shrink-0 hidden sm:block">
+        {keyboardOpen ? (
           <VirtualKeyboard
             onKeyPress={handleKeyPress}
             onBackspace={handleBackspace}
             onClear={handleClear}
           />
-        </div>
-      ) : (
-        <button
-          onClick={() => { setKeyboardOpen(true); touch() }}
-          className="shrink-0 w-full bg-el-dark border-t border-el-gray py-4 text-el-light/70 active:bg-el-gray text-sm font-semibold"
-        >
-          ⌨︎ {t('search.tapToType')}
-        </button>
-      )}
+        ) : (
+          <button
+            onClick={() => { setKeyboardOpen(true); touch() }}
+            className="w-full bg-el-dark border-t border-el-gray py-4 text-el-light/70 active:bg-el-gray text-sm font-semibold"
+          >
+            ⌨︎ {t('search.tapToType')}
+          </button>
+        )}
+      </div>
 
       {/* Modals */}
       {selectedSession && (
