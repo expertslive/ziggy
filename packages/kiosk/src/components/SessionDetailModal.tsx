@@ -101,19 +101,30 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
                 {t('speakers.title')}
               </h3>
               <div className="space-y-3">
-                {session.speakers.map((speaker) => (
+                {session.speakers.map((speaker) => {
+                  const isMvp = speaker.labels?.some((l) => l.name === 'Microsoft MVP');
+                  return (
                   <div key={speaker.id} className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-el-gray-light overflow-hidden shrink-0">
-                      {speaker.image ? (
+                    <div className="relative w-12 h-12 shrink-0">
+                      <div className="w-full h-full rounded-full bg-el-gray-light overflow-hidden">
+                        {speaker.image ? (
+                          <img
+                            src={speaker.image}
+                            alt={speaker.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-lg text-el-light/60">
+                            {speaker.name[0]}
+                          </div>
+                        )}
+                      </div>
+                      {isMvp && (
                         <img
-                          src={speaker.image}
-                          alt={speaker.name}
-                          className="w-full h-full object-cover"
+                          src="https://cdn.run.events/label-badge-images/1bc5962c-e222-4bb3-bfab-add778c970d7"
+                          alt="Microsoft MVP"
+                          className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-white p-px shadow"
                         />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-lg text-el-light/60">
-                          {speaker.name[0]}
-                        </div>
                       )}
                     </div>
                     <div>
@@ -126,7 +137,8 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

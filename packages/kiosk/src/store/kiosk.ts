@@ -13,7 +13,6 @@ interface KioskState {
   selectedDayIndex: number | null
   openSessionId: number | null
   openSpeakerId: number | null
-  openBoothId: number | null
   searchQuery: string
   selectedMapId: string | null
   mapHighlightId: string | null
@@ -26,7 +25,6 @@ interface KioskState {
   setLanguage: (lang: string) => void
   openSession: (id: number | null) => void
   openSpeaker: (id: number | null) => void
-  openBooth: (id: number | null) => void
   setSearchQuery: (q: string) => void
   setSelectedDayIndex: (i: number | null) => void
   setSelectedMap: (id: string | null, highlightId?: string | null) => void
@@ -42,7 +40,6 @@ const INITIAL_SESSION = {
   selectedDayIndex: null as number | null,
   openSessionId: null as number | null,
   openSpeakerId: null as number | null,
-  openBoothId: null as number | null,
   searchQuery: '',
   selectedMapId: null as string | null,
   mapHighlightId: null as string | null,
@@ -63,7 +60,6 @@ export const useKioskStore = create<KioskState>()((set) => ({
   setLanguage: (language) => set({ language }),
   openSession: (openSessionId) => set({ openSessionId }),
   openSpeaker: (openSpeakerId) => set({ openSpeakerId }),
-  openBooth: (openBoothId) => set({ openBoothId }),
   setSearchQuery: (searchQuery) => set({ searchQuery }),
   setSelectedDayIndex: (selectedDayIndex) => set({ selectedDayIndex }),
   setSelectedMap: (selectedMapId, mapHighlightId = null) => set({ selectedMapId, mapHighlightId }),

@@ -10,7 +10,6 @@ describe('kiosk store resetSession', () => {
     useKioskStore.setState({
       openSessionId: 42,
       openSpeakerId: 7,
-      openBoothId: 3,
       searchQuery: 'azure',
       selectedDayIndex: 2,
       selectedMapId: 'm1',
@@ -26,7 +25,6 @@ describe('kiosk store resetSession', () => {
     const s = useKioskStore.getState()
     expect(s.openSessionId).toBeNull()
     expect(s.openSpeakerId).toBeNull()
-    expect(s.openBoothId).toBeNull()
     expect(s.searchQuery).toBe('')
     expect(s.selectedDayIndex).toBeNull()
     expect(s.selectedMapId).toBeNull()

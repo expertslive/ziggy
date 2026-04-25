@@ -227,7 +227,7 @@ export function MapPage() {
   const mapHighlightId = useKioskStore((s) => s.mapHighlightId);
   const setMapHighlight = useKioskStore((s) => s.setMapHighlight);
   const lang = i18n.language;
-  const { data: maps, isLoading, error } = useFloorMaps();
+  const { data: maps, isLoading } = useFloorMaps();
   const { data: nowData } = useNowSessions();
 
   // Auto-select the map containing the highlighted hotspot if needed.
@@ -246,7 +246,7 @@ export function MapPage() {
     }
   }, [mapHighlightId, maps, selectedMapId, setSelectedMap]);
 
-  if (isLoading) {
+  if (isLoading || !maps) {
     return (
       <PageContainer>
         <h1 className="text-3xl font-extrabold text-el-light mb-4">
@@ -257,17 +257,6 @@ export function MapPage() {
             {t('common.loading')}
           </div>
         </div>
-      </PageContainer>
-    );
-  }
-
-  if (error || !maps) {
-    return (
-      <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">
-          {t('map.title')}
-        </h1>
-        <p className="text-el-red text-lg">{t('common.error')}</p>
       </PageContainer>
     );
   }

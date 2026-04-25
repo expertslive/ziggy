@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import { PageContainer } from '../components/PageContainer'
 
 function Card({
@@ -21,45 +22,45 @@ function Card({
 
 export function InfoPage() {
   const { t } = useTranslation()
+  const ssid = t('info.wifi.ssid')
+  const password = t('info.wifi.password')
+  const wifiString = `WIFI:T:WPA;S:${ssid};P:${password};;`
   return (
     <PageContainer>
       <h1 className="text-3xl font-extrabold text-el-light mb-6">{t('info.title')}</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card title={t('info.wifi.title')} wide>
-          <div className="text-el-light/70 text-sm mb-1">SSID</div>
-          <div className="text-3xl font-extrabold text-el-light mb-3 select-text">
-            {t('info.wifi.ssid')}
-          </div>
-          <div className="text-el-light/70 text-sm mb-1">Password</div>
-          <div className="text-3xl font-extrabold text-el-light select-text">
-            {t('info.wifi.password')}
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            <div className="flex-1">
+              <div className="text-el-light/70 text-sm mb-1">SSID</div>
+              <div className="text-3xl font-extrabold text-el-light mb-3 select-text">
+                {ssid}
+              </div>
+              <div className="text-el-light/70 text-sm mb-1">Password</div>
+              <div className="text-3xl font-extrabold text-el-light select-text">
+                {password}
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-3 self-center md:self-auto shrink-0">
+              <QRCodeSVG
+                value={wifiString}
+                size={200}
+                bgColor="#ffffff"
+                fgColor="#000000"
+                includeMargin
+              />
+            </div>
           </div>
         </Card>
-        <Card title={t('info.venue.title')}>
-          <div className="text-el-light font-bold">{t('info.venue.name')}</div>
-          <div className="text-el-light/70 whitespace-pre-line mt-1">
-            {t('info.venue.address')}
-          </div>
-        </Card>
-        <Card title={t('info.schedule.title')}>
+        <Card title={t('info.times.title')}>
           <ul className="text-el-light/90 space-y-1">
-            <li>{t('info.schedule.doorsOpen')}</li>
-            <li>{t('info.schedule.lunch')}</li>
-            <li>{t('info.schedule.drinks')}</li>
+            <li>{t('info.times.doorsOpen')}</li>
+            <li>{t('info.times.lunch')}</li>
+            <li>{t('info.times.drinks')}</li>
           </ul>
         </Card>
-        <Card title={t('info.emergency.title')}>
-          <div className="text-el-light">{t('info.emergency.location')}</div>
-          <div className="text-el-light/70 mt-1">{t('info.emergency.phone')}</div>
-        </Card>
-        <Card title={t('info.facilities.title')}>
-          <div className="text-el-light">{t('info.facilities.toilets')}</div>
-          <div className="text-el-light mt-1">{t('info.facilities.cloakroom')}</div>
-        </Card>
-        <Card title={t('info.contact.title')}>
-          <div className="text-el-light font-bold">{t('info.contact.name')}</div>
-          <div className="text-el-light/70 mt-1">{t('info.contact.email')}</div>
-          <div className="text-el-light/70">{t('info.contact.phone')}</div>
+        <Card title={t('info.questions.title')}>
+          <p className="text-el-light/80 leading-relaxed">{t('info.questions.body')}</p>
         </Card>
       </div>
     </PageContainer>

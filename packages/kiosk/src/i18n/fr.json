@@ -4,7 +4,6 @@
     "agenda": "Programme",
     "speakers": "Intervenants",
     "map": "Plan",
-    "expo": "Expo",
     "sponsors": "Sponsors",
     "search": "Recherche",
     "info": "Info"
@@ -47,12 +46,6 @@
     "upcomingSessions": "À venir",
     "showOnMap": "Voir sur le plan"
   },
-  "booths": {
-    "title": "Expo",
-    "noBooths": "Aucun exposant disponible.",
-    "count": "{{count}} exposants",
-    "boothNumber": "Stand {{number}}"
-  },
   "sponsors": {
     "title": "Sponsors",
     "filterAll": "Tous"
@@ -66,7 +59,6 @@
     "minChars": "Saisissez au moins 4 caractères pour rechercher.",
     "sectionSessions": "Sessions",
     "sectionSpeakers": "Intervenants",
-    "sectionBooths": "Stands",
     "keepTyping": "Continuez à taper pour les sessions (min. 4 caractères)",
     "showAll": "Afficher les {{count}}",
     "tapToType": "Appuyer pour saisir"
@@ -89,32 +81,15 @@
       "ssid": "ExpertsLive",
       "password": "ExpertsLive2026"
     },
-    "venue": {
-      "title": "Lieu",
-      "name": "Experts Live Netherlands 2026",
-      "address": "Blokhoeve 1\n3438 LC Nieuwegein"
+    "times": {
+      "title": "Horaires",
+      "doorsOpen": "Ouverture: 07:00",
+      "lunch": "Déjeuner: 12:00–13:00",
+      "drinks": "Cocktail: 17:30"
     },
-    "schedule": {
-      "title": "Programme",
-      "doorsOpen": "Ouverture des portes: 08:30",
-      "lunch": "Déjeuner: 12:30–13:30",
-      "drinks": "Cocktail: 17:00"
-    },
-    "emergency": {
-      "title": "Urgence",
-      "location": "Brenda Kager",
-      "phone": "+31 6 4143 3385"
-    },
-    "facilities": {
-      "title": "Équipements",
-      "toilets": "Voir la signalisation",
-      "cloakroom": "Près de l'entrée principale"
-    },
-    "contact": {
-      "title": "Contact",
-      "name": "Brenda Kager",
-      "email": "",
-      "phone": "+31 6 4143 3385"
+    "questions": {
+      "title": "Questions ?",
+      "body": "Demandez à un des bénévoles (reconnaissables par leur tenue Experts Live) ou rendez-vous à l'accueil."
     }
   }
 }

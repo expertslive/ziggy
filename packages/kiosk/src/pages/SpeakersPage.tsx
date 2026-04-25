@@ -12,7 +12,7 @@ export function SpeakersPage() {
   const touch = useKioskStore((s) => s.touch);
   const openSpeakerId = useKioskStore((s) => s.openSpeakerId);
   const openSpeaker = useKioskStore((s) => s.openSpeaker);
-  const { data: speakers, isLoading, error } = useSpeakers();
+  const { data: speakers, isLoading } = useSpeakers();
 
   // Sort speakers A-Z by name
   const sortedSpeakers = useMemo(() => {
@@ -25,22 +25,13 @@ export function SpeakersPage() {
     return speakers.find((s) => s.uniqueId === openSpeakerId) ?? null;
   }, [openSpeakerId, speakers]);
 
-  if (isLoading) {
+  if (isLoading || !speakers) {
     return (
       <PageContainer>
         <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('speakers.title')}</h1>
         <div className="flex items-center justify-center h-48">
           <div className="animate-pulse text-el-light/60 text-lg">{t('common.loading')}</div>
         </div>
-      </PageContainer>
-    );
-  }
-
-  if (error || !speakers) {
-    return (
-      <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('speakers.title')}</h1>
-        <p className="text-el-red text-lg">{t('common.error')}</p>
       </PageContainer>
     );
   }

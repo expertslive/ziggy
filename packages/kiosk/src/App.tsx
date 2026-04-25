@@ -13,7 +13,6 @@ const NowPage = lazy(() => import('./pages/NowPage').then(m => ({ default: m.Now
 const AgendaPage = lazy(() => import('./pages/AgendaPage').then(m => ({ default: m.AgendaPage })));
 const SpeakersPage = lazy(() => import('./pages/SpeakersPage').then(m => ({ default: m.SpeakersPage })));
 const MapPage = lazy(() => import('./pages/MapPage').then(m => ({ default: m.MapPage })));
-const BoothsPage = lazy(() => import('./pages/BoothsPage').then(m => ({ default: m.BoothsPage })));
 const SponsorsPage = lazy(() => import('./pages/SponsorsPage').then(m => ({ default: m.SponsorsPage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
 const InfoPage = lazy(() => import('./pages/InfoPage').then(m => ({ default: m.InfoPage })));
@@ -52,7 +51,6 @@ export function App() {
             <Route path="/agenda" element={<ErrorBoundary><AgendaPage /></ErrorBoundary>} />
             <Route path="/speakers" element={<ErrorBoundary><SpeakersPage /></ErrorBoundary>} />
             <Route path="/map" element={<ErrorBoundary><MapPage /></ErrorBoundary>} />
-            <Route path="/expo" element={<ErrorBoundary><BoothsPage /></ErrorBoundary>} />
             <Route path="/sponsors" element={<ErrorBoundary><SponsorsPage /></ErrorBoundary>} />
             <Route path="/search" element={<ErrorBoundary><SearchPage /></ErrorBoundary>} />
             <Route path="/info" element={<ErrorBoundary><InfoPage /></ErrorBoundary>} />

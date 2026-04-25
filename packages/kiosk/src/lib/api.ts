@@ -86,19 +86,6 @@ export interface Speaker {
   labels: Label[];
 }
 
-export interface Booth {
-  id: number;
-  name: string;
-  description?: string;
-  boothNumber?: string;
-  location?: string;
-  organization?: string;
-  logoUrl?: string;
-  website?: string;
-  /** kiosk-local; merged from booth-overrides cosmos container */
-  floorMapHotspotId?: string;
-}
-
 export interface Sponsor {
   id: string;
   name: string;
@@ -156,10 +143,6 @@ export function fetchNowSessions(slug: string): Promise<NowResponse> {
 
 export function fetchSpeakers(slug: string): Promise<Speaker[]> {
   return fetchJson<Speaker[]>(`/api/events/${slug}/speakers`);
-}
-
-export function fetchBooths(slug: string): Promise<Booth[]> {
-  return fetchJson<Booth[]>(`/api/events/${slug}/booths`);
 }
 
 export function fetchSearch(slug: string, query: string): Promise<AgendaSession[]> {

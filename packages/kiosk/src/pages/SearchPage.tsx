@@ -1,16 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AnimatePresence } from 'framer-motion';
 import { SessionCard } from '../components/SessionCard';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { SpeakerCard } from '../components/SpeakerCard';
 import { SpeakerDetailModal } from '../components/SpeakerDetailModal';
-import { BoothCard } from '../components/BoothCard';
-import { BoothDetailModal } from '../components/BoothDetailModal';
 import { VirtualKeyboard } from '../components/VirtualKeyboard';
-import { useSearch, useSpeakers, useBooths } from '../lib/hooks';
+import { useSearch, useSpeakers } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
-import type { AgendaSession, Speaker, Booth } from '../lib/api';
+import type { AgendaSession, Speaker } from '../lib/api';
 
 const INITIAL_LIMIT = 6;
 
@@ -23,16 +20,12 @@ export function SearchPage() {
   const openSession = useKioskStore((s) => s.openSession);
   const openSpeakerId = useKioskStore((s) => s.openSpeakerId);
   const openSpeaker = useKioskStore((s) => s.openSpeaker);
-  const openBoothId = useKioskStore((s) => s.openBoothId);
-  const openBooth = useKioskStore((s) => s.openBooth);
 
   const sessionsQ = useSearch(query);
   const speakersQ = useSpeakers();
-  const boothsQ = useBooths();
 
   const [expandSessions, setExpandSessions] = useState(false);
   const [expandSpeakers, setExpandSpeakers] = useState(false);
-  const [expandBooths, setExpandBooths] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState<boolean>(true);
 
   const q = query.trim().toLowerCase();
@@ -47,20 +40,10 @@ export function SearchPage() {
     );
   }, [speakersQ.data, q]);
 
-  const booths = useMemo<Booth[]>(() => {
-    if (!q || !boothsQ.data) return [];
-    return boothsQ.data.filter(
-      (b) =>
-        b.name.toLowerCase().includes(q) ||
-        b.organization?.toLowerCase().includes(q) ||
-        b.boothNumber?.toLowerCase().includes(q),
-    );
-  }, [boothsQ.data, q]);
-
   const sessions: AgendaSession[] = sessionsQ.data ?? [];
-  const hasAny = sessions.length > 0 || speakers.length > 0 || booths.length > 0;
+  const hasAny = sessions.length > 0 || speakers.length > 0;
   const showKeepTyping =
-    q.length > 0 && q.length < 4 && speakers.length === 0 && booths.length === 0;
+    q.length > 0 && q.length < 4 && speakers.length === 0;
 
   useEffect(() => {
     setKeyboardOpen(true);
@@ -79,15 +62,9 @@ export function SearchPage() {
     return speakersQ.data.find((s) => s.uniqueId === openSpeakerId) ?? null;
   }, [openSpeakerId, speakersQ.data]);
 
-  const selectedBooth = useMemo<Booth | null>(() => {
-    if (openBoothId == null || !boothsQ.data) return null;
-    return boothsQ.data.find((b) => b.id === openBoothId) ?? null;
-  }, [openBoothId, boothsQ.data]);
-
   const resetExpansion = () => {
     setExpandSessions(false);
     setExpandSpeakers(false);
-    setExpandBooths(false);
   };
 
   const handleKeyPress = (key: string) => {
@@ -206,38 +183,6 @@ export function SearchPage() {
           </section>
         )}
 
-        {booths.length > 0 && (
-          <section>
-            <h2 className="text-xl font-bold text-el-light mb-3">
-              {t('search.sectionBooths')} ({booths.length})
-            </h2>
-            <div className="space-y-3">
-              {booths
-                .slice(0, expandBooths ? booths.length : INITIAL_LIMIT)
-                .map((booth) => (
-                  <BoothCard
-                    key={booth.id}
-                    booth={booth}
-                    onTap={() => {
-                      openBooth(booth.id);
-                      touch();
-                    }}
-                  />
-                ))}
-            </div>
-            {booths.length > INITIAL_LIMIT && !expandBooths && (
-              <button
-                className="mt-3 text-el-blue font-bold"
-                onClick={() => {
-                  setExpandBooths(true);
-                  touch();
-                }}
-              >
-                {t('search.showAll', { count: booths.length })}
-              </button>
-            )}
-          </section>
-        )}
       </div>
 
       {/* Virtual keyboard (pinned to bottom) */}
@@ -271,14 +216,6 @@ export function SearchPage() {
           onClose={() => openSpeaker(null)}
         />
       )}
-      <AnimatePresence>
-        {selectedBooth && (
-          <BoothDetailModal
-            booth={selectedBooth}
-            onClose={() => openBooth(null)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }

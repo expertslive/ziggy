@@ -3,7 +3,6 @@ import {
   fetchAgenda,
   fetchNowSessions,
   fetchSpeakers,
-  fetchBooths,
   fetchSearch,
   fetchSponsors,
   fetchSponsorTiers,
@@ -15,7 +14,6 @@ import type {
   Agenda,
   NowResponse,
   Speaker,
-  Booth,
   AgendaSession,
   Sponsor,
   SponsorTier,
@@ -51,14 +49,6 @@ export function useSpeakers() {
   return useQuery<Speaker[]>({
     queryKey: ['speakers', slug],
     queryFn: () => fetchSpeakers(slug),
-  });
-}
-
-export function useBooths() {
-  const slug = useSlug();
-  return useQuery<Booth[]>({
-    queryKey: ['booths', slug],
-    queryFn: () => fetchBooths(slug),
   });
 }
 

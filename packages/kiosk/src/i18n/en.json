@@ -4,7 +4,6 @@
     "agenda": "Agenda",
     "speakers": "Speakers",
     "map": "Map",
-    "expo": "Expo",
     "sponsors": "Sponsors",
     "search": "Search",
     "info": "Info"
@@ -47,12 +46,6 @@
     "upcomingSessions": "Coming Up",
     "showOnMap": "Show on map"
   },
-  "booths": {
-    "title": "Expo",
-    "noBooths": "No exhibitor booths available.",
-    "count": "{{count}} exhibitors",
-    "boothNumber": "Booth {{number}}"
-  },
   "sponsors": {
     "title": "Sponsors",
     "filterAll": "All"
@@ -66,7 +59,6 @@
     "minChars": "Type at least 4 characters to search.",
     "sectionSessions": "Sessions",
     "sectionSpeakers": "Speakers",
-    "sectionBooths": "Booths",
     "keepTyping": "Keep typing for sessions (need ≥4 characters)",
     "showAll": "Show all {{count}}",
     "tapToType": "Tap to type"
@@ -89,32 +81,15 @@
       "ssid": "ExpertsLive",
       "password": "ExpertsLive2026"
     },
-    "venue": {
-      "title": "Venue",
-      "name": "Experts Live Netherlands 2026",
-      "address": "Blokhoeve 1\n3438 LC Nieuwegein"
+    "times": {
+      "title": "Times",
+      "doorsOpen": "Doors open: 07:00",
+      "lunch": "Lunch: 12:00–13:00",
+      "drinks": "Drinks: 17:30"
     },
-    "schedule": {
-      "title": "Schedule",
-      "doorsOpen": "Doors open: 08:30",
-      "lunch": "Lunch: 12:30–13:30",
-      "drinks": "Drinks: 17:00"
-    },
-    "emergency": {
-      "title": "Emergency",
-      "location": "Brenda Kager",
-      "phone": "+31 6 4143 3385"
-    },
-    "facilities": {
-      "title": "Facilities",
-      "toilets": "See signage",
-      "cloakroom": "Near the main entrance"
-    },
-    "contact": {
-      "title": "Contact",
-      "name": "Brenda Kager",
-      "email": "",
-      "phone": "+31 6 4143 3385"
+    "questions": {
+      "title": "Questions?",
+      "body": "Ask one of the volunteers (recognizable by their Experts Live clothing) or visit the registration desk."
     }
   }
 }
