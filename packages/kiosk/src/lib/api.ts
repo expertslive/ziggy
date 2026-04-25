@@ -106,6 +106,8 @@ export interface Sponsor {
   logoUrl: string;
   website?: string;
   boothNumber?: string;
+  /** kiosk-local: link to a hotspot on a floor map for "Show on map" deep-linking */
+  floorMapHotspotId?: string;
   description: Record<string, string>;
   sortOrder: number;
 }

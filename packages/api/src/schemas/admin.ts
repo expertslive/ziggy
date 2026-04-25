@@ -45,6 +45,7 @@ export const SponsorSchema = z.object({
   logoUrl: httpsUrl,
   website: httpsUrl.optional(),
   boothNumber: z.string().max(20).optional(),
+  floorMapHotspotId: z.string().min(1).max(100).optional(),
   description: i18nStringRecord,
   sortOrder: z.number().int().min(0).max(10_000),
 })

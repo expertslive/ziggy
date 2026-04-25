@@ -30,3 +30,5 @@ coverage/
 
 # API key image
 api-key.png
+claude_session.txt
+infra/main.json

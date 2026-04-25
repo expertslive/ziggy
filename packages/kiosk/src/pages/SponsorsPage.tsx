@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageContainer } from '../components/PageContainer';
-import { useSponsors, useSponsorTiers } from '../lib/hooks';
+import { useSponsors, useSponsorTiers, useFloorMaps } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
 import type { Sponsor } from '../lib/api';
 
@@ -64,10 +65,17 @@ function SponsorDetailModal({
   sponsor: Sponsor;
   onClose: () => void;
 }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const setSelectedMap = useKioskStore((s) => s.setSelectedMap);
+  const { data: floorMaps } = useFloorMaps();
   const lang = i18n.language;
   const description =
     sponsor.description[lang] || sponsor.description['en'] || '';
+
+  const matchingMap = (floorMaps ?? []).find((m) =>
+    m.hotspots?.some((h) => h.id === sponsor.floorMapHotspotId),
+  );
 
   return (
     <motion.div
@@ -101,6 +109,19 @@ function SponsorDetailModal({
             <span className="px-3 py-1 rounded-full bg-el-blue/20 text-el-blue text-sm font-semibold">
               Booth {sponsor.boothNumber}
             </span>
+          )}
+
+          {matchingMap && sponsor.floorMapHotspotId && (
+            <button
+              onClick={() => {
+                setSelectedMap(matchingMap.id, sponsor.floorMapHotspotId!);
+                onClose();
+                navigate('/map');
+              }}
+              className="inline-flex items-center gap-1 px-4 py-2 rounded-xl bg-el-blue text-white text-sm font-bold active:bg-el-blue/80"
+            >
+              &#x1F5FA; {t('map.showOnMap')}
+            </button>
           )}
 
           {description && (

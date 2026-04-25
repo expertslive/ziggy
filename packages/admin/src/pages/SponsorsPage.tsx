@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSponsors, useSponsorTiers, useCreateSponsor, useUpdateSponsor, useDeleteSponsor } from '../lib/hooks';
+import { useSponsors, useSponsorTiers, useCreateSponsor, useUpdateSponsor, useDeleteSponsor, useFloorMaps } from '../lib/hooks';
 import { SlideOver } from '../components/SlideOver';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useToast } from '../components/Toast';
@@ -12,6 +12,7 @@ interface SponsorForm {
   logoUrl: string;
   website: string;
   boothNumber: string;
+  floorMapHotspotId: string;
   sortOrder: number;
 }
 
@@ -22,6 +23,7 @@ const emptyForm: SponsorForm = {
   logoUrl: '',
   website: '',
   boothNumber: '',
+  floorMapHotspotId: '',
   sortOrder: 0,
 };
 
@@ -29,6 +31,7 @@ export function SponsorsPage() {
   const { toast } = useToast();
   const sponsors = useSponsors();
   const tiers = useSponsorTiers();
+  const floorMaps = useFloorMaps();
   const createMut = useCreateSponsor();
   const updateMut = useUpdateSponsor();
   const deleteMut = useDeleteSponsor();
@@ -53,6 +56,7 @@ export function SponsorsPage() {
       logoUrl: sponsor.logoUrl || '',
       website: sponsor.website || '',
       boothNumber: sponsor.boothNumber || '',
+      floorMapHotspotId: sponsor.floorMapHotspotId || '',
       sortOrder: sponsor.sortOrder ?? 0,
     });
     setPanelOpen(true);
@@ -60,12 +64,17 @@ export function SponsorsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Empty strings on optional fields would fail zod min(1); send undefined.
+    const payload = {
+      ...form,
+      floorMapHotspotId: form.floorMapHotspotId || undefined,
+    };
     try {
       if (editingId) {
-        await updateMut.mutateAsync({ id: editingId, data: form });
+        await updateMut.mutateAsync({ id: editingId, data: payload });
         toast('success', 'Sponsor updated');
       } else {
-        await createMut.mutateAsync(form);
+        await createMut.mutateAsync(payload);
         toast('success', 'Sponsor created');
       }
       setPanelOpen(false);
@@ -249,6 +258,29 @@ export function SponsorsPage() {
               className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="e.g. A12"
             />
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              Floor map hotspot (optional)
+            </label>
+            <select
+              value={form.floorMapHotspotId}
+              onChange={(e) => setField('floorMapHotspotId', e.target.value)}
+              className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            >
+              <option value="">— None —</option>
+              {(floorMaps.data || []).flatMap((map: any) =>
+                (map.hotspots || []).map((h: any) => (
+                  <option key={h.id} value={h.id}>
+                    {map.name} — {h.roomName}
+                  </option>
+                )),
+              )}
+            </select>
+            <p className="mt-1 text-xs text-gray-400">
+              Links this sponsor to a floor-map room for the kiosk's "Show on map" button.
+            </p>
           </div>
 
           <div>

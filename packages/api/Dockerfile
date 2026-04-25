@@ -5,7 +5,7 @@ RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
 # Copy workspace config
-COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
 COPY packages/shared/package.json packages/shared/
 COPY packages/api/package.json packages/api/
 
@@ -27,7 +27,7 @@ RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 
-COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc ./
 COPY packages/shared/package.json packages/shared/
 COPY packages/api/package.json packages/api/
 
