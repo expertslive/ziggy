@@ -24,7 +24,7 @@ export function AccessibilityMenu() {
       <button
         aria-label={t('a11y.title')}
         onClick={() => { setOpen((v) => !v); touch() }}
-        className="min-w-[48px] min-h-[48px] rounded-xl bg-el-gray text-el-light flex items-center justify-center text-xl font-bold active:bg-el-gray-light"
+        className="min-w-[44px] min-h-[44px] sm:min-w-[48px] sm:min-h-[48px] rounded-xl bg-el-gray text-el-light flex items-center justify-center text-xl font-bold active:bg-el-gray-light"
       >
         Ⓐ
       </button>

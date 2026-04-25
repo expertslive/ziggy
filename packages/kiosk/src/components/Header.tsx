@@ -39,9 +39,9 @@ export function Header() {
       {/* Left: Logo */}
       <Link to="/info" onClick={touch} className="flex items-center gap-2 active:opacity-70 transition-opacity">
         {logoUrl ? (
-          <img src={logoUrl} alt={config?.name || 'Experts Live'} className="h-10 w-auto" />
+          <img src={logoUrl} alt={config?.name || 'Experts Live'} className="h-8 sm:h-10 w-auto" />
         ) : (
-          <span className="text-2xl font-extrabold tracking-tight">
+          <span className="text-xl sm:text-2xl font-extrabold tracking-tight">
             <span className="text-el-navy">Experts</span>
             <span className="text-el-blue"> Live</span>
           </span>
@@ -61,9 +61,9 @@ export function Header() {
             touch();
             window.location.reload();
           }}
-          className="min-w-[48px] min-h-[48px] rounded-xl bg-el-gray text-el-light flex items-center justify-center text-xl font-bold active:bg-el-gray-light"
+          className="min-w-[44px] min-h-[44px] sm:min-w-[48px] sm:min-h-[48px] rounded-xl bg-el-gray text-el-light flex items-center justify-center text-xl font-bold active:bg-el-gray-light"
         >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h5M20 20v-5h-5M5 9a8 8 0 0114-3M19 15a8 8 0 01-14 3" />
           </svg>
         </button>
