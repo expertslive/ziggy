@@ -164,16 +164,29 @@ function FloorMapViewer({
       <p className="text-el-light/40 text-sm mb-3">{t('map.tapRoom')}</p>
 
       <div
-        className="relative w-full"
-        style={imgSize ? { aspectRatio: `${imgSize.w}/${imgSize.h}` } : undefined}
+        className="relative w-full bg-el-gray rounded-2xl overflow-hidden"
+        style={{
+          aspectRatio: imgSize ? `${imgSize.w}/${imgSize.h}` : '16/9',
+          minHeight: '40vh',
+        }}
       >
+        {!imgSize && (
+          <div className="absolute inset-0 flex items-center justify-center text-el-light/50">
+            <div className="animate-pulse">{t('common.loading')}</div>
+          </div>
+        )}
         <img
           src={map.imageUrl}
           alt={map.name}
+          loading="eager"
+          decoding="async"
           className="w-full h-full object-contain"
           onLoad={(e) => {
             const img = e.currentTarget;
             setImgSize({ w: img.naturalWidth, h: img.naturalHeight });
+          }}
+          onError={() => {
+            console.warn('[MapPage] floor map image failed to load:', map.imageUrl);
           }}
         />
         {imgSize && (

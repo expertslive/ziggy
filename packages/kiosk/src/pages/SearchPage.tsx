@@ -59,7 +59,7 @@ export function SearchPage() {
 
   const selectedSpeaker = useMemo<Speaker | null>(() => {
     if (openSpeakerId == null || !speakersQ.data) return null;
-    return speakersQ.data.find((s) => s.uniqueId === openSpeakerId) ?? null;
+    return speakersQ.data.find((s) => s.id === openSpeakerId) ?? null;
   }, [openSpeakerId, speakersQ.data]);
 
   const resetExpansion = () => {
@@ -160,10 +160,10 @@ export function SearchPage() {
                 .slice(0, expandSpeakers ? speakers.length : INITIAL_LIMIT)
                 .map((speaker) => (
                   <SpeakerCard
-                    key={speaker.uniqueId}
+                    key={speaker.id}
                     speaker={speaker}
                     onTap={() => {
-                      openSpeaker(speaker.uniqueId);
+                      openSpeaker(speaker.id);
                       touch();
                     }}
                   />

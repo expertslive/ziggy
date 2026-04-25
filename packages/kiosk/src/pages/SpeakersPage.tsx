@@ -22,7 +22,7 @@ export function SpeakersPage() {
 
   const selectedSpeaker = useMemo<Speaker | null>(() => {
     if (openSpeakerId == null || !speakers) return null;
-    return speakers.find((s) => s.uniqueId === openSpeakerId) ?? null;
+    return speakers.find((s) => s.id === openSpeakerId) ?? null;
   }, [openSpeakerId, speakers]);
 
   if (isLoading || !speakers) {
@@ -56,10 +56,10 @@ export function SpeakersPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {sortedSpeakers.map((speaker) => (
           <SpeakerCard
-            key={speaker.uniqueId}
+            key={speaker.id}
             speaker={speaker}
             onTap={() => {
-              openSpeaker(speaker.uniqueId);
+              openSpeaker(speaker.id);
               touch();
             }}
           />

@@ -21,7 +21,7 @@ export interface Label {
 
 export interface SpeakerRef {
   id: number;
-  uniqueId: number;
+  uniqueId: number | null;
   image: string;
   name: string;
   tagline: string | null;
@@ -75,7 +75,7 @@ export interface NowResponse {
 
 export interface Speaker {
   id: number;
-  uniqueId: number;
+  uniqueId: number | null;
   image: string;
   name: string;
   tagline: string | null;
