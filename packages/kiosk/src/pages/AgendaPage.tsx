@@ -289,7 +289,7 @@ export function AgendaPage() {
 
       {showJumpToNow && liveTimeslot && (
         <button
-          className="fixed bottom-24 right-6 bg-el-blue text-white rounded-full px-5 py-3 shadow-lg font-bold active:scale-95 transition-transform z-20"
+          className="fixed bottom-20 right-4 px-4 py-2 sm:bottom-24 sm:right-6 sm:px-5 sm:py-3 bg-el-blue text-white rounded-full shadow-lg font-bold active:scale-95 transition-transform z-20"
           onClick={() => {
             timeslotRefs.current
               .get(liveTimeslot.startTimeGroup)
