@@ -32,16 +32,7 @@ Per pagina checken: header (taalswitcher popover), bottom nav (icon-only), titel
 
 Bugs hier opnemen of als losse issues maken.
 
-## 4. Toetsenbord bij Zoeken — implementatie heroverwegen
-
-Op kiosk staat het virtuele toetsenbord nu pinned aan de bodem en collapse-t na 4s zonder typen. Mogelijke verbeteringen:
-
-- Toetsenbord standaard collapsed, expand alleen na tap op input → meer ruimte voor resultaten
-- Of: toetsenbord altijd zichtbaar maar kleiner / gegroepeerde lay-out die minder hoogte inneemt
-- Of: een fysiek touchscreen toetsenbord overlay i.p.v. de huidige inline-knoppen
-- Test of de huidige collapse-after-4s op fysieke kiosk hardware natuurlijk aanvoelt
-
-## 5. Sponsors → kaart-knop strategie heroverwegen
+## 4. Sponsors → kaart-knop strategie heroverwegen
 
 De "Open kaart van expo gebied" knop op de Sponsors pagina opent nu de algemene plattegrond (eerste map of map met "expo" in de naam). Overwegen:
 
