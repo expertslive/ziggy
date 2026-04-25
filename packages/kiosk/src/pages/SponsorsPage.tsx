@@ -26,18 +26,18 @@ function SponsorCard({
   const aspectBox = size === 'small' ? 'aspect-[2/1]' : 'aspect-[3/2]';
 
   return (
-    <div className={sizeClasses[size]}>
+    <div className={`${sizeClasses[size]} flex`}>
       <motion.button
         whileTap={{ scale: 0.96 }}
         onClick={onTap}
         className="w-full bg-white rounded-2xl p-3 flex flex-col items-center justify-center gap-2 active:bg-el-light transition-colors"
       >
-        <div className={`${aspectBox} w-full flex items-center justify-center px-2`}>
+        <div className={`${aspectBox} w-full flex items-center justify-center px-2 overflow-hidden`}>
           {sponsor.logoUrl ? (
             <img
               src={sponsor.logoUrl}
               alt={sponsor.name}
-              className="max-h-full max-w-full object-contain"
+              className="max-h-[80%] max-w-[85%] object-contain"
             />
           ) : (
             <span className="text-lg font-bold text-el-dark/40">{sponsor.name}</span>
