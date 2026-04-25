@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SessionCard } from '../components/SessionCard';
 import { SessionDetailModal } from '../components/SessionDetailModal';
@@ -24,9 +24,13 @@ export function SearchPage() {
   const sessionsQ = useSearch(query);
   const speakersQ = useSpeakers();
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [expandSessions, setExpandSessions] = useState(false);
   const [expandSpeakers, setExpandSpeakers] = useState(false);
-  const [keyboardOpen, setKeyboardOpen] = useState<boolean>(true);
+  const [keyboardOpen, setKeyboardOpen] = useState<boolean>(false);
+  const [focused, setFocused] = useState(false);
+  const [showHint, setShowHint] = useState(false);
 
   const q = query.trim().toLowerCase();
 
@@ -45,12 +49,26 @@ export function SearchPage() {
   const showKeepTyping =
     q.length > 0 && q.length < 4 && speakers.length === 0;
 
+  // Auto-collapse virtual keyboard after 4s of no typing IF results are showing.
   useEffect(() => {
-    setKeyboardOpen(true);
+    if (!keyboardOpen) return;
     if (!hasAny) return;
-    const timer = setTimeout(() => setKeyboardOpen(false), 4000);
+    const timer = setTimeout(() => {
+      setKeyboardOpen(false);
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }, 4000);
     return () => clearTimeout(timer);
-  }, [query, hasAny]);
+  }, [query, hasAny, keyboardOpen]);
+
+  // Discoverability hint: show after 2s of focus on empty query, while keyboard is closed.
+  useEffect(() => {
+    if (!focused || query.length > 0 || keyboardOpen) {
+      setShowHint(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowHint(true), 2000);
+    return () => clearTimeout(timer);
+  }, [focused, query, keyboardOpen]);
 
   const selectedSession = useMemo<AgendaSession | null>(() => {
     if (openSessionId == null) return null;
@@ -88,34 +106,57 @@ export function SearchPage() {
         <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">{t('search.title')}</h1>
         <div className="flex items-center gap-3 bg-el-gray rounded-xl px-4 py-3">
           <span className="text-el-light/40 text-lg">&#x1F50D;</span>
-          {/* iPhone: native text input */}
           <input
+            ref={inputRef}
             type="search"
             inputMode="search"
+            autoFocus
             value={query}
-            onChange={(e) => { setQuery(e.target.value); touch() }}
+            onChange={(e) => { setQuery(e.target.value); resetExpansion(); touch() }}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             placeholder={t('search.placeholder')}
-            className="sm:hidden flex-1 bg-transparent text-base text-el-light placeholder:text-el-light/30 outline-none"
+            className="flex-1 bg-transparent text-base text-el-light placeholder:text-el-light/30 outline-none min-h-[24px]"
           />
-
-          {/* Kiosk: read-only display of typed query */}
-          <div className="hidden sm:flex flex-1 text-base text-el-light min-h-[24px]">
-            {query || (
-              <span className="text-el-light/30">{t('search.placeholder')}</span>
-            )}
-          </div>
+          <button
+            onClick={() => {
+              const next = !keyboardOpen;
+              setKeyboardOpen(next);
+              touch();
+              if (next) {
+                inputRef.current?.blur();
+              } else {
+                setTimeout(() => inputRef.current?.focus(), 0);
+              }
+            }}
+            aria-label={t('search.toggleKeyboard')}
+            className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl transition-colors ${
+              keyboardOpen
+                ? 'bg-el-blue text-white'
+                : 'bg-el-gray text-el-light/60 active:bg-el-gray-light'
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <rect x="2" y="6" width="20" height="12" rx="2" ry="2" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14h6" />
+            </svg>
+          </button>
           {query.length > 0 && (
             <button
               onClick={() => {
                 handleClear();
                 touch();
               }}
+              aria-label="Clear"
               className="w-8 h-8 flex items-center justify-center rounded-full bg-el-gray-light text-el-light/60 active:bg-el-blue active:text-white text-sm"
             >
               &#x2715;
             </button>
           )}
         </div>
+        {showHint && (
+          <p className="text-el-light/50 text-sm mt-2">{t('search.keyboardHint')}</p>
+        )}
       </div>
 
       {/* Results area (scrollable, fills available space) */}
@@ -196,23 +237,27 @@ export function SearchPage() {
 
       </div>
 
-      {/* Virtual keyboard (pinned to bottom) — kiosk only */}
-      <div className="shrink-0 hidden sm:block">
-        {keyboardOpen ? (
+      {/* Virtual keyboard (collapsible) */}
+      {keyboardOpen && (
+        <div className="shrink-0">
+          <button
+            onClick={() => {
+              setKeyboardOpen(false);
+              setTimeout(() => inputRef.current?.focus(), 0);
+              touch();
+            }}
+            aria-label={t('search.closeKeyboard')}
+            className="w-full bg-el-dark border-t border-el-gray py-2 text-el-light/60 active:bg-el-gray text-xs font-semibold"
+          >
+            &#x2715; {t('search.closeKeyboard')}
+          </button>
           <VirtualKeyboard
             onKeyPress={handleKeyPress}
             onBackspace={handleBackspace}
             onClear={handleClear}
           />
-        ) : (
-          <button
-            onClick={() => { setKeyboardOpen(true); touch() }}
-            className="w-full bg-el-dark border-t border-el-gray py-4 text-el-light/70 active:bg-el-gray text-sm font-semibold"
-          >
-            ⌨︎ {t('search.tapToType')}
-          </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Modals */}
       {selectedSession && (

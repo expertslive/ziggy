@@ -69,7 +69,10 @@
     "sectionSpeakers": "Sprekers",
     "keepTyping": "Blijf typen voor sessies (minimaal 4 tekens)",
     "showAll": "Toon alle {{count}}",
-    "tapToType": "Tik om te typen"
+    "tapToType": "Tik om te typen",
+    "toggleKeyboard": "Toetsenbord aan/uit",
+    "keyboardHint": "Werkt geen toetsenbord? Tap ⌨",
+    "closeKeyboard": "Toetsenbord verbergen"
   },
   "a11y": {
     "title": "Weergave",

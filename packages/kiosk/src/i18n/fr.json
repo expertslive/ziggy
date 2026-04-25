@@ -69,7 +69,10 @@
     "sectionSpeakers": "Intervenants",
     "keepTyping": "Continuez à taper pour les sessions (min. 4 caractères)",
     "showAll": "Afficher les {{count}}",
-    "tapToType": "Appuyer pour saisir"
+    "tapToType": "Appuyer pour saisir",
+    "toggleKeyboard": "Clavier à l'écran",
+    "keyboardHint": "Pas de clavier ? Appuyez sur ⌨",
+    "closeKeyboard": "Masquer le clavier"
   },
   "a11y": {
     "title": "Affichage",

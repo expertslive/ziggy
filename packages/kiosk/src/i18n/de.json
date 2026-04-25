@@ -69,7 +69,10 @@
     "sectionSpeakers": "Sprecher",
     "keepTyping": "Weitertippen für Sitzungen (mindestens 4 Zeichen)",
     "showAll": "Alle {{count}} anzeigen",
-    "tapToType": "Tippen zum Schreiben"
+    "tapToType": "Tippen zum Schreiben",
+    "toggleKeyboard": "Bildschirmtastatur ein/aus",
+    "keyboardHint": "Keine Tastatur? Tipp ⌨",
+    "closeKeyboard": "Tastatur ausblenden"
   },
   "a11y": {
     "title": "Anzeige",

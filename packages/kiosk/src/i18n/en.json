@@ -69,7 +69,10 @@
     "sectionSpeakers": "Speakers",
     "keepTyping": "Keep typing for sessions (need ≥4 characters)",
     "showAll": "Show all {{count}}",
-    "tapToType": "Tap to type"
+    "tapToType": "Tap to type",
+    "toggleKeyboard": "Toggle on-screen keyboard",
+    "keyboardHint": "No keyboard? Tap ⌨",
+    "closeKeyboard": "Hide keyboard"
   },
   "a11y": {
     "title": "Display",
