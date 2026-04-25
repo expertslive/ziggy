@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useKioskStore } from '../store/kiosk';
 import { useEventConfig } from '../lib/hooks';
 import { AccessibilityMenu } from './AccessibilityMenu';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 function useClock(): string {
   const [time, setTime] = useState(() => formatTime(new Date()));
@@ -27,16 +27,8 @@ function formatTime(date: Date): string {
 }
 
 export function Header() {
-  const { i18n } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
-  const setLanguage = useKioskStore((s) => s.setLanguage);
   const { data: config } = useEventConfig();
-
-  const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang);
-    setLanguage(lang);
-    touch();
-  };
 
   const time = useClock();
   const logoUrl = config?.branding?.logoUrl;
@@ -76,19 +68,7 @@ export function Header() {
           </svg>
         </button>
         <AccessibilityMenu />
-        {languages.map((lang) => (
-          <button
-            key={lang}
-            onClick={() => changeLanguage(lang)}
-            className={`min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl text-sm font-bold transition-colors ${
-              i18n.language === lang
-                ? 'bg-el-blue text-white'
-                : 'bg-el-gray text-el-light active:bg-el-gray-light'
-            }`}
-          >
-            {lang.toUpperCase()}
-          </button>
-        ))}
+        <LanguageSwitcher languages={languages} />
       </div>
     </header>
   );
