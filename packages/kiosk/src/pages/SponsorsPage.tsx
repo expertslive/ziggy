@@ -17,9 +17,9 @@ function SponsorCard({
   onTap: () => void;
 }) {
   const sizeClasses = {
-    large: 'w-full sm:w-1/2 p-3',
-    medium: 'w-1/2 sm:w-1/3 p-2',
-    small: 'w-1/3 sm:w-1/4 p-2',
+    large: 'w-full p-3',
+    medium: 'w-full sm:w-1/3 p-2',
+    small: 'w-1/2 sm:w-1/4 p-2',
   };
   const aspectBox = size === 'small' ? 'aspect-[2/1]' : 'aspect-[3/2]';
 
@@ -191,7 +191,7 @@ export function SponsorsPage() {
             touch();
             navigate('/map');
           }}
-          className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-el-blue text-white font-bold active:bg-el-blue/80"
+          className="mb-6 w-full sm:w-auto inline-flex justify-center sm:justify-start items-center gap-2 px-4 py-2 rounded-xl bg-el-blue text-white font-bold active:bg-el-blue/80"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
