@@ -63,6 +63,18 @@ export function Header() {
 
       {/* Right: Language switcher */}
       <div className="flex items-center gap-2">
+        <button
+          aria-label="Refresh"
+          onClick={() => {
+            touch();
+            window.location.reload();
+          }}
+          className="min-w-[48px] min-h-[48px] rounded-xl bg-el-gray text-el-light flex items-center justify-center text-xl font-bold active:bg-el-gray-light"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h5M20 20v-5h-5M5 9a8 8 0 0114-3M19 15a8 8 0 01-14 3" />
+          </svg>
+        </button>
         <AccessibilityMenu />
         {languages.map((lang) => (
           <button

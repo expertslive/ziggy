@@ -100,6 +100,39 @@ export function useDeleteFloorMap() {
   });
 }
 
+// ─── Shop Items ──────────────────────────────────────────────────────────────
+
+export function useShopItems() {
+  return useQuery({
+    queryKey: ['shop-items'],
+    queryFn: api.fetchShopItems,
+  });
+}
+
+export function useCreateShopItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: any) => api.createShopItem(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['shop-items'] }),
+  });
+}
+
+export function useUpdateShopItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => api.updateShopItem(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['shop-items'] }),
+  });
+}
+
+export function useDeleteShopItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.deleteShopItem(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['shop-items'] }),
+  });
+}
+
 // ─── Event Config ────────────────────────────────────────────────────────────
 
 export function useEventConfig() {

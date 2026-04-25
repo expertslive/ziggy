@@ -11,6 +11,7 @@ import type {
   AdminEventConfig,
   I18nOverrides,
   BoothOverride,
+  ShopItem,
 } from '@ziggy/shared'
 import { DEFAULT_BRANDING } from '@ziggy/shared'
 import { requireAuth } from '../middleware/auth.js'
@@ -27,6 +28,7 @@ import {
   EventConfigSchema,
   I18nOverridesSchema,
   BoothOverrideSchema,
+  ShopItemSchema,
 } from '../schemas/admin.js'
 
 function clientIp(c: Context): string {
@@ -579,6 +581,86 @@ admin.put('/api/admin/events/:slug/booth-overrides/:boothId', async (c) => {
   }
   const result = await upsert('booth-overrides', doc)
   return c.json(result)
+})
+
+// ---------------------------------------------------------------------------
+// Shop Items CRUD
+// ---------------------------------------------------------------------------
+
+/** GET /api/admin/events/:slug/shop-items */
+admin.get('/api/admin/events/:slug/shop-items', async (c) => {
+  const slug = c.req.param('slug')
+  const items = await findAll<ShopItem>('shop-items', 'eventSlug', slug)
+  return c.json(items)
+})
+
+/** POST /api/admin/events/:slug/shop-items */
+admin.post('/api/admin/events/:slug/shop-items', async (c) => {
+  const slug = c.req.param('slug')
+  const body = await c.req.json()
+  const parsed = ShopItemSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+  const data = parsed.data
+  const now = new Date().toISOString()
+  const item: ShopItem = {
+    id: crypto.randomUUID(),
+    eventSlug: slug,
+    name: data.name,
+    description: stripUndefined(data.description),
+    imageUrl: data.imageUrl,
+    priceLabel: data.priceLabel,
+    isHighlighted: data.isHighlighted,
+    sortOrder: data.sortOrder,
+    createdAt: now,
+    updatedAt: now,
+  }
+  const created = await upsert('shop-items', item)
+  return c.json(created, 201)
+})
+
+/** PUT /api/admin/events/:slug/shop-items/:id */
+admin.put('/api/admin/events/:slug/shop-items/:id', async (c) => {
+  const slug = c.req.param('slug')
+  const id = c.req.param('id')
+  const existing = await findById<ShopItem>('shop-items', id, slug)
+  if (!existing) return c.json({ error: 'Shop item not found' }, 404)
+
+  const body = await c.req.json()
+  const parsed = ShopItemSchema.partial().safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+  const patch = parsed.data
+  const updated: ShopItem = {
+    ...existing,
+    ...(patch.name !== undefined && { name: patch.name }),
+    ...(patch.description !== undefined && {
+      description: stripUndefined(patch.description),
+    }),
+    ...(patch.imageUrl !== undefined && { imageUrl: patch.imageUrl }),
+    ...(patch.priceLabel !== undefined && { priceLabel: patch.priceLabel }),
+    ...(patch.isHighlighted !== undefined && { isHighlighted: patch.isHighlighted }),
+    ...(patch.sortOrder !== undefined && { sortOrder: patch.sortOrder }),
+    id,
+    eventSlug: slug,
+    updatedAt: new Date().toISOString(),
+  }
+  const result = await upsert('shop-items', updated)
+  return c.json(result)
+})
+
+/** DELETE /api/admin/events/:slug/shop-items/:id */
+admin.delete('/api/admin/events/:slug/shop-items/:id', async (c) => {
+  const slug = c.req.param('slug')
+  const id = c.req.param('id')
+  try {
+    await deleteItem('shop-items', id, slug)
+  } catch {
+    return c.json({ error: 'Shop item not found' }, 404)
+  }
+  return c.json({ ok: true })
 })
 
 export default admin

@@ -5,6 +5,7 @@
     "speakers": "Sprekers",
     "map": "Plattegrond",
     "sponsors": "Sponsors",
+    "shop": "Shop",
     "search": "Zoeken",
     "info": "Info"
   },
@@ -48,7 +49,14 @@
   },
   "sponsors": {
     "title": "Sponsors",
-    "filterAll": "Alle"
+    "filterAll": "Alle",
+    "openExpoMap": "Open kaart van expo gebied"
+  },
+  "shop": {
+    "title": "Shop",
+    "subtitle": "Alleen verkrijgbaar op 2 juni. Opbrengst gaat naar het goede doel.",
+    "featured": "Uitgelicht",
+    "empty": "Shop opent 2 juni"
   },
   "session": {
     "live": "LIVE"

@@ -5,6 +5,7 @@
     "speakers": "Intervenants",
     "map": "Plan",
     "sponsors": "Sponsors",
+    "shop": "Boutique",
     "search": "Recherche",
     "info": "Info"
   },
@@ -48,7 +49,14 @@
   },
   "sponsors": {
     "title": "Sponsors",
-    "filterAll": "Tous"
+    "filterAll": "Tous",
+    "openExpoMap": "Ouvrir le plan expo"
+  },
+  "shop": {
+    "title": "Boutique",
+    "subtitle": "Disponible uniquement le 2 juin. Les bénéfices sont reversés à une œuvre caritative.",
+    "featured": "À la une",
+    "empty": "La boutique ouvre le 2 juin"
   },
   "session": {
     "live": "LIVE"

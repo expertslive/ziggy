@@ -5,6 +5,7 @@
     "speakers": "Speakers",
     "map": "Map",
     "sponsors": "Sponsors",
+    "shop": "Shop",
     "search": "Search",
     "info": "Info"
   },
@@ -48,7 +49,14 @@
   },
   "sponsors": {
     "title": "Sponsors",
-    "filterAll": "All"
+    "filterAll": "All",
+    "openExpoMap": "Open expo floor map"
+  },
+  "shop": {
+    "title": "Shop",
+    "subtitle": "Available June 2 only. Proceeds go to charity.",
+    "featured": "Featured",
+    "empty": "Shop opens June 2"
   },
   "session": {
     "live": "LIVE"

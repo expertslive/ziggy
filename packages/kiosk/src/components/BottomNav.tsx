@@ -58,6 +58,15 @@ const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    to: '/shop',
+    labelKey: 'nav.shop',
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z" />
+      </svg>
+    ),
+  },
+  {
     to: '/search',
     labelKey: 'nav.search',
     icon: (

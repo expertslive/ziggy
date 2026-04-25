@@ -174,6 +174,20 @@ export function fetchEventConfig(slug: string): Promise<EventConfig> {
   return fetchJson<EventConfig>(`/api/events/${slug}/config`);
 }
 
+export interface ShopItem {
+  id: string;
+  name: string;
+  description: Record<string, string>;
+  imageUrl: string;
+  priceLabel: string;
+  isHighlighted?: boolean;
+  sortOrder: number;
+}
+
+export function fetchShopItems(slug: string): Promise<ShopItem[]> {
+  return fetchJson<ShopItem[]>(`/api/events/${slug}/shop-items`);
+}
+
 export interface I18nOverrides {
   language: string;
   overrides: Record<string, string>;

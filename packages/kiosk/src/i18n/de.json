@@ -5,6 +5,7 @@
     "speakers": "Referenten",
     "map": "Lageplan",
     "sponsors": "Sponsoren",
+    "shop": "Shop",
     "search": "Suche",
     "info": "Info"
   },
@@ -48,7 +49,14 @@
   },
   "sponsors": {
     "title": "Sponsoren",
-    "filterAll": "Alle"
+    "filterAll": "Alle",
+    "openExpoMap": "Expo-Plan öffnen"
+  },
+  "shop": {
+    "title": "Shop",
+    "subtitle": "Nur am 2. Juni verfügbar. Erlös geht an wohltätige Zwecke.",
+    "featured": "Besonders",
+    "empty": "Shop öffnet am 2. Juni"
   },
   "session": {
     "live": "LIVE"

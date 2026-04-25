@@ -141,14 +141,27 @@ function SponsorDetailModal({
 
 export function SponsorsPage() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const touch = useKioskStore((s) => s.touch);
+  const setSelectedMap = useKioskStore((s) => s.setSelectedMap);
   const { data: sponsors, isLoading: sponsorsLoading } = useSponsors();
   const { data: tiers, isLoading: tiersLoading } = useSponsorTiers();
+  const { data: floorMaps } = useFloorMaps();
   const [selectedSponsor, setSelectedSponsor] = useState<Sponsor | null>(null);
   const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
 
   const isLoading = sponsorsLoading || tiersLoading;
   const lang = i18n.language;
+
+  // Find an "expo" map by name/label, fallback to first
+  const expoMap =
+    (floorMaps ?? []).find(
+      (m) =>
+        m.name.toLowerCase().includes('expo') ||
+        Object.values(m.label || {}).some((v) =>
+          v.toLowerCase().includes('expo'),
+        ),
+    ) ?? floorMaps?.[0];
 
   // Sort tiers by sortOrder
   const sortedTiers = [...(tiers || [])].sort(
@@ -167,9 +180,25 @@ export function SponsorsPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-3xl font-extrabold text-el-light mb-6">
+      <h1 className="text-3xl font-extrabold text-el-light mb-2">
         {t('sponsors.title')}
       </h1>
+
+      {expoMap && (
+        <button
+          onClick={() => {
+            setSelectedMap(expoMap.id);
+            touch();
+            navigate('/map');
+          }}
+          className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-el-blue text-white font-bold active:bg-el-blue/80"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+          </svg>
+          {t('sponsors.openExpoMap')}
+        </button>
+      )}
 
       {/* Tier filter chips */}
       {!isLoading && sortedTiers.length > 0 && (

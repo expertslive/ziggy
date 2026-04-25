@@ -5,6 +5,7 @@ import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SponsorsPage } from './pages/SponsorsPage';
 import { SponsorTiersPage } from './pages/SponsorTiersPage';
+import { ShopItemsPage } from './pages/ShopItemsPage';
 import { FloorMapsPage } from './pages/FloorMapsPage';
 import { HotspotEditorPage } from './pages/HotspotEditorPage';
 import { EventConfigPage } from './pages/EventConfigPage';
@@ -22,6 +23,7 @@ const navItems = [
   { to: '/', label: 'Dashboard', icon: DashboardIcon },
   { to: '/sponsors', label: 'Sponsors', icon: SponsorsIcon },
   { to: '/tiers', label: 'Tiers', icon: TiersIcon },
+  { to: '/shop-items', label: 'Shop Items', icon: ShopItemsIcon },
   { to: '/floor-maps', label: 'Floor Maps', icon: FloorMapsIcon },
   { to: '/config', label: 'Config', icon: ConfigIcon },
   { to: '/i18n', label: 'Translations', icon: TranslationsIcon },
@@ -110,6 +112,7 @@ export function App() {
                   <Route path="/" element={<DashboardPage />} />
                   <Route path="/sponsors" element={<SponsorsPage />} />
                   <Route path="/tiers" element={<SponsorTiersPage />} />
+                  <Route path="/shop-items" element={<ShopItemsPage />} />
                   <Route path="/floor-maps" element={<FloorMapsPage />} />
                   <Route path="/config" element={<EventConfigPage />} />
                   <Route path="/i18n" element={<I18nOverridesPage />} />
@@ -145,6 +148,14 @@ function TiersIcon({ active }: { active: boolean }) {
   return (
     <svg className={`h-5 w-5 ${active ? 'text-primary' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+    </svg>
+  );
+}
+
+function ShopItemsIcon({ active }: { active: boolean }) {
+  return (
+    <svg className={`h-5 w-5 ${active ? 'text-primary' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z" />
     </svg>
   );
 }

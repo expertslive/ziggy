@@ -9,6 +9,7 @@ import {
   fetchFloorMaps,
   fetchEventConfig,
   fetchI18nOverrides,
+  fetchShopItems,
 } from './api';
 import type {
   Agenda,
@@ -20,6 +21,7 @@ import type {
   FloorMap,
   EventConfig,
   I18nOverrides,
+  ShopItem,
 } from './api';
 import { useKioskStore } from '../store/kiosk';
 
@@ -91,6 +93,14 @@ export function useEventConfig() {
     queryKey: ['event-config', slug],
     queryFn: () => fetchEventConfig(slug),
     staleTime: 300_000,
+  });
+}
+
+export function useShopItems() {
+  const slug = useSlug();
+  return useQuery<ShopItem[]>({
+    queryKey: ['shop-items', slug],
+    queryFn: () => fetchShopItems(slug),
   });
 }
 

@@ -126,6 +126,20 @@ export function updateEventConfig(data: any) {
   return fetchJson(`/api/admin/events/${slug}/config`, { method: 'PUT', body: JSON.stringify(data) });
 }
 
+// Shop Items
+export function fetchShopItems() {
+  return fetchJson<any[]>(`/api/admin/events/${slug}/shop-items`);
+}
+export function createShopItem(data: any) {
+  return fetchJson(`/api/admin/events/${slug}/shop-items`, { method: 'POST', body: JSON.stringify(data) });
+}
+export function updateShopItem(id: string, data: any) {
+  return fetchJson(`/api/admin/events/${slug}/shop-items/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+}
+export function deleteShopItem(id: string) {
+  return fetchJson(`/api/admin/events/${slug}/shop-items/${id}`, { method: 'DELETE' });
+}
+
 // I18n Overrides
 export function fetchI18nOverrides() {
   return fetchJson<any[]>(`/api/admin/events/${slug}/i18n-overrides`);

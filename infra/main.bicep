@@ -86,6 +86,7 @@ var containers = [
   { name: 'admins', partitionKey: '/email' }
   { name: 'i18n-overrides', partitionKey: '/eventSlug' }
   { name: 'booth-overrides', partitionKey: '/eventSlug' }
+  { name: 'shop-items', partitionKey: '/eventSlug' }
 ]
 
 resource cosmosContainers 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-05-15' = [

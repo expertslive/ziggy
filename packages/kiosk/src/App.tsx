@@ -14,6 +14,7 @@ const AgendaPage = lazy(() => import('./pages/AgendaPage').then(m => ({ default:
 const SpeakersPage = lazy(() => import('./pages/SpeakersPage').then(m => ({ default: m.SpeakersPage })));
 const MapPage = lazy(() => import('./pages/MapPage').then(m => ({ default: m.MapPage })));
 const SponsorsPage = lazy(() => import('./pages/SponsorsPage').then(m => ({ default: m.SponsorsPage })));
+const ShopPage = lazy(() => import('./pages/ShopPage').then(m => ({ default: m.ShopPage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
 const InfoPage = lazy(() => import('./pages/InfoPage').then(m => ({ default: m.InfoPage })));
 
@@ -52,6 +53,7 @@ export function App() {
             <Route path="/speakers" element={<ErrorBoundary><SpeakersPage /></ErrorBoundary>} />
             <Route path="/map" element={<ErrorBoundary><MapPage /></ErrorBoundary>} />
             <Route path="/sponsors" element={<ErrorBoundary><SponsorsPage /></ErrorBoundary>} />
+            <Route path="/shop" element={<ErrorBoundary><ShopPage /></ErrorBoundary>} />
             <Route path="/search" element={<ErrorBoundary><SearchPage /></ErrorBoundary>} />
             <Route path="/info" element={<ErrorBoundary><InfoPage /></ErrorBoundary>} />
           </Routes>

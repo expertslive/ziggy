@@ -110,3 +110,12 @@ export const I18nOverridesSchema = z.object({
 export const BoothOverrideSchema = z.object({
   floorMapHotspotId: z.string().min(1).max(100).optional(),
 })
+
+export const ShopItemSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: i18nStringRecord,
+  imageUrl: httpsUrl,
+  priceLabel: z.string().min(1).max(80),
+  isHighlighted: z.boolean().optional(),
+  sortOrder: z.number().int().min(0).max(10_000),
+})
