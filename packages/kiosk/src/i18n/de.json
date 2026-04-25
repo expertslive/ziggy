@@ -54,7 +54,8 @@
     "boothNumber": "Stand {{number}}"
   },
   "sponsors": {
-    "title": "Sponsoren"
+    "title": "Sponsoren",
+    "filterAll": "Alle"
   },
   "session": {
     "live": "LIVE"
@@ -67,7 +68,8 @@
     "sectionSpeakers": "Sprecher",
     "sectionBooths": "Stände",
     "keepTyping": "Weitertippen für Sitzungen (mindestens 4 Zeichen)",
-    "showAll": "Alle {{count}} anzeigen"
+    "showAll": "Alle {{count}} anzeigen",
+    "tapToType": "Tippen zum Schreiben"
   },
   "a11y": {
     "title": "Anzeige",

@@ -54,7 +54,8 @@
     "boothNumber": "Stand {{number}}"
   },
   "sponsors": {
-    "title": "Sponsors"
+    "title": "Sponsors",
+    "filterAll": "Alle"
   },
   "session": {
     "live": "LIVE"
@@ -67,7 +68,8 @@
     "sectionSpeakers": "Sprekers",
     "sectionBooths": "Stands",
     "keepTyping": "Blijf typen voor sessies (minimaal 4 tekens)",
-    "showAll": "Toon alle {{count}}"
+    "showAll": "Toon alle {{count}}",
+    "tapToType": "Tik om te typen"
   },
   "a11y": {
     "title": "Weergave",

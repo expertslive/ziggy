@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
@@ -24,11 +24,14 @@ export function App() {
   const theme = useKioskStore((s) => s.theme);
   useInactivityReset();
 
+  useEffect(() => {
+    document.documentElement.style.fontSize = `${fontScale * 18}px`;
+  }, [fontScale]);
+
   return (
     <div
       className="flex flex-col h-dvh bg-el-darker text-el-light font-sans"
       data-theme={theme}
-      style={{ fontSize: `${fontScale * 18}px` }}
       onTouchStart={touch}
       onClick={touch}
     >

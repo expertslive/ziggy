@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 import { SessionCard } from '../components/SessionCard';
@@ -33,6 +33,7 @@ export function SearchPage() {
   const [expandSessions, setExpandSessions] = useState(false);
   const [expandSpeakers, setExpandSpeakers] = useState(false);
   const [expandBooths, setExpandBooths] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState<boolean>(true);
 
   const q = query.trim().toLowerCase();
 
@@ -60,6 +61,13 @@ export function SearchPage() {
   const hasAny = sessions.length > 0 || speakers.length > 0 || booths.length > 0;
   const showKeepTyping =
     q.length > 0 && q.length < 4 && speakers.length === 0 && booths.length === 0;
+
+  useEffect(() => {
+    setKeyboardOpen(true);
+    if (!hasAny) return;
+    const timer = setTimeout(() => setKeyboardOpen(false), 4000);
+    return () => clearTimeout(timer);
+  }, [query, hasAny]);
 
   const selectedSession = useMemo<AgendaSession | null>(() => {
     if (openSessionId == null) return null;
@@ -233,13 +241,22 @@ export function SearchPage() {
       </div>
 
       {/* Virtual keyboard (pinned to bottom) */}
-      <div className="shrink-0">
-        <VirtualKeyboard
-          onKeyPress={handleKeyPress}
-          onBackspace={handleBackspace}
-          onClear={handleClear}
-        />
-      </div>
+      {keyboardOpen ? (
+        <div className="shrink-0">
+          <VirtualKeyboard
+            onKeyPress={handleKeyPress}
+            onBackspace={handleBackspace}
+            onClear={handleClear}
+          />
+        </div>
+      ) : (
+        <button
+          onClick={() => { setKeyboardOpen(true); touch() }}
+          className="shrink-0 w-full bg-el-dark border-t border-el-gray py-4 text-el-light/70 active:bg-el-gray text-sm font-semibold"
+        >
+          ⌨︎ {t('search.tapToType')}
+        </button>
+      )}
 
       {/* Modals */}
       {selectedSession && (

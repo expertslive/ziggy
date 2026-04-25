@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageContainer } from '../components/PageContainer';
 import { useSponsors, useSponsorTiers } from '../lib/hooks';
+import { useKioskStore } from '../store/kiosk';
 import type { Sponsor } from '../lib/api';
 
 function SponsorCard({
@@ -31,7 +32,7 @@ function SponsorCard({
       <motion.button
         whileTap={{ scale: 0.96 }}
         onClick={onTap}
-        className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex flex-col items-center justify-center gap-2 active:bg-white/20 transition-colors"
+        className="w-full bg-white rounded-2xl p-4 flex flex-col items-center justify-center gap-2 active:bg-el-light transition-colors"
       >
         {sponsor.logoUrl ? (
           <img
@@ -47,7 +48,7 @@ function SponsorCard({
           </div>
         )}
         {size !== 'small' && (
-          <span className="text-el-light/80 text-sm font-semibold truncate w-full text-center">
+          <span className="text-el-dark/80 text-sm font-semibold truncate w-full text-center">
             {sponsor.name}
           </span>
         )}
@@ -126,9 +127,11 @@ function SponsorDetailModal({
 
 export function SponsorsPage() {
   const { t, i18n } = useTranslation();
+  const touch = useKioskStore((s) => s.touch);
   const { data: sponsors, isLoading: sponsorsLoading } = useSponsors();
   const { data: tiers, isLoading: tiersLoading } = useSponsorTiers();
   const [selectedSponsor, setSelectedSponsor] = useState<Sponsor | null>(null);
+  const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
 
   const isLoading = sponsorsLoading || tiersLoading;
   const lang = i18n.language;
@@ -154,6 +157,45 @@ export function SponsorsPage() {
         {t('sponsors.title')}
       </h1>
 
+      {/* Tier filter chips */}
+      {!isLoading && sortedTiers.length > 0 && (
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+          <button
+            onClick={() => {
+              setSelectedTierId(null);
+              touch();
+            }}
+            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
+              selectedTierId === null
+                ? 'bg-el-blue text-white'
+                : 'bg-el-gray text-el-light/70 active:bg-el-gray-light'
+            }`}
+          >
+            {t('sponsors.filterAll')}
+          </button>
+          {sortedTiers.map((tier) => {
+            const active = selectedTierId === tier.id;
+            const label = tier.label[lang] || tier.label['en'] || tier.name;
+            return (
+              <button
+                key={tier.id}
+                onClick={() => {
+                  setSelectedTierId(active ? null : tier.id);
+                  touch();
+                }}
+                className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${
+                  active
+                    ? 'bg-el-blue text-white'
+                    : 'bg-el-gray text-el-light/70 active:bg-el-gray-light'
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {isLoading && (
         <p className="text-el-light/60 text-lg">{t('common.loading')}</p>
       )}
@@ -164,6 +206,7 @@ export function SponsorsPage() {
 
       {!isLoading &&
         sortedTiers.map((tier) => {
+          if (selectedTierId !== null && tier.id !== selectedTierId) return null;
           const tierSponsors = sponsorsByTier.get(tier.id);
           if (!tierSponsors || tierSponsors.length === 0) return null;
 

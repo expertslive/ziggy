@@ -54,7 +54,8 @@
     "boothNumber": "Booth {{number}}"
   },
   "sponsors": {
-    "title": "Sponsors"
+    "title": "Sponsors",
+    "filterAll": "All"
   },
   "session": {
     "live": "LIVE"
@@ -67,7 +68,8 @@
     "sectionSpeakers": "Speakers",
     "sectionBooths": "Booths",
     "keepTyping": "Keep typing for sessions (need ≥4 characters)",
-    "showAll": "Show all {{count}}"
+    "showAll": "Show all {{count}}",
+    "tapToType": "Tap to type"
   },
   "a11y": {
     "title": "Display",

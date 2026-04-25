@@ -5,7 +5,7 @@ import { useAgenda, useEventConfig } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { SessionCard } from '../components/SessionCard';
-import { useClockTick } from '../lib/clock';
+import { useClockTick, getSimulatedNow } from '../lib/clock';
 import type { AgendaSession, AgendaDay } from '../lib/api';
 
 interface DayTab {
@@ -28,7 +28,11 @@ function formatDayLabel(dateStr: string, language: string): string {
  * (in the event timezone), or fall back to 0.
  */
 function getInitialDayIndex(days: DayTab[], timezone: string): number {
-  const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: timezone }); // "2026-06-02"
+  const override = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('now')
+    : null
+  const now = getSimulatedNow(override)
+  const todayStr = now.toLocaleDateString('sv-SE', { timeZone: timezone })
   const idx = days.findIndex((d) => d.date === todayStr);
   return idx >= 0 ? idx : 0;
 }

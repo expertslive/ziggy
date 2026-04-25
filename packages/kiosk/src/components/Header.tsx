@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useKioskStore } from '../store/kiosk';
 import { useEventConfig } from '../lib/hooks';
@@ -44,7 +45,7 @@ export function Header() {
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-el-dark border-b border-el-gray shrink-0">
       {/* Left: Logo */}
-      <div className="flex items-center gap-2">
+      <Link to="/info" onClick={touch} className="flex items-center gap-2 active:opacity-70 transition-opacity">
         {logoUrl ? (
           <img src={logoUrl} alt={config?.name || 'Experts Live'} className="h-10 w-auto" />
         ) : (
@@ -53,7 +54,7 @@ export function Header() {
             <span className="text-el-blue"> Live</span>
           </span>
         )}
-      </div>
+      </Link>
 
       {/* Center: Clock */}
       <div className="text-3xl font-bold tabular-nums text-el-light">
