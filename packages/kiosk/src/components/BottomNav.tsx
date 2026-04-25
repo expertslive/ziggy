@@ -98,8 +98,9 @@ export function BottomNav() {
           key={item.to}
           to={item.to}
           onClick={touch}
+          aria-label={t(item.labelKey)}
           className={({ isActive }) =>
-            `flex-1 flex flex-col items-center justify-center gap-1.5 min-h-[80px] py-3 transition-colors ${
+            `flex-1 flex flex-col items-center justify-center gap-0 sm:gap-1.5 min-h-[64px] sm:min-h-[80px] py-2 sm:py-3 transition-colors ${
               isActive
                 ? 'text-el-blue bg-el-gray/40 border-t-2 border-el-blue'
                 : 'text-el-light/60 active:text-el-light active:bg-el-gray/20 border-t-2 border-transparent'
@@ -107,7 +108,7 @@ export function BottomNav() {
           }
         >
           {item.icon}
-          <span className="text-[11px] font-semibold">{t(item.labelKey)}</span>
+          <span className="hidden sm:block text-[11px] font-semibold">{t(item.labelKey)}</span>
         </NavLink>
       ))}
     </nav>
