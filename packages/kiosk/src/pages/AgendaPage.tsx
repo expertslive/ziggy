@@ -104,29 +104,12 @@ export function AgendaPage() {
     return null;
   }, [openSessionId, days]);
 
-  if (agendaLoading) {
-    return (
-      <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
-        <div className="flex items-center justify-center h-48">
-          <div className="animate-pulse text-el-light/60 text-lg">{t('common.loading')}</div>
-        </div>
-      </PageContainer>
-    );
-  }
-
-  if (days.length === 0) {
-    return (
-      <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
-        <p className="text-el-light/60 text-lg">{t('common.noResults')}</p>
-      </PageContainer>
-    );
-  }
-
+  // currentDay can be undefined while data loads or when days is empty.
+  // ALL hooks must run unconditionally (Rules of Hooks) — handle undefined inside each hook.
   const currentDay = days[activeDayIndex] ?? days[0];
 
   const labels = useMemo(() => {
+    if (!currentDay) return [];
     const map = new Map<string, { name: string; color: string }>();
     for (const slot of currentDay.timeslots) {
       for (const s of slot.sessions) {
@@ -139,6 +122,7 @@ export function AgendaPage() {
   }, [currentDay]);
 
   const filteredTimeslots = useMemo(() => {
+    if (!currentDay) return [];
     if (agendaLabelFilter.length === 0) return currentDay.timeslots;
     return currentDay.timeslots
       .map((slot) => ({
@@ -163,7 +147,28 @@ export function AgendaPage() {
   }, [filteredTimeslots, now]);
 
   const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: timezone });
-  const showJumpToNow = currentDay.date === todayStr && !!liveTimeslot;
+  const showJumpToNow = currentDay?.date === todayStr && !!liveTimeslot;
+
+  // Conditional renders AFTER all hooks have run.
+  if (agendaLoading) {
+    return (
+      <PageContainer>
+        <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
+        <div className="flex items-center justify-center h-48">
+          <div className="animate-pulse text-el-light/60 text-lg">{t('common.loading')}</div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  if (days.length === 0 || !currentDay) {
+    return (
+      <PageContainer>
+        <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
+        <p className="text-el-light/60 text-lg">{t('common.noResults')}</p>
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer>
