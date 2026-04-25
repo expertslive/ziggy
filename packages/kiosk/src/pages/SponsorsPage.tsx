@@ -180,7 +180,7 @@ export function SponsorsPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-3xl font-extrabold text-el-light mb-2">
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-2">
         {t('sponsors.title')}
       </h1>
 

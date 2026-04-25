@@ -83,7 +83,7 @@ export function ShopPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-3xl font-extrabold text-el-light mb-2">{t('shop.title')}</h1>
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-2">{t('shop.title')}</h1>
       <p className="text-el-light/70 mb-6">{t('shop.subtitle')}</p>
 
       {isLoading && <p className="text-el-light/60">{t('common.loading')}</p>}

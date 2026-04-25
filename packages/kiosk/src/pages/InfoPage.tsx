@@ -27,7 +27,7 @@ export function InfoPage() {
   const wifiString = `WIFI:T:WPA;S:${ssid};P:${password};;`
   return (
     <PageContainer>
-      <h1 className="text-3xl font-extrabold text-el-light mb-6">{t('info.title')}</h1>
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-6">{t('info.title')}</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card title={t('info.wifi.title')} wide>
           <div className="flex flex-col md:flex-row md:items-center gap-6">

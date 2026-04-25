@@ -153,7 +153,7 @@ export function AgendaPage() {
   if (agendaLoading) {
     return (
       <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
         <div className="flex items-center justify-center h-48">
           <div className="animate-pulse text-el-light/60 text-lg">{t('common.loading')}</div>
         </div>
@@ -164,7 +164,7 @@ export function AgendaPage() {
   if (days.length === 0 || !currentDay) {
     return (
       <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
         <p className="text-el-light/60 text-lg">{t('common.noResults')}</p>
       </PageContainer>
     );
@@ -172,7 +172,7 @@ export function AgendaPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">{t('agenda.title')}</h1>
 
       {/* Day tabs */}
       {days.length > 1 && (

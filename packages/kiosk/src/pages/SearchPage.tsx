@@ -85,7 +85,7 @@ export function SearchPage() {
     <div className="flex flex-col h-full">
       {/* Search input area */}
       <div className="px-6 pt-6 pb-3 shrink-0">
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('search.title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">{t('search.title')}</h1>
         <div className="flex items-center gap-3 bg-el-gray rounded-xl px-4 py-3">
           <span className="text-el-light/40 text-lg">&#x1F50D;</span>
           <div className="flex-1 text-base text-el-light min-h-[24px]">

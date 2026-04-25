@@ -262,7 +262,7 @@ export function MapPage() {
   if (isLoading || !maps) {
     return (
       <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">
           {t('map.title')}
         </h1>
         <div className="flex items-center justify-center h-48">
@@ -277,7 +277,7 @@ export function MapPage() {
   if (maps.length === 0) {
     return (
       <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">
           {t('map.title')}
         </h1>
         <p className="text-el-light/60 text-lg">{t('map.noMaps')}</p>
@@ -297,7 +297,7 @@ export function MapPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-3xl font-extrabold text-el-light mb-4">
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">
         {t('map.title')}
       </h1>
 

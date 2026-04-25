@@ -91,7 +91,7 @@ export function NowPage() {
   if (isLoading) {
     return (
       <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-2">{t('now.title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-2">{t('now.title')}</h1>
         <p className="text-el-light/60 text-lg mb-6">{t('now.subtitle')}</p>
         <div className="flex items-center justify-center h-48">
           <div className="animate-pulse text-el-light/60 text-lg">{t('common.loading')}</div>
@@ -106,7 +106,7 @@ export function NowPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-3xl font-extrabold text-el-light mb-2">{t('now.title')}</h1>
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-2">{t('now.title')}</h1>
       <p className="text-el-light/60 text-lg mb-6">{t('now.subtitle')}</p>
 
       {/* Current sessions */}

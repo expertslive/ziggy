@@ -28,7 +28,7 @@ export function SpeakersPage() {
   if (isLoading || !speakers) {
     return (
       <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('speakers.title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">{t('speakers.title')}</h1>
         <div className="flex items-center justify-center h-48">
           <div className="animate-pulse text-el-light/60 text-lg">{t('common.loading')}</div>
         </div>
@@ -39,7 +39,7 @@ export function SpeakersPage() {
   if (sortedSpeakers.length === 0) {
     return (
       <PageContainer>
-        <h1 className="text-3xl font-extrabold text-el-light mb-4">{t('speakers.title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">{t('speakers.title')}</h1>
         <p className="text-el-light/60 text-lg">{t('common.noResults')}</p>
       </PageContainer>
     );
@@ -47,7 +47,7 @@ export function SpeakersPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-3xl font-extrabold text-el-light mb-2">{t('speakers.title')}</h1>
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-2">{t('speakers.title')}</h1>
       <p className="text-el-light/40 text-sm mb-6">
         {t('speakers.sortedAZ', { count: sortedSpeakers.length })}
       </p>
