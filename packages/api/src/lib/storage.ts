@@ -30,13 +30,16 @@ export async function uploadImage(
   const container = client().getContainerClient(CONTAINER)
   const blobName = `${crypto.randomUUID()}${extensionFor(type)}`
   const blob = container.getBlockBlobClient(blobName)
+  // Note: Azure Blob metadata keys must be valid C# identifiers (no hyphens),
+  // so X-Content-Type-Options can't be set as metadata. The kiosk SWA sets
+  // nosniff globally for HTML/JS responses; for blob URLs the browser still
+  // honors the explicit Content-Type below.
   const options: BlockBlobParallelUploadOptions = {
     blobHTTPHeaders: {
       blobContentType: type,
       blobCacheControl: 'public, max-age=31536000, immutable',
       blobContentDisposition: 'inline',
     },
-    metadata: { 'x-content-type-options': 'nosniff' },
   }
   await blob.uploadData(Buffer.from(buffer), options)
   return blob.url

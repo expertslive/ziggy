@@ -193,8 +193,8 @@ admin.post('/api/admin/upload', async (c) => {
   try {
     const url = await uploadImage(buffer, detected)
     return c.json({ url })
-  } catch {
-    console.error('[admin/upload] failed')
+  } catch (err) {
+    console.error('[admin/upload] failed:', err instanceof Error ? err.message : err)
     return c.json({ error: 'Failed to upload image' }, 500)
   }
 })
