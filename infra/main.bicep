@@ -3,19 +3,14 @@ targetScope = 'resourceGroup'
 @description('Base name for all resources')
 param baseName string = 'ziggy'
 
+@description('Name of the Key Vault that holds jwt-secret and run-events-api-key')
+param keyVaultName string = 'ziggy-kv-af9a93'
+
 @description('Location for all resources')
 param location string = resourceGroup().location
 
-@description('run.events API key')
-@secure()
-param runEventsApiKey string
-
 @description('Event slug')
 param eventSlug string = 'experts-live-netherlands-2026'
-
-@description('JWT secret for admin auth')
-@secure()
-param jwtSecret string
 
 @description('Location for Cosmos DB (fallback if primary region has capacity issues)')
 param cosmosDbLocation string = 'northeurope'
@@ -29,6 +24,11 @@ var logAnalyticsName = '${baseName}-logs'
 var containerAppEnvName = '${baseName}-cae'
 var containerAppName = '${baseName}-api'
 var staticWebAppName = '${baseName}-kiosk'
+
+// ─── Key Vault (existing — holds rotation-sensitive secrets) ──────────
+resource keyVault 'Microsoft.KeyVault/vaults@2024-04-01-preview' existing = {
+  name: keyVaultName
+}
 
 // ─── Container Registry ───────────────────────────────────────────────
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
@@ -162,6 +162,9 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
 resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: containerAppName
   location: location
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
@@ -189,7 +192,8 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         }
         {
           name: 'run-events-api-key'
-          value: runEventsApiKey
+          keyVaultUrl: '${keyVault.properties.vaultUri}secrets/run-events-api-key'
+          identity: 'system'
         }
         {
           name: 'cosmos-connection-string'
@@ -197,7 +201,8 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         }
         {
           name: 'jwt-secret'
-          value: jwtSecret
+          keyVaultUrl: '${keyVault.properties.vaultUri}secrets/jwt-secret'
+          identity: 'system'
         }
         {
           name: 'storage-connection-string'
@@ -261,6 +266,18 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         ]
       }
     }
+  }
+}
+
+// ─── Grant Container App identity access to read KV secrets ──────────
+resource kvSecretsUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: keyVault
+  // role definition GUID for "Key Vault Secrets User"
+  name: guid(keyVault.id, containerApp.id, '4633458b-17de-408a-b874-0445c86b69e6')
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+    principalId: containerApp.identity.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
