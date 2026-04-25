@@ -65,9 +65,7 @@ If any step 7–11 fails, revert by:
 1. Re-point Container App traffic to the previous revision (`az containerapp revision set-mode single --revision <previous>`).
 2. Static Web Apps auto-deploys on merge to `main`, so a revert commit will roll it back on the next deploy.
 
-## Follow-ups tracked in `docs/roadmap.md`
-
-These are documented in the roadmap but not part of this deploy:
+## Follow-ups (not part of this deploy)
 
 - Cosmos `upsert()` → `create()` for the bootstrap admin path (Task 1.5 concern — the token gate is the primary defense)
 - Application Insights + kiosk heartbeat monitoring

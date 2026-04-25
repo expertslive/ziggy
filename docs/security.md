@@ -227,8 +227,7 @@ sequenceDiagram
 
 ## Known follow-ups
 
-Tracked in [roadmap.md](./roadmap.md) and the
-[security-hardening-review.md](./security-hardening-review.md):
+Tracked in [security-hardening-review.md](./security-hardening-review.md):
 
 - Move admin tokens from `localStorage` to **HttpOnly; Secure; SameSite**
   cookies + CSRF.

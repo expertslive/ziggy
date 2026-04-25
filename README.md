@@ -59,7 +59,6 @@ Start with `architecture.md` if you're new to the codebase.
 | [docs/lessons-learned.md](docs/lessons-learned.md) | Gotchas and design notes from the rebuild |
 | [docs/event-ready-deploy-runbook.md](docs/event-ready-deploy-runbook.md) | Pre/post-deploy checklist |
 | [docs/security-hardening-review.md](docs/security-hardening-review.md) | Original security audit (April 2026) |
-| [docs/roadmap.md](docs/roadmap.md) | Implementation phases + future improvements |
 
 ## License
 
