@@ -164,10 +164,9 @@ function FloorMapViewer({
       <p className="text-el-light/40 text-sm mb-3">{t('map.tapRoom')}</p>
 
       <div
-        className="relative w-full bg-el-gray rounded-2xl overflow-hidden"
+        className="relative w-full bg-el-gray rounded-2xl overflow-hidden min-h-[50vh] sm:min-h-[40vh]"
         style={{
           aspectRatio: imgSize ? `${imgSize.w}/${imgSize.h}` : '16/9',
-          minHeight: '40vh',
         }}
       >
         {!imgSize && (
