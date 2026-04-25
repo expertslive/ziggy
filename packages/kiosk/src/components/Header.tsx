@@ -57,7 +57,7 @@ export function Header() {
       </Link>
 
       {/* Center: Clock */}
-      <div className="text-3xl font-bold tabular-nums text-el-light">
+      <div className="hidden sm:block text-3xl font-bold tabular-nums text-el-light">
         {time}
       </div>
 
