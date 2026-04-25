@@ -1,109 +1,65 @@
-# Ziggy — Experts Live Kiosk App
+# Ziggy
 
-A touch-screen kiosk web app for conference venues, allowing attendees to find sessions, speakers, expo booths, sponsors, and navigate interactive floor maps.
+Touch-screen kiosk web app for [Experts Live](https://www.intechnieuws.nl/experts-live-netherlands-2026/)
+conference events. Attendees walk up to a 1080×1920 portrait screen, find
+sessions, speakers, booths, and venue maps; admins manage event content
+through a separate panel. Session, speaker, and booth data is sourced from
+[run.events](https://run.events); admin-managed data lives in Azure Cosmos
+DB.
 
-Built for [Experts Live](https://www.intechnieuws.nl/experts-live-netherlands-2026/) events. Data sourced from the [run.events](https://run.events) platform.
+## Live URLs
 
-## Features
+- Kiosk: `https://ziggy.expertslive.dev` (planned) — currently
+  `https://victorious-plant-071edeb03.6.azurestaticapps.net`
+- Admin: `https://ziggy-admin.expertslive.dev` (live) — fallback
+  `https://gray-hill-067f71103.1.azurestaticapps.net`
 
-### What's Happening Now
-
-The home screen shows sessions currently in progress with a live countdown, plus a preview of what's coming up next. The page auto-refreshes so kiosks always display the latest information.
-
-### Agenda
-
-Browse the full conference schedule organized by day. Tap any session to see details including description, speakers, room location, and time slot. Swipe or tap day tabs to switch between conference days.
-
-### Speakers
-
-A searchable grid of all speakers with photos. Tap a speaker to see their bio and the sessions they're presenting.
-
-### Interactive Floor Maps
-
-Zoomable venue maps with tappable room hotspots. Tap a room to see which session is currently running there and what's coming up next. Admins draw hotspot regions using a visual polygon editor.
-
-### Expo
-
-Browse exhibitor booths with logos, booth numbers, and descriptions. Tap for full details.
-
-### Sponsors
-
-Tiered sponsor display — Ultimate sponsors featured prominently, with Gold, Speaker Dinner, and other tiers displayed at appropriate sizes.
-
-### Search
-
-Full-text search across sessions, speakers, and booths with an on-screen virtual keyboard optimized for touch input.
-
-### Multi-language
-
-Supports Dutch, English, German, and French out of the box. Language switcher in the header. Admins can override any translation string per event.
-
-### Touch Optimized
-
-- 48px minimum tap targets
-- Press animations for tactile feedback
-- No hover states — designed for fingers, not mice
-- Kiosk-safe: no text selection, no pinch zoom, no context menus
-- Auto-resets to the home screen after 60 seconds of inactivity
-
-## Admin Panel
-
-Event organizers manage their kiosk configuration through a separate admin panel:
-
-- **Event config** — branding colors, logo, languages, timezone
-- **Sponsors** — add/edit/remove sponsors with logos, descriptions, tier assignment
-- **Floor maps** — upload venue images, draw tappable room hotspots with a visual editor
-- **Translations** — override any UI string per language
-
-## Quick Start
-
-### Prerequisites
-
-- Node.js >= 20
-- pnpm >= 9
-
-### Setup
+## Quick start
 
 ```bash
-# Install dependencies
+# Install
 pnpm install
 
-# Build shared types
+# Build shared types first — every other package depends on it
 pnpm build:shared
 
-# Start API (in one terminal)
+# Configure API
 cp packages/api/.env.example packages/api/.env
-# Edit .env to add your run.events API key
-pnpm dev:api
+# Edit .env to add RUN_EVENTS_API_KEY (and Cosmos/Storage if testing those)
 
-# Start kiosk (in another terminal)
-pnpm dev:kiosk
-
-# Start admin panel (optional, in another terminal)
-pnpm dev:admin
+# Run all three dev servers in separate terminals
+pnpm dev:api      # API on http://localhost:3001
+pnpm dev:kiosk    # kiosk on http://localhost:5173
+pnpm dev:admin    # admin on http://localhost:5174
 ```
 
-The kiosk app runs at `http://localhost:5173` and proxies API calls to `http://localhost:3001`.
-
-### Commands
-
 | Command | Description |
-|---------|-------------|
-| `pnpm dev:api` | Start API dev server |
-| `pnpm dev:kiosk` | Start kiosk dev server |
-| `pnpm dev:admin` | Start admin dev server |
-| `pnpm build` | Build all packages |
-| `pnpm lint` | Lint all packages |
+|---|---|
+| `pnpm dev:api` / `dev:kiosk` / `dev:admin` | Run a dev server |
+| `pnpm build:shared` | Build the shared types package (required first) |
+| `pnpm build` | Build everything |
 | `pnpm typecheck` | Type-check all packages |
+| `pnpm -r test` | Run unit tests in every package |
 
 ## Documentation
 
-- [Admin Guide](docs/admin-guide.md) — how to configure events, manage sponsors, draw floor map hotspots, and override translations
-- [Architecture](docs/architecture.md) — tech stack, project structure, data flow
-- [API Reference](docs/api.md) — backend endpoints and environment variables
-- [Deployment](docs/deployment.md) — Azure infrastructure and CI/CD
-- [Azure Cost Estimate](docs/azure-costs.md) — monthly cost breakdown
-- [Roadmap](docs/roadmap.md) — implementation phases and progress
+Start with `architecture.md` if you're new to the codebase.
+
+| Document | Contents |
+|---|---|
+| [docs/architecture.md](docs/architecture.md) | Tech stack, package layout, data flow diagrams, kiosk page tree |
+| [docs/data-model.md](docs/data-model.md) | Shared types, Cosmos containers, run.events transform |
+| [docs/state-management.md](docs/state-management.md) | Zustand store, inactivity reset, deep links, theme + font scale |
+| [docs/api.md](docs/api.md) | Full HTTP endpoint reference, schemas, rate limits, headers |
+| [docs/security.md](docs/security.md) | Threat model, JWT, Key Vault, validation, security headers |
+| [docs/deployment.md](docs/deployment.md) | Azure topology, CI/CD, manual deploy, Bicep refactor history |
+| [docs/azure-costs.md](docs/azure-costs.md) | Monthly cost estimates by resource |
+| [docs/admin-guide.md](docs/admin-guide.md) | How event organizers use the admin panel |
+| [docs/attendee-guide.md](docs/attendee-guide.md) | What attendees see and tap on the kiosk |
+| [docs/lessons-learned.md](docs/lessons-learned.md) | Gotchas and design notes from the rebuild |
+| [docs/event-ready-deploy-runbook.md](docs/event-ready-deploy-runbook.md) | Pre/post-deploy checklist |
+| [docs/security-hardening-review.md](docs/security-hardening-review.md) | Original security audit (April 2026) |
+| [docs/roadmap.md](docs/roadmap.md) | Implementation phases + future improvements |
 
 ## License
 

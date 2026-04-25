@@ -11,8 +11,10 @@ Ziggy is designed for minimal Azure spend, leveraging free tiers wherever possib
 | **Container Apps** | Consumption | **$0–5** | Scales to zero when idle; ~$0 between events |
 | **Container Registry** | Basic | **$5** | Docker image storage |
 | **Blob Storage** | Standard LRS | **$0.10–1** | Floor maps + sponsor logos (~100 MB) |
+| **Key Vault** | Standard | **<$0.05** | Holds `jwt-secret` and `run-events-api-key`. Charged per 10K operations — Container App reads happen at startup only. |
+| **Log Analytics** | PerGB2018 (30-day retention) | **$0–2** | Container App stdout. Free quota covers idle months. |
 | | | | |
-| **Total** | | **$5–11/month** | |
+| **Total** | | **$5–13/month** | |
 
 ## Cost by Usage Period
 

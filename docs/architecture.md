@@ -1,109 +1,181 @@
 # Architecture
 
-## Tech Stack
+Ziggy is a pnpm monorepo with four packages, an Azure backend, and a single
+upstream data source ([run.events](https://run.events)). The kiosk is a touch
+SPA, the admin is a separate SPA for organizers, and the API is a thin Hono
+proxy with a small admin-managed data layer in Cosmos DB.
 
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| **Frontend (kiosk + admin)** | React 19 + TypeScript + Vite + Tailwind v4 | SPA with large touch-target UI, no SSR needed |
-| **Backend** | Hono + Node.js + TypeScript | Lightweight BFF/proxy, first-class TypeScript |
-| **Database** | Azure Cosmos DB (free tier) | Zero cost, document model fits the data |
-| **File storage** | Azure Blob Storage | Floor map images, sponsor logos |
-| **SPA hosting** | Azure Static Web Apps (free tier) | Free SPA hosting with CI/CD |
-| **API hosting** | Azure Container Apps (Consumption) | Scales to zero between events |
-| **Monorepo** | pnpm workspaces | Shared types/constants across packages |
+## Packages
 
-### Key Libraries
+| Package | Role |
+|---|---|
+| `@ziggy/shared` | TypeScript types and constants (run.events response shapes, transformed types, admin-managed types, language list, cache TTL). Imported by every other package. |
+| `@ziggy/api` | Hono v4 backend on Node.js. Proxies run.events with caching, exposes a CRUD layer for admin data, signs JWTs, validates uploads. |
+| `@ziggy/kiosk` | React 19 SPA optimized for 1080×1920 portrait touch kiosks. Reads only public endpoints. |
+| `@ziggy/admin` | React 19 SPA for event organizers. JWT-authenticated, talks to `/api/admin/*`. |
 
-| Library | Purpose |
-|---------|---------|
-| `@tanstack/react-query` | Data fetching with caching, retry, stale-while-revalidate |
-| `react-simple-keyboard` | On-screen virtual keyboard for kiosk search |
-| `react-konva` | Canvas-based polygon editor for admin hotspot drawing |
-| `@use-gesture/react` | Swipe gestures for day/map switching |
-| `react-i18next` | Multi-language support (NL, EN, DE, FR) |
-| `zustand` | Lightweight state management (kiosk inactivity, touch tracking) |
-| `framer-motion` | Touch-optimized press animations |
-| `date-fns` | Date/time formatting and timezone logic |
+`@ziggy/shared` must be built first — the API and SPAs import it as a
+workspace dependency. Shared types use `.js` extensions in their relative
+imports (e.g. `import type { Sponsor } from './sponsor.js'`) because TypeScript
+ESM resolution requires the emitted file extension, not the source one.
 
-## Project Structure
-
-```
-ziggy/
-├── packages/
-│   ├── shared/          # TypeScript types, constants, utils
-│   ├── api/             # Hono backend (BFF proxy + admin API + Cosmos DB)
-│   ├── kiosk/           # Kiosk SPA (touch-optimized, attendee-facing)
-│   └── admin/           # Admin panel SPA (event config, sponsors, floor maps)
-├── docs/                # Documentation
-├── .github/workflows/   # CI/CD (lint on PR, deploy on push to main)
-├── pnpm-workspace.yaml
-└── tsconfig.base.json
-```
-
-## Data Flow
+## High-level data flow
 
 ```mermaid
-graph LR
-    RE[run.events API] -->|POST, 5-min cache| API[Hono API]
-    API -->|JSON| K[Kiosk SPA]
-    A[Admin Panel] -->|CRUD| API
-    API -->|read/write| DB[(Cosmos DB)]
-    API -->|read/write| BS[(Blob Storage)]
+flowchart LR
+    RE[run.events API]
+    API[Hono API<br/>Container Apps]
+    DB[(Cosmos DB)]
+    BS[(Blob Storage)]
+    K[Kiosk SPA<br/>SWA]
+    A[Admin SPA<br/>SWA]
+
+    RE -- POST, ApiKey header --> API
+    API <-- read/write --> DB
+    API <-- upload --> BS
+    K -- public GET --> API
+    A -- Bearer JWT --> API
 ```
 
-- **Session, speaker, and booth data**: fetched from the run.events API via POST requests, cached in-memory for 5 minutes
-- **Sponsors, floor maps, event config, i18n overrides**: managed by admins, stored in Cosmos DB
-- **Images** (logos, floor map images): stored in Azure Blob Storage
+Two data ownerships:
 
-## Kiosk Screen Layout
+| Source | Data |
+|---|---|
+| **run.events** (POST endpoints, 5-min cache) | Agenda items, speakers, booths, partnerships |
+| **Cosmos DB** (admin CRUD) | Event config, sponsors, sponsor tiers, floor maps + hotspots, i18n overrides, booth overrides, admin users |
+| **Blob Storage** | Sponsor logos, floor map images, event logos (uploaded via `/api/admin/upload`) |
+
+## Why each piece
+
+- **Hono** — minimal, first-class TypeScript, runs anywhere with a `fetch`
+  interface; pairs with `@hono/node-server` for the Container App. The API is
+  small and Hono's middleware shape (`secureHeaders`, `bodyLimit`, `cors`)
+  composes cleanly for what we need.
+- **TanStack Query (kiosk)** — built-in retry with exponential backoff, stale
+  while-revalidate, persistence to `localStorage`. The kiosk needs to survive
+  flaky WiFi during the event; persistence + `networkMode: 'offlineFirst'` give
+  us "last known good" behavior across page reloads.
+- **Zustand (kiosk)** — all per-session UI state (open modal IDs, search query,
+  selected day, label filter, font scale, theme, map highlight) lives in one
+  small store. The inactivity reset clears the whole store atomically — this is
+  the reason we centralized state instead of leaving it in components.
+- **Tailwind v4** — uses the Vite plugin and an `@theme` block in
+  `index.css`. There is no `tailwind.config.js`. Custom tokens emit as
+  `var(--color-*)` references, so `[data-theme='high-contrast']` overrides
+  cascade to every utility automatically.
+- **Cosmos DB serverless** — admin writes are infrequent and small; serverless
+  RU pricing fits the access pattern and the free tier covers it entirely.
+
+## Agenda data flow
 
 ```mermaid
-graph TD
-    subgraph Kiosk
-        H[Header: Logo + Clock + Language Switcher]
-        C[Page Content Area - scrollable]
-        N[Bottom Nav: Now / Agenda / Speakers / Map / Expo / Sponsors / Search]
+sequenceDiagram
+    participant K as Kiosk (React Query)
+    participant API as Hono API
+    participant C as cache (Map<string, Entry>)
+    participant LG as lastGood (Map<string, T>)
+    participant RE as run.events
+
+    K->>API: GET /api/events/:slug/agenda
+    API->>C: get('agenda:slug')
+    alt fresh hit
+        C-->>API: cached agenda
+    else miss
+        API->>RE: POST /v2/events/:slug/agenda<br/>(ApiKey, 10s timeout)
+        alt success
+            RE-->>API: items[]
+            API->>API: transformAgenda → days/timeslots
+            API->>C: set (5 min TTL)
+            API->>LG: set (no expiry)
+        else upstream error
+            API->>LG: getOrStale
+            alt last-good present
+                LG-->>API: stale agenda
+                API->>API: header X-Stale: true
+            else nothing cached
+                API-->>K: 502 { error }
+            end
+        end
     end
-    H --> C --> N
+    API-->>K: JSON agenda
 ```
 
-## Database Schema
+The transformation flattens run.events' single `RunEventsAgendaItem[]` array
+into a structured `Agenda { days: [{ date, timeslots: [{ startTimeGroup,
+sessions[] }] }] }` shape. The transform groups by `startDate.substring(0,10)`
+for the day, then by `startTimeGroup` for the timeslot, picks the earliest
+start and latest end across the timeslot, and copies the cleaned-up session
+fields. See `packages/api/src/lib/run-events.ts:48`.
 
-Cosmos DB containers (all partitioned by event slug):
+## Kiosk page tree
+
+```mermaid
+flowchart TD
+    Root["/"] --> Now["/now"]
+    Root -.redirect.-> Now
+    Root --> Agenda["/agenda"]
+    Root --> Speakers["/speakers"]
+    Root --> Map["/map"]
+    Root --> Expo["/expo"]
+    Root --> Sponsors["/sponsors"]
+    Root --> Search["/search"]
+    Root --> Info["/info"]
+
+    H["Header<br/>logo · clock · accessibility · language"]
+    BN["BottomNav<br/>Now · Agenda · Speakers · Map · Expo · Sponsors · Search · Info"]
+    Overlays["WarmupOverlay<br/>ReconnectingBanner<br/>ErrorBoundary"]
+
+    H --- Root
+    BN --- Root
+    Overlays --- Root
+```
+
+Every route is wrapped in `<ErrorBoundary>` and lazily loaded with
+`React.lazy`. The `WarmupOverlay` gates first-paint until the core queries
+(`agenda`, `now-sessions`, `event-config`) succeed once or 15 seconds elapse.
+The `ReconnectingBanner` appears as a thin yellow strip after 10 seconds of
+sustained query errors.
+
+## Cosmos containers
 
 ```mermaid
 erDiagram
     EVENTS {
-        string slug PK
+        string id PK "= slug"
+        string slug
         string name
         object branding
+        array days
         array languages
-        string timezone
     }
     SPONSORS {
         string id PK
         string eventSlug
-        string name
-        string tierId
+        string tierId FK
         string logoUrl
+        string floorMapHotspotId
         object description
     }
     SPONSOR_TIERS {
         string id PK
         string eventSlug
-        string name
-        string size
+        string displaySize
         int sortOrder
     }
     FLOOR_MAPS {
         string id PK
         string eventSlug
-        string name
         string imageUrl
         array hotspots
     }
+    BOOTH_OVERRIDES {
+        string id PK "= slug:boothId"
+        string eventSlug
+        string boothId
+        string floorMapHotspotId
+    }
     I18N_OVERRIDES {
-        string id PK
+        string id PK "= slug_lang"
         string eventSlug
         string language
         object overrides
@@ -117,17 +189,21 @@ erDiagram
     EVENTS ||--o{ SPONSORS : has
     EVENTS ||--o{ SPONSOR_TIERS : defines
     EVENTS ||--o{ FLOOR_MAPS : has
+    EVENTS ||--o{ BOOTH_OVERRIDES : has
     EVENTS ||--o{ I18N_OVERRIDES : has
     SPONSOR_TIERS ||--o{ SPONSORS : categorizes
+    FLOOR_MAPS ||--o{ SPONSORS : "linked via floorMapHotspotId"
+    FLOOR_MAPS ||--o{ BOOTH_OVERRIDES : "linked via floorMapHotspotId"
 ```
 
-## Code Conventions
+All containers except `events` and `admins` partition on `eventSlug`. `events`
+partitions on `slug` (effectively the same value). `admins` partitions on
+`email`.
 
-- TypeScript strict mode everywhere
-- ESM (`"type": "module"`) in all packages
-- Shared types use `.js` extension in imports (TypeScript ESM requirement)
-- Prettier: no semicolons, single quotes, trailing commas
-- API routes return JSON, errors use `{ error: string }` shape
-- Kiosk uses React Query for server state, Zustand for UI state
-- i18n: `react-i18next` with inline JSON resources (no HTTP backend for translations)
-- Tailwind v4 with `@tailwindcss/vite` plugin — theme defined via `@theme` in CSS, not config file
+## See also
+
+- [data-model.md](./data-model.md) — type definitions, run.events transform
+- [state-management.md](./state-management.md) — Zustand store and reset flow
+- [api.md](./api.md) — full endpoint reference
+- [security.md](./security.md) — threat model and hardening
+- [deployment.md](./deployment.md) — Azure topology and CI/CD

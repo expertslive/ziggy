@@ -4,11 +4,34 @@ This guide covers how to set up and manage your event using the Ziggy admin pane
 
 ## Getting Started
 
-### First Login
+### Login
 
-1. Open the admin panel URL in your browser
-2. Log in with your admin credentials
-3. You'll see the sidebar with: **Config**, **Sponsors**, **Tiers**, **Floor Maps**, and **Translations**
+The admin panel is at:
+
+- Production: `https://ziggy-admin.expertslive.dev` (or the SWA fallback
+  `https://gray-hill-067f71103.1.azurestaticapps.net`)
+- Local dev: `http://localhost:5174` (after `pnpm dev:admin`)
+
+The default admin email is `admin@expertslive.nl`. The password is whatever
+was set at first-time bootstrap — see "Resetting the admin password" below.
+
+After successful login you'll see the sidebar with: **Config**, **Sponsors**,
+**Tiers**, **Floor Maps**, and **Translations**. Tokens last 24 hours; you'll
+be sent back to the login screen after expiry.
+
+### Resetting the admin password
+
+There is no in-app "forgot password" flow. To reset:
+
+1. Set `SETUP_TOKEN` on the Container App (a 32+ char random string).
+2. Delete the existing admin document from the Cosmos `admins` container
+   (e.g. via Data Explorer in the Azure portal).
+3. POST to `/api/auth/setup` with header `X-Setup-Token: <value>` and body
+   `{ "email": "...", "password": "..." }`. You'll get back a fresh token.
+4. **Unset `SETUP_TOKEN`** on the Container App and restart the revision.
+   This re-disables the bootstrap path.
+
+See [security.md](./security.md) for the full setup endpoint decision tree.
 
 ### Initial Setup Checklist
 
@@ -73,6 +96,19 @@ Navigate to **Sponsors** in the sidebar.
    - **Sort order** — display order within their tier
 3. Click **Save**
 
+### Linking a sponsor to a floor-map hotspot
+
+Each sponsor can deep-link to a polygon on the floor map. When set, the
+sponsor's detail screen on the kiosk gets a "Show on map" button that pans
+to the hotspot and pulses it amber.
+
+1. In the sponsor edit form, find the **Floor map hotspot** picker.
+2. Pick a floor map from the dropdown, then choose one of its hotspots from
+   the second dropdown. The IDs are the same hotspot IDs you set in the
+   floor map editor.
+3. Save the sponsor. The link takes effect on the next kiosk data refresh
+   (within ~5 minutes).
+
 ### Editing Sponsors
 
 Click a sponsor in the list to edit. You can update any field, change their tier, or replace their logo. Click **Delete** to remove a sponsor.
@@ -133,6 +169,24 @@ Click **Save** to persist all hotspots. Coordinates are stored in a normalized f
 
 ---
 
+## Linking booths to floor-map hotspots
+
+Booths come from run.events, so they don't appear in the admin's CRUD
+sidebar. The link from a booth to a floor-map hotspot is a kiosk-local
+piece of metadata — the API exposes it on a separate endpoint:
+
+```bash
+curl -X PUT \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"floorMapHotspotId":"hotspot-uuid"}' \
+  https://<api-host>/api/admin/events/<slug>/booth-overrides/<boothId>
+```
+
+The kiosk merges this into the public booths response, and the booth detail
+screen then shows a "Show on map" button. A booths admin UI is on the
+roadmap — for now this is a `curl`-only path.
+
 ## Translation Overrides
 
 Navigate to **Translations** in the sidebar.
@@ -162,6 +216,24 @@ The kiosk comes with built-in translations for Dutch, English, German, and Frenc
 Overrides are applied on top of the built-in translations when the kiosk loads, so you can override as many or as few strings as you want.
 
 ---
+
+## Practical info page placeholders
+
+The kiosk's `/info` page renders WiFi credentials, venue address, organizer
+contact details, and similar event-day info. The values are kept in the i18n
+JSON files (`packages/kiosk/src/i18n/{nl,en,de,fr}.json`) under the `info`
+key. Some entries have placeholder values like `FILLED_AT_BUILD_TIME` that
+need to be edited *before* the deploy that the kiosks will run during the
+event:
+
+```bash
+grep -rn FILLED_AT_BUILD_TIME packages/kiosk/src/i18n
+```
+
+Replace each occurrence with the real value (WiFi password, emergency
+phone, etc.) and commit. The values can also be overridden per-event from
+the admin **Translations** screen — useful if values change between
+deploys.
 
 ## Kiosk Behavior
 
