@@ -54,9 +54,14 @@
   },
   "shop": {
     "title": "Shop",
-    "subtitle": "Nur am 2. Juni verfügbar. Erlös geht an wohltätige Zwecke.",
+    "subtitle": "Nur am 2. Juni verfügbar. Erlös geht an das Experts Live Stipendium.",
     "featured": "Besonders",
-    "empty": "Shop öffnet am 2. Juni"
+    "empty": "Shop öffnet am 2. Juni",
+    "studiebeurs": {
+      "heading": "Experts Live Stipendium — nominiere Talent",
+      "body1": "Bei jedem Kauf nominierst du jemanden für das Experts Live Stipendium von €5.000: ein Microsoft-Zertifizierungspaket (Prüfungen, Studienmaterial, Schulung) einlösbar innerhalb von 12 Monaten.",
+      "body2": "Mehr Käufe = mehr Nominierungen. Selbstnominierung ist erlaubt. Die Gewinnerin oder der Gewinner wird innerhalb von 30 Tagen nach dem Event auf LinkedIn bekanntgegeben."
+    }
   },
   "session": {
     "live": "LIVE"

@@ -54,9 +54,14 @@
   },
   "shop": {
     "title": "Boutique",
-    "subtitle": "Disponible uniquement le 2 juin. Les bénéfices sont reversés à une œuvre caritative.",
+    "subtitle": "Disponible uniquement le 2 juin. Les bénéfices reviennent à la bourse Experts Live.",
     "featured": "À la une",
-    "empty": "La boutique ouvre le 2 juin"
+    "empty": "La boutique ouvre le 2 juin",
+    "studiebeurs": {
+      "heading": "Bourse Experts Live — nommez un talent",
+      "body1": "À chaque achat, vous nommez quelqu'un pour la bourse Experts Live de 5 000 € : un pack de certification Microsoft (examens, supports, formation) à utiliser dans les 12 mois.",
+      "body2": "Plus d'achats = plus de nominations. L'autonomination est autorisée. Le gagnant est annoncé via LinkedIn dans les 30 jours suivant l'événement."
+    }
   },
   "session": {
     "live": "LIVE"

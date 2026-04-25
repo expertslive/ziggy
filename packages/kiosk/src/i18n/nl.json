@@ -54,9 +54,14 @@
   },
   "shop": {
     "title": "Shop",
-    "subtitle": "Alleen verkrijgbaar op 2 juni. Opbrengst gaat naar het goede doel.",
+    "subtitle": "Alleen verkrijgbaar op 2 juni. Opbrengst gaat naar de Experts Live Studiebeurs.",
     "featured": "Uitgelicht",
-    "empty": "Shop opent 2 juni"
+    "empty": "Shop opent 2 juni",
+    "studiebeurs": {
+      "heading": "Experts Live Studiebeurs — nomineer talent",
+      "body1": "Bij elke aankoop nomineer je iemand voor de Experts Live Studiebeurs van €5.000: een Microsoft-certificeringspakket (examens, studiemateriaal, training) te besteden binnen 12 maanden.",
+      "body2": "Meer aankopen = meer nominaties. Zelfnominatie is toegestaan. De winnaar wordt binnen 30 dagen na het event bekendgemaakt via LinkedIn."
+    }
   },
   "session": {
     "live": "LIVE"

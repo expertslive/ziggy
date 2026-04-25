@@ -84,7 +84,13 @@ export function ShopPage() {
   return (
     <PageContainer>
       <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-2">{t('shop.title')}</h1>
-      <p className="text-el-light/70 mb-6">{t('shop.subtitle')}</p>
+      <p className="text-el-light/70 mb-4">{t('shop.subtitle')}</p>
+
+      <div className="bg-el-blue/10 border border-el-blue/40 rounded-2xl p-4 mb-6">
+        <h2 className="text-base font-bold text-el-blue mb-2">{t('shop.studiebeurs.heading')}</h2>
+        <p className="text-el-light/80 text-sm leading-relaxed mb-2">{t('shop.studiebeurs.body1')}</p>
+        <p className="text-el-light/80 text-sm leading-relaxed">{t('shop.studiebeurs.body2')}</p>
+      </div>
 
       {isLoading && <p className="text-el-light/60">{t('common.loading')}</p>}
 

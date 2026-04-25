@@ -54,9 +54,14 @@
   },
   "shop": {
     "title": "Shop",
-    "subtitle": "Available June 2 only. Proceeds go to charity.",
+    "subtitle": "Available June 2 only. Proceeds go to the Experts Live Scholarship.",
     "featured": "Featured",
-    "empty": "Shop opens June 2"
+    "empty": "Shop opens June 2",
+    "studiebeurs": {
+      "heading": "Experts Live Scholarship — nominate talent",
+      "body1": "With every purchase you nominate someone for the €5,000 Experts Live Scholarship: a Microsoft certification package (exams, study material, training) to be used within 12 months.",
+      "body2": "More purchases = more nominations. Self-nomination is allowed. The winner is announced via LinkedIn within 30 days after the event."
+    }
   },
   "session": {
     "live": "LIVE"
