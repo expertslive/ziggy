@@ -43,6 +43,7 @@ export const SponsorSchema = z.object({
       'Expected UUID',
     ),
   logoUrl: httpsUrl,
+  logoOnDark: z.boolean().optional(),
   website: httpsUrl.optional(),
   boothNumber: z.string().max(20).optional(),
   floorMapHotspotId: z.string().min(1).max(100).optional(),

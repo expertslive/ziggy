@@ -10,6 +10,7 @@ interface SponsorForm {
   tierId: string;
   description: Record<string, string>;
   logoUrl: string;
+  logoOnDark: boolean;
   website: string;
   boothNumber: string;
   floorMapHotspotId: string;
@@ -21,6 +22,7 @@ const emptyForm: SponsorForm = {
   tierId: '',
   description: {},
   logoUrl: '',
+  logoOnDark: false,
   website: '',
   boothNumber: '',
   floorMapHotspotId: '',
@@ -54,6 +56,7 @@ export function SponsorsPage() {
       tierId: sponsor.tierId || '',
       description: sponsor.description || {},
       logoUrl: sponsor.logoUrl || '',
+      logoOnDark: sponsor.logoOnDark ?? false,
       website: sponsor.website || '',
       boothNumber: sponsor.boothNumber || '',
       floorMapHotspotId: sponsor.floorMapHotspotId || '',
@@ -237,6 +240,21 @@ export function SponsorsPage() {
               className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="https://..."
             />
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <input
+                type="checkbox"
+                checked={form.logoOnDark ?? false}
+                onChange={(e) => setField('logoOnDark', e.target.checked)}
+                className="h-4 w-4 rounded border-border text-primary focus:ring-2 focus:ring-primary/20"
+              />
+              <span>Logo op donkere achtergrond (voor witte logo's)</span>
+            </label>
+            <p className="mt-1 text-xs text-gray-400">
+              Toon deze sponsor op een donkere kaart i.p.v. wit — handig voor logo's die wit op transparant zijn.
+            </p>
           </div>
 
           <div>

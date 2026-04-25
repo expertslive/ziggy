@@ -91,6 +91,7 @@ export interface Sponsor {
   name: string;
   tierId: string;
   logoUrl: string;
+  logoOnDark?: boolean;
   website?: string;
   boothNumber?: string;
   /** kiosk-local: link to a hotspot on a floor map for "Show on map" deep-linking */

@@ -228,6 +228,7 @@ admin.post('/api/admin/events/:slug/sponsors', async (c) => {
     tierId: data.tierId,
     description: stripUndefined(data.description),
     logoUrl: data.logoUrl,
+    logoOnDark: data.logoOnDark,
     website: data.website,
     boothNumber: data.boothNumber,
     floorMapHotspotId: data.floorMapHotspotId,
@@ -259,6 +260,7 @@ admin.put('/api/admin/events/:slug/sponsors/:id', async (c) => {
     ...(patch.name !== undefined && { name: patch.name }),
     ...(patch.tierId !== undefined && { tierId: patch.tierId }),
     ...(patch.logoUrl !== undefined && { logoUrl: patch.logoUrl }),
+    ...(patch.logoOnDark !== undefined && { logoOnDark: patch.logoOnDark }),
     ...(patch.website !== undefined && { website: patch.website }),
     ...(patch.boothNumber !== undefined && { boothNumber: patch.boothNumber }),
     ...(patch.floorMapHotspotId !== undefined && {

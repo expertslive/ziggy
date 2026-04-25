@@ -7,6 +7,8 @@ export interface Sponsor {
   tierId: string
   description: Record<string, string>
   logoUrl: string
+  // render the card with a dark background — useful for logos that are white text/marks on transparent
+  logoOnDark?: boolean
   website?: string
   boothNumber?: string
   // kiosk-local: link to a hotspot on a floor map for "Show on map" deep-linking

@@ -24,13 +24,19 @@ function SponsorCard({
     small: 'w-1/2 sm:w-1/4 p-2',
   };
   const aspectBox = size === 'small' ? 'aspect-[2/1]' : 'aspect-[3/2]';
+  const bgClass = sponsor.logoOnDark
+    ? 'bg-el-dark active:bg-el-gray'
+    : 'bg-white active:bg-el-light';
+  const nameColorClass = sponsor.logoOnDark
+    ? 'text-el-light/80'
+    : 'text-el-dark/80';
 
   return (
     <div className={`${sizeClasses[size]} flex`}>
       <motion.button
         whileTap={{ scale: 0.96 }}
         onClick={onTap}
-        className="w-full bg-white rounded-2xl p-3 flex flex-col items-center justify-center gap-2 active:bg-el-light transition-colors"
+        className={`w-full ${bgClass} rounded-2xl p-3 flex flex-col items-center justify-center gap-2 transition-colors`}
       >
         <div className={`${aspectBox} w-full flex items-center justify-center px-2 overflow-hidden`}>
           {sponsor.logoUrl ? (
@@ -40,11 +46,11 @@ function SponsorCard({
               className="max-h-[80%] max-w-[85%] object-contain"
             />
           ) : (
-            <span className="text-lg font-bold text-el-dark/40">{sponsor.name}</span>
+            <span className={`text-lg font-bold ${sponsor.logoOnDark ? 'text-el-light/40' : 'text-el-dark/40'}`}>{sponsor.name}</span>
           )}
         </div>
         {size !== 'small' && (
-          <span className="text-el-dark/80 text-sm font-semibold truncate w-full text-center">
+          <span className={`${nameColorClass} text-sm font-semibold truncate w-full text-center`}>
             {sponsor.name}
           </span>
         )}
