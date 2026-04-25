@@ -16,8 +16,10 @@ function SponsorCard({
   size: 'large' | 'medium' | 'small';
   onTap: () => void;
 }) {
+  // iPhone (default): bigger logos for legibility (full-width Ultimate/Gold,
+  // half-width smaller tiers). Kiosk (sm: and up): original tier-based grid.
   const sizeClasses = {
-    large: 'w-full p-3',
+    large: 'w-full sm:w-1/2 p-3',
     medium: 'w-full sm:w-1/3 p-2',
     small: 'w-1/2 sm:w-1/4 p-2',
   };
