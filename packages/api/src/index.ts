@@ -28,7 +28,9 @@ if (env.nodeEnv === 'production') {
     cors({
       origin: [
         'https://ziggy.expertslive.dev',
+        'https://ziggy-admin.expertslive.dev',
         'https://victorious-plant-071edeb03.6.azurestaticapps.net',
+        'https://gray-hill-067f71103.1.azurestaticapps.net',
       ],
       allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowHeaders: ['Content-Type', 'Authorization'],
