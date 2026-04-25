@@ -6,7 +6,7 @@ interface PageContainerProps {
 
 export function PageContainer({ children }: PageContainerProps) {
   return (
-    <div className="scrollable h-full px-6 py-6">
+    <div className="scrollable h-full px-4 py-4 sm:px-6 sm:py-6">
       {children}
     </div>
   );
