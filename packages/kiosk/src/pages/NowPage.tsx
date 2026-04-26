@@ -121,6 +121,7 @@ export function NowPage() {
                 <SessionCard
                   session={session}
                   now={now}
+                  forceState="live"
                   onTap={() => {
                     openSession(session.id);
                     touch();

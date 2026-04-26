@@ -4,18 +4,22 @@ import type { AgendaSession } from '../lib/api';
 interface SessionCardProps {
   session: AgendaSession;
   now?: Date;
+  /** When set, overrides the client-side time check. Used by /now where the
+   * API has already decided a session is live or past — re-deriving on the
+   * client risks browser timezone vs override (UTC) parsing mismatches. */
+  forceState?: 'live' | 'past';
   onTap: () => void;
 }
 
-export function SessionCard({ session, now, onTap }: SessionCardProps) {
+export function SessionCard({ session, now, forceState, onTap }: SessionCardProps) {
   const { t } = useTranslation();
   const visibleLabels = session.labels.filter((l) => l.showInElement);
 
   const current = now ?? new Date();
   const start = new Date(session.startDate);
   const end = new Date(session.endDate);
-  const isLive = current >= start && current < end;
-  const isPast = current >= end;
+  const isLive = forceState === 'live' || (forceState === undefined && current >= start && current < end);
+  const isPast = forceState === 'past' || (forceState === undefined && current >= end);
 
   return (
     <button
