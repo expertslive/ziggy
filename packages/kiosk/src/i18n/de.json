@@ -91,7 +91,7 @@
   "warmup": {
     "title": "Aufwärmen…",
     "subtitle": "Die Veranstaltungsdaten werden geladen.",
-    "retry": "Erneut versuchen"
+    "autoReloadIn": "Seite lädt in {{seconds}}s neu"
   },
   "info": {
     "title": "Praktische Infos",

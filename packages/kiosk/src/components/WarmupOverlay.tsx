@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 const CORE_KEYS = ['agenda', 'now-sessions', 'event-config']
+const COUNTDOWN_SECONDS = 10
 
 export function WarmupOverlay() {
   const { t } = useTranslation()
@@ -40,18 +41,35 @@ export function WarmupOverlay() {
     }
   }, [client])
 
+  // Countdown to auto-reload while the overlay is shown.
+  const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS)
+  useEffect(() => {
+    if (!show) {
+      setSecondsLeft(COUNTDOWN_SECONDS)
+      return
+    }
+    const tick = setInterval(() => {
+      setSecondsLeft((s) => (s > 0 ? s - 1 : 0))
+    }, 1000)
+    return () => clearInterval(tick)
+  }, [show])
+
+  useEffect(() => {
+    if (show && secondsLeft === 0) {
+      window.location.reload()
+    }
+  }, [show, secondsLeft])
+
   if (!show) return null
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-el-darker/90">
       <div className="text-4xl font-extrabold text-el-light mb-2">{t('warmup.title')}</div>
       <div className="text-el-light/70 mb-6">{t('warmup.subtitle')}</div>
-      <button
-        className="bg-el-blue text-white px-6 py-3 rounded-xl font-bold text-lg"
-        onClick={() => client.invalidateQueries()}
-      >
-        {t('warmup.retry')}
-      </button>
+      <div className="w-12 h-12 mb-6 border-4 border-el-blue/30 border-t-el-blue rounded-full animate-spin" />
+      <div className="text-el-light/50 text-sm">
+        {t('warmup.autoReloadIn', { seconds: secondsLeft })}
+      </div>
     </div>
   )
 }

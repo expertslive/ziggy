@@ -31,4 +31,5 @@ coverage/
 # API key image
 api-key.png
 claude_session.txt
+ziggy_tijd_testen.txt
 infra/main.json

@@ -91,7 +91,7 @@
   "warmup": {
     "title": "Opwarmen…",
     "subtitle": "Evenementgegevens worden geladen.",
-    "retry": "Opnieuw proberen"
+    "autoReloadIn": "Pagina herlaadt over {{seconds}}s"
   },
   "info": {
     "title": "Praktische info",

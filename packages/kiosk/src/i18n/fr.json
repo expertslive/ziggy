@@ -91,7 +91,7 @@
   "warmup": {
     "title": "Préparation…",
     "subtitle": "Les données de l'événement se chargent.",
-    "retry": "Réessayer"
+    "autoReloadIn": "Rechargement dans {{seconds}}s"
   },
   "info": {
     "title": "Infos pratiques",

@@ -91,7 +91,7 @@
   "warmup": {
     "title": "Warming up…",
     "subtitle": "The event data is loading.",
-    "retry": "Retry"
+    "autoReloadIn": "Reloading in {{seconds}}s"
   },
   "info": {
     "title": "Practical info",
