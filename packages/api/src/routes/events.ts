@@ -112,7 +112,11 @@ events.get('/api/events/:slug/sessions/now', async (c) => {
     }))
     const eventTimezone = items[0]?.timeZone || 'Europe/Amsterdam'
 
-    const now = new Date()
+    // Optional ?now= override for test/preview. Always falls back to real time
+    // if the param is missing or unparseable.
+    const overrideStr = c.req.query('now')
+    const override = overrideStr ? new Date(overrideStr) : null
+    const now = override && !Number.isNaN(override.getTime()) ? override : new Date()
     const nowStr = now.toLocaleString('sv-SE', { timeZone: eventTimezone })
     const nowIso = nowStr.replace(' ', 'T')
 

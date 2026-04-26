@@ -39,9 +39,15 @@ export function useAgenda() {
 
 export function useNowSessions() {
   const slug = useSlug();
+  // Forward the dev-only ?now= URL override so the API filters with the
+  // simulated time. Lets us verify lunch/break/borrel cards pre-event.
+  const nowOverride =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('now')
+      : null;
   return useQuery<NowResponse>({
-    queryKey: ['now-sessions', slug],
-    queryFn: () => fetchNowSessions(slug),
+    queryKey: ['now-sessions', slug, nowOverride],
+    queryFn: () => fetchNowSessions(slug, nowOverride),
     refetchInterval: 30_000,
   });
 }

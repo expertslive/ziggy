@@ -139,8 +139,14 @@ export function fetchAgenda(slug: string): Promise<Agenda> {
   return fetchJson<Agenda>(`/api/events/${slug}/agenda`);
 }
 
-export function fetchNowSessions(slug: string): Promise<NowResponse> {
-  return fetchJson<NowResponse>(`/api/events/${slug}/sessions/now`);
+export function fetchNowSessions(
+  slug: string,
+  nowOverride?: string | null,
+): Promise<NowResponse> {
+  const qs = nowOverride
+    ? `?now=${encodeURIComponent(nowOverride)}`
+    : '';
+  return fetchJson<NowResponse>(`/api/events/${slug}/sessions/now${qs}`);
 }
 
 export function fetchSpeakers(slug: string): Promise<Speaker[]> {
