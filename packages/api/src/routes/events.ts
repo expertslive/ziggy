@@ -102,7 +102,14 @@ events.get('/api/events/:slug/sessions/now', async (c) => {
   const hadLive = cache.get(cacheKey) !== undefined
 
   try {
-    const items = await runEvents.fetchRawAgenda(apiKey, slug)
+    const rawItems = await runEvents.fetchRawAgenda(apiKey, slug)
+    // run.events returns labels and speakers as null for NonContent items;
+    // kiosk components iterate over these so normalize to [].
+    const items = rawItems.map((it) => ({
+      ...it,
+      labels: it.labels ?? [],
+      speakers: it.speakers ?? [],
+    }))
     const eventTimezone = items[0]?.timeZone || 'Europe/Amsterdam'
 
     const now = new Date()
