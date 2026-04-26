@@ -100,41 +100,41 @@ events.get('/api/events/:slug/sessions/now', async (c) => {
 
   const cacheKey = `agenda-raw:${slug}`
   const hadLive = cache.get(cacheKey) !== undefined
+
   try {
     const items = await runEvents.fetchRawAgenda(apiKey, slug)
-    const hasLiveNow = cache.get(cacheKey) !== undefined
-    if (!hadLive && !hasLiveNow && cache.hasLastGood(cacheKey)) {
-      c.header('X-Stale', 'true')
-    }
     const eventTimezone = items[0]?.timeZone || 'Europe/Amsterdam'
 
-    // Get current time in event timezone
     const now = new Date()
-    const nowStr = now.toLocaleString('sv-SE', { timeZone: eventTimezone }) // "2026-06-01 14:30:00"
-    const nowIso = nowStr.replace(' ', 'T') // "2026-06-01T14:30:00"
+    const nowStr = now.toLocaleString('sv-SE', { timeZone: eventTimezone })
+    const nowIso = nowStr.replace(' ', 'T')
 
     const current: RunEventsAgendaItem[] = []
+    const currentBreaks: RunEventsAgendaItem[] = []
     const upcoming: RunEventsAgendaItem[] = []
 
     for (const item of items) {
-      // Only include actual sessions
-      if (item.elementType !== 1) continue
-
-      if (item.startDate <= nowIso && nowIso < item.endDate) {
-        current.push(item)
+      const isLive = item.startDate <= nowIso && nowIso < item.endDate
+      if (isLive) {
+        if (item.elementType === 1) current.push(item)
+        else if (item.elementType === 2) currentBreaks.push(item)
       } else if (item.startDate > nowIso) {
         upcoming.push(item)
       }
     }
 
-    // Sort upcoming by start time and take the next timeslot
     upcoming.sort((a, b) => a.startDate.localeCompare(b.startDate))
     const nextTimeGroup = upcoming[0]?.startTimeGroup
     const upNext = nextTimeGroup
       ? upcoming.filter((s) => s.startTimeGroup === nextTimeGroup)
       : []
 
-    return c.json({ current, upNext, timeZone: eventTimezone })
+    const hasLiveNow = cache.get(cacheKey) !== undefined
+    if (!hadLive && !hasLiveNow && cache.hasLastGood(cacheKey)) {
+      c.header('X-Stale', 'true')
+    }
+
+    return c.json({ current, currentBreaks, upNext, timeZone: eventTimezone })
   } catch (err) {
     console.error('[events/sessions/now]', err)
     return c.json({ error: 'Failed to fetch current sessions' }, 502)
