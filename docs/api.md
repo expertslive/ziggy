@@ -25,7 +25,7 @@ fallbacks. All errors use `{ error: string }` shape (sometimes with an
 |---|---|---|
 | `GET` | `/api/events/:slug/config` | Public event config (branding, languages, days, timezone). Returned shape is `PublicEventConfig` — explicitly projected to exclude any admin-only fields. Falls back to a hardcoded default if Cosmos returns nothing. |
 | `GET` | `/api/events/:slug/agenda` | Structured agenda: `{ days: [{ date, timeslots: [{ startTimeGroup, sessions[] }] }], timeZone }`. |
-| `GET` | `/api/events/:slug/sessions/now` | `{ current: AgendaItem[], upNext: AgendaItem[], timeZone }`. `current` = sessions whose `[startDate, endDate)` contains the event-timezone wall clock; `upNext` = the next contiguous timeslot. |
+| `GET` | `/api/events/:slug/sessions/now` | `{ current: AgendaItem[], currentBreaks: AgendaItem[], upNext: AgendaItem[], timeZone }`. `current` = content sessions (`elementType=1`) whose `[startDate, endDate)` contains "now"; `currentBreaks` = NonContent items (`elementType=2` — lunch, breaks, registration, borrel) live at the same instant; `upNext` = next contiguous timeslot of content sessions. NonContent items have `labels: []` and `speakers: []` normalized server-side because run.events returns `null` for both. Accepts an optional `?now=<ISO-8601>` query param to override "now" — used by the kiosk's preview mode (`/now?now=2026-06-02T12:30:00Z` shows the kiosk what lunch looks like). |
 | `GET` | `/api/events/:slug/speakers` | Returns `RunEventsSpeaker[]`. |
 | `GET` | `/api/events/:slug/booths` | Returns `RunEventsBooth[]`, each merged with its optional `floorMapHotspotId` from the `booth-overrides` Cosmos container. |
 | `GET` | `/api/events/:slug/search?q=` | Agenda full-text search. `q` must be 4–100 chars (`MIN_SEARCH_LENGTH = 4`). Returns up to whatever run.events returns — capped at 100 chars on input. |
@@ -38,6 +38,7 @@ fallbacks. All errors use `{ error: string }` shape (sometimes with an
 | `GET` | `/api/events/:slug/sponsor-tiers` | `SponsorTier[]`. |
 | `GET` | `/api/events/:slug/floor-maps` | `FloorMap[]` (each contains a `hotspots` array). |
 | `GET` | `/api/events/:slug/i18n-overrides` | `I18nOverrides[]` (one document per language). |
+| `GET` | `/api/events/:slug/shop-items` | `ShopItem[]` from Cosmos `shop-items` (sorted by `sortOrder`). Falls back to `[]` on error. |
 
 ### Stale-while-error and the `X-Stale` header
 
@@ -97,7 +98,9 @@ All routes below require `Authorization: Bearer <jwt>` and run through the
 `SponsorSchema` requires: `name` (1–200), `tierId` (UUID), `logoUrl` (https),
 `description` (i18n record limited to supported languages, each ≤2000 chars),
 `sortOrder` (0–10000). Optional: `website` (https), `boothNumber` (≤20),
-`floorMapHotspotId` (1–100).
+`floorMapHotspotId` (1–100), `logoOnDark` (boolean — when true the kiosk renders
+the logo on a dark background instead of white; for sponsors with white-on-
+transparent logos like Inforcer, Experts Inside, ESPC).
 
 ### Sponsor tiers
 
@@ -152,6 +155,25 @@ floor-map-hotspot link).
 |---|---|---|
 | `GET` | `/api/admin/events/:slug/booth-overrides` | List. |
 | `PUT` | `/api/admin/events/:slug/booth-overrides/:boothId` | `{ floorMapHotspotId?: string }`. Doc id is `${slug}:${boothId}`. |
+
+### Shop items
+
+CRUD for the `/shop` page. Items render on the kiosk in two groups:
+highlighted items (featured row) and regular items (grid), sorted by
+`sortOrder`. Each item links to a per-purchase nomination for the **Experts
+Live Studiebeurs** (a €5,000 Microsoft certification package).
+
+| Method | Path | Body / Notes |
+|---|---|---|
+| `GET` | `/api/admin/events/:slug/shop-items` | List. |
+| `POST` | `/api/admin/events/:slug/shop-items` | `ShopItemSchema`. Returns the created item with a generated UUID id, status 201. |
+| `PUT` | `/api/admin/events/:slug/shop-items/:id` | `ShopItemSchema.partial()`. 404 if not found. |
+| `DELETE` | `/api/admin/events/:slug/shop-items/:id` | 404 if not found, otherwise `{ ok: true }`. |
+
+`ShopItemSchema` requires: `name` (i18n, ≤200 per language), `description`
+(i18n, ≤2000 per language), `imageUrl` (https), `priceLabel` (1–50; e.g.
+"€25" or "€50 / bid"), `sortOrder` (0–10000). Optional: `isHighlighted`
+(boolean — featured row).
 
 ### Image upload
 

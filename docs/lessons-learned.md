@@ -28,8 +28,7 @@ but never actually used by the runtime (which always read
 `RUN_EVENTS_API_KEY` from env). The public config endpoint returned the
 whole document, including `apiKey`. Fix: remove the field from the shared
 type, project explicit fields in the public route, and add a regression test
-that `/api/events/:slug/config` never returns secret-shaped keys. See
-[security-hardening-review.md](./security-hardening-review.md) finding P0.
+that `/api/events/:slug/config` never returns secret-shaped keys.
 
 ## Container Apps secrets can reference Key Vault directly
 
@@ -124,3 +123,38 @@ The kiosk's CSP allows any HTTPS origin for `connect-src` so that swapping
 the API host (e.g. cutover to a custom domain, or moving regions) doesn't
 require redeploying the SWA. The narrowing is on `default-src 'self'`,
 which still blocks unexpected fetches that aren't `connect-src`-typed.
+
+## run.events returns `null` for empty `labels`/`speakers` on NonContent
+
+Content sessions (`elementType=1`) come back with `labels: []` and
+`speakers: []` when those arrays are empty, but NonContent items
+(`elementType=2` — lunch, breaks, registratie, borrel) come back with
+`labels: null, speakers: null`. The kiosk assumed both fields were always
+arrays and crashed on the first lunch break with `Cannot read properties of
+null (reading 'length')`. Fix: normalize to `[]` server-side in the
+NonContent transform path inside the `/sessions/now` route. Don't rely on
+TanStack Query selectors to clean it up downstream — the JSON-decoded
+runtime shape disagreed with the TypeScript type, so the type system was
+silent.
+
+## A `?now=` URL override needs server forwarding to be a true e2e preview
+
+The kiosk's `useClockTick()` parses `?now=` from the URL and freezes
+client-side time. Originally we thought that was enough to preview "what
+does the kiosk look like during lunch" — but `/sessions/now` filters
+*server-side* against `Date.now()`, so the API kept returning the live
+current/upNext sessions and the break card never appeared. Fix: forward
+`?now=` from `useNowSessions` as a query param to
+`GET /api/events/:slug/sessions/now?now=…` and have the API filter against
+that instant. Without the server hop, only the on-screen clocks shift while
+the data stays live.
+
+## Vite doesn't copy `staticwebapp.config.json` from the package root
+
+`staticwebapp.config.json` (CSP, headers, SPA fallback) needs to land in
+the SWA upload directory, which is `packages/{kiosk,admin}/dist/`. Putting
+the file at the package root or under `src/` does **not** work — Vite only
+copies `public/` to `dist/`. After a deploy where the file was at the
+package root, the SWA shipped with default headers and the kiosk's CSP went
+missing without any visible build error. Move it to `public/`, rebuild,
+re-deploy.

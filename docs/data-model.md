@@ -55,6 +55,7 @@ export interface Sponsor {
   website?: string
   boothNumber?: string
   floorMapHotspotId?: string     // optional deep-link to map
+  logoOnDark?: boolean           // render logo on dark bg (white-on-transparent logos)
   sortOrder: number
   createdAt: string
   updatedAt: string
@@ -119,6 +120,30 @@ export interface BoothOverride {
 Booths come from run.events but the link to a floor map hotspot is
 kiosk-local. The public booths route merges the override in before sending to
 the kiosk.
+
+### Shop items
+
+```ts
+// packages/shared/src/types/shop-item.ts
+export interface ShopItem {
+  id: string
+  eventSlug: string
+  name: Record<string, string>          // i18n
+  description: Record<string, string>   // i18n
+  imageUrl: string                       // Blob Storage URL
+  priceLabel: string                     // free-form, e.g. "€25"
+  isHighlighted?: boolean                // featured/auction row
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
+```
+
+Items power the kiosk `/shop` page. Highlighted items render in a featured
+row (intended for one-off auction-style items — e.g. the signed Octocat
+print donated by Martin Woodward, designed by Simon Oxley); regular items
+fall into the grid below. Each purchase nominates someone for the **Experts
+Live Studiebeurs**, a €5,000 Microsoft certification package.
 
 ### Admins and i18n overrides
 
@@ -213,6 +238,7 @@ Database name: `ziggy`. All defined in `infra/main.bicep`.
 | `sponsor-tiers` | `/eventSlug` | Tier definitions; `displaySize` controls kiosk rendering size. |
 | `floor-maps` | `/eventSlug` | Floor map metadata + embedded `hotspots` array (no separate hotspot container). |
 | `booth-overrides` | `/eventSlug` | Composite-id documents (`slug:boothId`) layering kiosk metadata over run.events booths. |
+| `shop-items` | `/eventSlug` | Items shown on the kiosk `/shop` page; `isHighlighted` items render in a featured row. |
 | `i18n-overrides` | `/eventSlug` | One document per `(slug, language)` pair with deterministic id `slug_lang`. |
 | `admins` | `/email` | Admin users; the bootstrap admin uses fixed id `bootstrap`. |
 
@@ -224,8 +250,8 @@ Database name: `ziggy`. All defined in `infra/main.bicep`.
 | Agenda | `/agenda`, `/config` | agenda | events | logo |
 | Speakers | `/speakers` | speakers | — | speaker images via run.events CDN |
 | Map | `/floor-maps`, `/agenda`, `/booths`, `/sponsors` | agenda, booths | floor-maps, sponsors, booth-overrides | floor map images, sponsor logos |
-| Expo | `/booths`, `/floor-maps` | booths | floor-maps, booth-overrides | — |
 | Sponsors | `/sponsors`, `/sponsor-tiers`, `/floor-maps` | — | sponsors, sponsor-tiers, floor-maps | sponsor logos |
+| Shop | `/shop-items` | — | shop-items | shop item images |
 | Search | `/search` | search | — | — |
 | Info | `/config` | — | events | — |
 | (background) | `/i18n-overrides` | — | i18n-overrides | — |
@@ -238,6 +264,7 @@ erDiagram
     EVENTS ||--o{ SPONSOR_TIERS : defines
     EVENTS ||--o{ FLOOR_MAPS : has
     EVENTS ||--o{ BOOTH_OVERRIDES : has
+    EVENTS ||--o{ SHOP_ITEMS : has
     EVENTS ||--o{ I18N_OVERRIDES : has
     SPONSOR_TIERS ||--o{ SPONSORS : "groups by tierId"
     FLOOR_MAPS ||--o{ SPONSORS : "linked via floorMapHotspotId"
@@ -271,6 +298,13 @@ erDiagram
       string id PK "= slug:boothId"
       string boothId
       string floorMapHotspotId FK
+    }
+    SHOP_ITEMS {
+      string id PK
+      object name
+      string priceLabel
+      bool isHighlighted
+      int sortOrder
     }
     I18N_OVERRIDES {
       string id PK "= slug_lang"

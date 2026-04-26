@@ -1,5 +1,7 @@
 # Event-Ready Deploy Runbook
 
+*Originally written for the April 2026 event-ready deploy. Current ops state assumed.*
+
 Run this in order for the first deploy of the event-ready polish work to Experts Live NL 2026.
 
 ## Pre-deploy

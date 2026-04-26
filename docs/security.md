@@ -227,7 +227,7 @@ sequenceDiagram
 
 ## Known follow-ups
 
-Tracked in [security-hardening-review.md](./security-hardening-review.md):
+Tracked as follow-ups in the project backlog:
 
 - Move admin tokens from `localStorage` to **HttpOnly; Secure; SameSite**
   cookies + CSRF.
@@ -243,7 +243,5 @@ Tracked in [security-hardening-review.md](./security-hardening-review.md):
 
 ## See also
 
-- [security-hardening-review.md](./security-hardening-review.md) — original
-  audit (April 2026), lists every finding by priority.
 - [event-ready-deploy-runbook.md](./event-ready-deploy-runbook.md) — pre/post
   deploy checklist with curl-based verification commands for every header.

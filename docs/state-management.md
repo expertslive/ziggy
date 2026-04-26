@@ -77,9 +77,12 @@ http://localhost:5173/now?now=2026-06-01T09:30:00
 
 The `useClockTick()` hook returns the parsed Date, and the `now` page uses
 this to find current/upNext sessions. Without an override the clock ticks
-every 30 seconds. The override only affects what the kiosk *thinks* the
-current time is — server-side `/sessions/now` still uses real time, so this
-is mainly useful for component-level testing.
+every 30 seconds. The override is also forwarded as a `?now=…` query param
+to `GET /api/events/:slug/sessions/now` (via `useNowSessions`), so the
+server filters `current` / `upNext` / `currentBreaks` against the same
+instant — visiting `/now?now=2026-06-02T12:30:00Z` shows exactly what the
+kiosk renders during lunch (NonContent break card), not just shifted client
+clocks.
 
 ## Deep link state pattern
 

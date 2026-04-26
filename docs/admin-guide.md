@@ -16,8 +16,8 @@ The default admin email is `admin@expertslive.nl`. The password is whatever
 was set at first-time bootstrap — see "Resetting the admin password" below.
 
 After successful login you'll see the sidebar with: **Config**, **Sponsors**,
-**Tiers**, **Floor Maps**, and **Translations**. Tokens last 24 hours; you'll
-be sent back to the login screen after expiry.
+**Tiers**, **Floor Maps**, **Shop Items**, and **Translations**. Tokens last
+24 hours; you'll be sent back to the login screen after expiry.
 
 ### Resetting the admin password
 
@@ -90,6 +90,10 @@ Navigate to **Sponsors** in the sidebar.
    - **Name** — sponsor/company name (required)
    - **Tier** — select from your defined tiers
    - **Logo** — upload a logo image or paste a URL
+   - **Logo on dark** — checkbox. Tick this for sponsors whose logo is
+     white-on-transparent (e.g. Inforcer, Experts Inside, ESPC). The kiosk
+     renders the logo on the dark Experts Live background instead of white,
+     so the marks stay visible.
    - **Description** — per-language description text
    - **Website** — sponsor's website URL
    - **Booth number** — if the sponsor has an expo booth
@@ -166,6 +170,39 @@ After drawing or selecting a hotspot:
 #### Saving
 
 Click **Save** to persist all hotspots. Coordinates are stored in a normalized format (0–1 range) so they display correctly on any screen size.
+
+---
+
+## Shop Items
+
+Navigate to **Shop Items** in the sidebar to manage what attendees see on
+the kiosk's `/shop` page. Every purchase nominates someone for the **Experts
+Live Studiebeurs** — a €5,000 Microsoft certification package — so this is
+both a merch shop and a fundraising tool.
+
+### Adding an item
+
+1. Click **"New Shop Item"**
+2. Fill in the details:
+   - **Name** — per-language item name (required)
+   - **Description** — per-language description
+   - **Image** — upload a product image or paste a URL
+   - **Price label** — free-form text such as `€25` or `€50 / bid`. This is
+     a label, not a calculated price — formatting is up to you.
+   - **Highlighted** — checkbox. Highlighted items render in a featured row
+     above the regular grid. Use sparingly; the page is most striking when
+     only one item (e.g. an auction lot) is highlighted at a time.
+   - **Sort order** — display order within the regular grid (lower numbers
+     first). Highlighted items use the same sort order within their row.
+3. Click **Save**
+
+The current event's headline highlighted item is the signed Octocat print
+donated by Martin Woodward (GitHub), originally created by Simon Oxley.
+
+### Editing or removing an item
+
+Click an item in the list to edit. Click **Delete** to remove it. Changes
+appear on kiosks within ~5 minutes (the API cache TTL).
 
 ---
 

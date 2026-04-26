@@ -42,8 +42,8 @@ Two data ownerships:
 | Source | Data |
 |---|---|
 | **run.events** (POST endpoints, 5-min cache) | Agenda items, speakers, booths, partnerships |
-| **Cosmos DB** (admin CRUD) | Event config, sponsors, sponsor tiers, floor maps + hotspots, i18n overrides, booth overrides, admin users |
-| **Blob Storage** | Sponsor logos, floor map images, event logos (uploaded via `/api/admin/upload`) |
+| **Cosmos DB** (admin CRUD) | Event config, sponsors, sponsor tiers, floor maps + hotspots, i18n overrides, booth overrides, shop items, admin users |
+| **Blob Storage** | Sponsor logos, shop item images, floor map images, event logos (uploaded via `/api/admin/upload`) |
 
 ## Why each piece
 
@@ -107,6 +107,15 @@ for the day, then by `startTimeGroup` for the timeslot, picks the earliest
 start and latest end across the timeslot, and copies the cleaned-up session
 fields. See `packages/api/src/lib/run-events.ts:48`.
 
+The kiosk supports a `?now=<ISO-8601>` URL override for previewing what
+`/now`, `/agenda` jump-to-now, and break cards look like at a given moment.
+The override flows through both the kiosk's `useClockTick` hook (so all
+client-side clocks show the override time) **and** as a forwarded query
+param to `GET /api/events/:slug/sessions/now?now=…`, so the API filters
+"current" / "upNext" / "currentBreaks" against the same instant. Without the
+server forwarding, only client clocks would shift while the API kept
+returning live data.
+
 ## Kiosk page tree
 
 ```mermaid
@@ -116,13 +125,13 @@ flowchart TD
     Root --> Agenda["/agenda"]
     Root --> Speakers["/speakers"]
     Root --> Map["/map"]
-    Root --> Expo["/expo"]
     Root --> Sponsors["/sponsors"]
+    Root --> Shop["/shop"]
     Root --> Search["/search"]
     Root --> Info["/info"]
 
-    H["Header<br/>logo · clock · accessibility · language"]
-    BN["BottomNav<br/>Now · Agenda · Speakers · Map · Expo · Sponsors · Search · Info"]
+    H["Header<br/>logo (→ /info) · clock · accessibility · refresh · language"]
+    BN["BottomNav<br/>Now · Agenda · Speakers · Map · Sponsors · Shop · Search · Info"]
     Overlays["WarmupOverlay<br/>ReconnectingBanner<br/>ErrorBoundary"]
 
     H --- Root
@@ -174,6 +183,16 @@ erDiagram
         string boothId
         string floorMapHotspotId
     }
+    SHOP_ITEMS {
+        string id PK
+        string eventSlug
+        object name
+        object description
+        string imageUrl
+        string priceLabel
+        bool isHighlighted
+        int sortOrder
+    }
     I18N_OVERRIDES {
         string id PK "= slug_lang"
         string eventSlug
@@ -190,6 +209,7 @@ erDiagram
     EVENTS ||--o{ SPONSOR_TIERS : defines
     EVENTS ||--o{ FLOOR_MAPS : has
     EVENTS ||--o{ BOOTH_OVERRIDES : has
+    EVENTS ||--o{ SHOP_ITEMS : has
     EVENTS ||--o{ I18N_OVERRIDES : has
     SPONSOR_TIERS ||--o{ SPONSORS : categorizes
     FLOOR_MAPS ||--o{ SPONSORS : "linked via floorMapHotspotId"

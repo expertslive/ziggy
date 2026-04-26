@@ -13,7 +13,7 @@ Analytics for runtime logs.
 | Container Apps Environment | `ziggy-cae` | Linked to Log Analytics | Hosts the Container App. |
 | Static Web App (kiosk) | `ziggy-kiosk` | Free | Hosts the kiosk SPA. Custom domain `ziggy.expertslive.dev` planned. Default: `victorious-plant-071edeb03.6.azurestaticapps.net`. |
 | Static Web App (admin) | `ziggy-admin` | Free | Hosts the admin SPA. Custom domain `ziggy-admin.expertslive.dev` (live). Default: `gray-hill-067f71103.1.azurestaticapps.net`. |
-| Cosmos DB | `ziggy-db-s4yz4bpkfrzam` | Serverless, North Europe | Database `ziggy`, seven containers (events, sponsors, sponsor-tiers, floor-maps, admins, i18n-overrides, booth-overrides). |
+| Cosmos DB | `ziggy-db-s4yz4bpkfrzam` | Serverless, North Europe | Database `ziggy`, eight containers (events, sponsors, sponsor-tiers, floor-maps, admins, i18n-overrides, booth-overrides, shop-items). All non-event/non-admin containers partition on `/eventSlug`. |
 | Storage Account | `ziggystXXXXXXXX` | Standard LRS | Blob container `images` with public-blob access for sponsor logos and floor map images. |
 | Container Registry | `ziggycrs4yz4bpkfrzam` | Basic, ACR admin user enabled | Holds `ziggy-api` images. |
 | Key Vault | `ziggy-kv-af9a93` | Standard | Holds `jwt-secret` and `run-events-api-key`. Container App MSI granted "Key Vault Secrets User" via role assignment. |
@@ -95,20 +95,29 @@ flowchart LR
     CK --> PN[pnpm install]
     PN --> BLD[pnpm -r build]
     BLD --> KB[Build kiosk with VITE_API_URL]
-    KB --> SWA[Deploy SWA via static-web-apps-deploy]
+    KB --> SWAK[Deploy kiosk SWA<br/>SWA_DEPLOYMENT_TOKEN]
+    BLD --> AB[Build admin with VITE_API_URL]
+    AB --> SWAA[Deploy admin SWA<br/>ADMIN_SWA_DEPLOYMENT_TOKEN]
     BLD --> AZ[azure/login with AZURE_CREDENTIALS]
     AZ --> ACRB[az acr build → ziggy-api:sha + :latest]
     ACRB --> UPD[az containerapp update --image ...:sha]
 ```
+
+Both SWAs deploy from the same workflow. Each SWA's
+`staticwebapp.config.json` (CSP + headers + SPA fallback) lives in
+`packages/{kiosk,admin}/public/` so Vite copies it into `dist/` — putting it
+at the package root would not work, since the SWA deploy step uploads only
+the build output directory.
 
 Required GitHub secrets:
 
 | Secret | Purpose |
 |---|---|
 | `AZURE_CREDENTIALS` | Service principal `ziggy-github-actions`, scoped Contributor on `ziggy-rg`. JSON output of `az ad sp create-for-rbac --sdk-auth`. |
-| `API_URL` | Production API URL, baked into the kiosk build as `VITE_API_URL`. |
+| `API_URL` | Production API URL, baked into both SPA builds as `VITE_API_URL`. |
 | `ACR_NAME` | ACR name (e.g. `ziggycrs4yz4bpkfrzam`) for `az acr build`. |
-| `SWA_DEPLOYMENT_TOKEN` | Static Web App deployment token for the kiosk SWA. |
+| `SWA_DEPLOYMENT_TOKEN` | Deployment token for the kiosk SWA. |
+| `ADMIN_SWA_DEPLOYMENT_TOKEN` | Deployment token for the admin SWA. |
 
 ## Manual deploy procedures
 
