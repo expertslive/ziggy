@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
@@ -22,6 +23,7 @@ function Card({
 
 export function InfoPage() {
   const { t } = useTranslation()
+  const [copied, setCopied] = useState(false)
   const ssid = t('info.wifi.ssid')
   const password = t('info.wifi.password')
   const wifiString = `WIFI:T:WPA;S:${ssid};P:${password};;`
@@ -37,9 +39,37 @@ export function InfoPage() {
                 {ssid}
               </div>
               <div className="text-el-light/70 text-sm mb-1">Password</div>
-              <div className="text-3xl font-extrabold text-el-light select-text">
+              <div className="text-3xl font-extrabold text-el-light select-text mb-2">
                 {password}
               </div>
+              <button
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(password)
+                    setCopied(true)
+                    setTimeout(() => setCopied(false), 2000)
+                  } catch {
+                    // clipboard API unavailable — silent fallback
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-el-blue text-white text-sm font-bold active:bg-el-blue/80"
+              >
+                {copied ? (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {t('info.wifi.copied')}
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    {t('info.wifi.copyPassword')}
+                  </>
+                )}
+              </button>
             </div>
             <div className="bg-white rounded-xl p-3 self-center md:self-auto shrink-0">
               <QRCodeSVG

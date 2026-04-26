@@ -33,9 +33,20 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
       }}
     >
       <div
-        className="w-full max-h-[85vh] bg-el-dark rounded-t-3xl overflow-hidden flex flex-col animate-slide-up"
+        className="relative w-full max-h-[90dvh] bg-el-dark rounded-t-3xl overflow-hidden flex flex-col animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Floating close (defense-in-depth, always reachable on mobile) */}
+        <button
+          onClick={() => {
+            onClose();
+            touch();
+          }}
+          aria-label="Close"
+          className="absolute top-3 right-3 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-el-gray/80 backdrop-blur text-el-light text-xl active:bg-el-gray"
+        >
+          &#x2715;
+        </button>
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-el-light/20" />

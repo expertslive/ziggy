@@ -42,9 +42,20 @@ export function SpeakerDetailModal({ speaker, onClose }: SpeakerDetailModalProps
         }}
       >
         <div
-          className="w-full max-w-2xl max-h-[85vh] bg-el-dark rounded-t-2xl overflow-hidden flex flex-col animate-slide-up"
+          className="relative w-full max-w-2xl max-h-[90dvh] bg-el-dark rounded-t-2xl overflow-hidden flex flex-col animate-slide-up"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Floating close (defense-in-depth, always reachable on mobile) */}
+          <button
+            onClick={() => {
+              onClose();
+              touch();
+            }}
+            aria-label="Close"
+            className="absolute top-3 right-3 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-el-gray/80 backdrop-blur text-el-light text-xl active:bg-el-gray"
+          >
+            &#x2715;
+          </button>
           {/* Header */}
           <div className="flex items-start gap-5 p-6 pb-4 border-b border-el-gray">
             <div className="w-24 h-24 rounded-full bg-el-gray-light overflow-hidden shrink-0">

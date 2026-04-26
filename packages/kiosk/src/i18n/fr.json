@@ -98,7 +98,9 @@
     "wifi": {
       "title": "WiFi",
       "ssid": "ExpertsLive",
-      "password": "ExpertsLive2026"
+      "password": "ExpertsLive2026",
+      "copyPassword": "Copier le mot de passe",
+      "copied": "Copié !"
     },
     "times": {
       "title": "Horaires",

@@ -46,9 +46,16 @@ function ShopDetailModal({ item, onClose }: { item: ShopItem; onClose: () => voi
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="bg-el-dark rounded-t-3xl w-full max-w-2xl max-h-[80vh] overflow-auto"
+        className="relative bg-el-dark rounded-t-3xl w-full max-w-2xl max-h-[90dvh] overflow-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute top-3 right-3 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-el-gray/80 backdrop-blur text-el-light text-xl active:bg-el-gray"
+        >
+          &#x2715;
+        </button>
         <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mt-3 mb-4" />
         {item.imageUrl && (
           <img src={item.imageUrl} alt={item.name} className="w-full h-64 object-cover" />
