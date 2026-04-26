@@ -61,6 +61,8 @@ export function InfoPage() {
         </Card>
         <Card title={t('info.questions.title')}>
           <p className="text-el-light/80 leading-relaxed">{t('info.questions.body')}</p>
+          <hr className="my-3 border-el-light/10" />
+          <p className="italic text-el-light/60 text-sm">{t('info.questions.emergency')}</p>
         </Card>
       </div>
     </PageContainer>

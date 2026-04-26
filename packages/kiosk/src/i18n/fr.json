@@ -105,7 +105,8 @@
     },
     "questions": {
       "title": "Questions ?",
-      "body": "Demandez à un des bénévoles (reconnaissables par leur tenue Experts Live) ou rendez-vous à l'accueil."
+      "body": "Demandez à un des bénévoles (reconnaissables par leur tenue Experts Live) ou rendez-vous à l'accueil.",
+      "emergency": "Urgence médicale : signalez-le à l'accueil ou appelez le 112."
     }
   }
 }

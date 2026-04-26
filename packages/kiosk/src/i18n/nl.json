@@ -105,7 +105,8 @@
     },
     "questions": {
       "title": "Vragen?",
-      "body": "Vraag een van de vrijwilligers (te herkennen aan de Experts Live kleding) of ga naar de registratiebalie."
+      "body": "Vraag een van de vrijwilligers (te herkennen aan de Experts Live kleding) of ga naar de registratiebalie.",
+      "emergency": "Bij medisch nood: meld het direct bij de balie of bel 112."
     }
   }
 }

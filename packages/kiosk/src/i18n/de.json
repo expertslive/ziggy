@@ -105,7 +105,8 @@
     },
     "questions": {
       "title": "Fragen?",
-      "body": "Fragen Sie einen Freiwilligen (erkennbar an der Experts Live Kleidung) oder gehen Sie zur Anmeldung."
+      "body": "Fragen Sie einen Freiwilligen (erkennbar an der Experts Live Kleidung) oder gehen Sie zur Anmeldung.",
+      "emergency": "Medizinischer Notfall: melden Sie es an der Anmeldung oder rufen Sie 112."
     }
   }
 }
