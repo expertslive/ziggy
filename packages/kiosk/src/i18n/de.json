@@ -102,9 +102,24 @@
     },
     "times": {
       "title": "Zeiten",
-      "doorsOpen": "Türen öffnen: 07:00",
-      "lunch": "Mittagessen: 12:00–13:00",
-      "drinks": "Umtrunk: 17:30"
+      "morning": {
+        "heading": "Vormittag",
+        "registration": "07:15  Anmeldung öffnet",
+        "firstBreakout": "07:45  Erste Breakouts",
+        "keynote": "09:00  Keynote"
+      },
+      "afternoon": {
+        "heading": "Nachmittag",
+        "morningBreakouts": "10:10–12:00  Breakouts",
+        "lunch": "12:00–13:00  Mittagessen",
+        "afternoonBreakouts": "13:00–16:15  Breakouts (mit Pause)"
+      },
+      "evening": {
+        "heading": "Tagesende",
+        "prizeShow": "16:20  Sponsoren-Preisverleihung",
+        "closing": "16:50  Closing Note",
+        "drinks": "17:35  Networking-Empfang"
+      }
     },
     "travel": {
       "title": "Anreise",

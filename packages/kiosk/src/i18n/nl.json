@@ -102,9 +102,24 @@
     },
     "times": {
       "title": "Tijden",
-      "doorsOpen": "Deuren open: 07:00",
-      "lunch": "Lunch: 12:00–13:00",
-      "drinks": "Borrel: 17:30"
+      "morning": {
+        "heading": "Ochtend",
+        "registration": "07:15  Registratie opent",
+        "firstBreakout": "07:45  Eerste breakouts",
+        "keynote": "09:00  Keynote"
+      },
+      "afternoon": {
+        "heading": "Middag",
+        "morningBreakouts": "10:10–12:00  Breakouts",
+        "lunch": "12:00–13:00  Lunch",
+        "afternoonBreakouts": "13:00–16:15  Breakouts (met pauze)"
+      },
+      "evening": {
+        "heading": "Einde dag",
+        "prizeShow": "16:20  Sponsors prijzen show",
+        "closing": "16:50  Closing note",
+        "drinks": "17:35  Netwerkborrel"
+      }
     },
     "travel": {
       "title": "Reizen",
