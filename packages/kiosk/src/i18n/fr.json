@@ -21,7 +21,10 @@
     "upNext": "À suivre",
     "noSessions": "Il n'y a pas de sessions en ce moment.",
     "noSessionsNextAt": "Il n'y a pas de sessions en ce moment. Prochaine session à {{time}}.",
-    "timeRemaining": "Encore {{minutes}}"
+    "timeRemaining": "Encore {{minutes}}",
+    "breakUntil": "jusqu'à {{time}}",
+    "minutesLeft": "{{minutes}} min restantes",
+    "nextUpAt": "Prochaine session à {{time}}"
   },
   "agenda": {
     "title": "Programme",

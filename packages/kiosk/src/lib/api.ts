@@ -69,6 +69,7 @@ export interface Agenda {
 
 export interface NowResponse {
   current: AgendaSession[];
+  currentBreaks: AgendaSession[];
   upNext: AgendaSession[];
   timeZone: string;
 }

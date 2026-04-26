@@ -21,7 +21,10 @@
     "upNext": "Up Next",
     "noSessions": "There are no sessions right now.",
     "noSessionsNextAt": "There are no sessions right now. Next session at {{time}}.",
-    "timeRemaining": "{{minutes}} remaining"
+    "timeRemaining": "{{minutes}} remaining",
+    "breakUntil": "until {{time}}",
+    "minutesLeft": "{{minutes}} min left",
+    "nextUpAt": "Next session at {{time}}"
   },
   "agenda": {
     "title": "Agenda",

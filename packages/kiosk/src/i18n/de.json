@@ -21,7 +21,10 @@
     "upNext": "Als Nächstes",
     "noSessions": "Es finden gerade keine Sitzungen statt.",
     "noSessionsNextAt": "Es finden gerade keine Sitzungen statt. Nächste Sitzung um {{time}}.",
-    "timeRemaining": "Noch {{minutes}}"
+    "timeRemaining": "Noch {{minutes}}",
+    "breakUntil": "bis {{time}}",
+    "minutesLeft": "noch {{minutes}} Min",
+    "nextUpAt": "Nächste Sitzung um {{time}}"
   },
   "agenda": {
     "title": "Agenda",

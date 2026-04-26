@@ -21,7 +21,10 @@
     "upNext": "Binnenkort",
     "noSessions": "Er zijn momenteel geen sessies.",
     "noSessionsNextAt": "Er zijn momenteel geen sessies. Volgende sessie om {{time}}.",
-    "timeRemaining": "Nog {{minutes}}"
+    "timeRemaining": "Nog {{minutes}}",
+    "breakUntil": "tot {{time}}",
+    "minutesLeft": "nog {{minutes}} min",
+    "nextUpAt": "Volgende sessie om {{time}}"
   },
   "agenda": {
     "title": "Agenda",

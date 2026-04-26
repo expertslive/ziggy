@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { PageContainer } from '../components/PageContainer';
 import { SessionCard } from '../components/SessionCard';
 import { SessionDetailModal } from '../components/SessionDetailModal';
+import { NonContentCard } from '../components/NonContentCard';
 import { useNowSessions } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
 import { useClockTick } from '../lib/clock';
@@ -79,6 +80,7 @@ export function NowPage() {
   const touch = useKioskStore((s) => s.touch);
   const openSessionId = useKioskStore((s) => s.openSessionId);
   const openSession = useKioskStore((s) => s.openSession);
+  const language = useKioskStore((s) => s.language);
   const { data, isLoading } = useNowSessions();
   const now = useClockTick(30_000);
 
@@ -100,8 +102,9 @@ export function NowPage() {
     );
   }
 
-  const { current, upNext } = data ?? { current: [], upNext: [] };
+  const { current, currentBreaks, upNext } = data ?? { current: [], currentBreaks: [], upNext: [] };
   const hasCurrentSessions = current.length > 0;
+  const hasCurrentBreaks = currentBreaks.length > 0;
   const hasUpNext = upNext.length > 0;
 
   return (
@@ -129,6 +132,23 @@ export function NowPage() {
               </div>
             ))}
           </div>
+        </div>
+      ) : hasCurrentBreaks ? (
+        <div className="mb-8 space-y-4">
+          {currentBreaks.map((b) => (
+            <NonContentCard key={b.id} item={b} now={now} />
+          ))}
+          {hasUpNext && (
+            <p className="text-el-light/60 text-center">
+              {t('now.nextUpAt', {
+                time: new Date(upNext[0].startDate).toLocaleTimeString(language === 'nl' ? 'nl-NL' : 'en-GB', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false,
+                }),
+              })}
+            </p>
+          )}
         </div>
       ) : (
         <div className="mb-8 py-12 flex flex-col items-center justify-center">
