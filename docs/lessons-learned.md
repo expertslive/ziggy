@@ -149,6 +149,56 @@ current/upNext sessions and the break card never appeared. Fix: forward
 that instant. Without the server hop, only the on-screen clocks shift while
 the data stays live.
 
+## Trust the server when it's the source of truth
+
+`/api/events/:slug/sessions/now` already filters items into `current` based
+on event-tz string comparison. The client `SessionCard` then re-checked
+`isLive` with `current >= start && current < end`, where `current` is a UTC
+`Date` from the `?now=` override and `start`/`end` come from
+timezone-naive run.events strings parsed as **browser-local**. Different
+browser timezones produce different answers — a session the API said was
+live could fail the client-side check and miss its `LIVE` pulse pill, making
+the card look "calm" when it should be active. Fix: trust the API. We added
+a `forceState?: 'live' | 'past'` prop to `SessionCard`. NowPage passes
+`forceState="live"` for cards in the `current` bucket; AgendaPage keeps the
+auto-derive path because it needs to style past/future across the whole day.
+Lesson: re-implementing the same filter on both sides is asking for them to
+disagree.
+
+## i18next silently falls back to the key when a translation is missing
+
+Removing `info.times.doorsOpen` from the JSON without also updating
+`InfoPage.tsx` rendered the literal text **`info.times.doorsOpen`** on the
+kiosk — no build error, no console warning, no test failure. The keys are
+strings to the type system. Whenever you remove or rename an i18n key, grep
+the codebase before merging:
+
+```bash
+grep -rn "info.times.doorsOpen" packages/kiosk/src
+```
+
+A pre-merge CI step that loads the locale JSON and asserts every
+`t('...')` literal in `.tsx` files resolves to a real key would catch this
+class of regression.
+
+## Container App in-memory cache lingers past a code deploy
+
+We ship a 5-minute in-memory cache layer in front of run.events
+(`packages/api/src/lib/cache.ts`). A code deploy creates a **new** Container
+App revision with empty RAM, but Azure does a graceful rollout — the old
+revision keeps serving traffic until the new one is healthy. Requests
+landing on the still-warm old revision return cached pre-fix data, and once
+the new revision takes over its empty cache pulls fresh data on the next
+miss. So sometimes a fix appears to take ~5 minutes to "show up" even
+though the build is live. If you need an immediate cache flush after
+deploy:
+
+```
+az containerapp revision restart --name ziggy-api --resource-group ziggy-rg \
+  --revision $(az containerapp show -n ziggy-api -g ziggy-rg --query \
+    properties.latestRevisionName -o tsv)
+```
+
 ## Vite doesn't copy `staticwebapp.config.json` from the package root
 
 `staticwebapp.config.json` (CSP, headers, SPA fallback) needs to land in
