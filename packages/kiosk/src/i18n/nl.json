@@ -103,6 +103,25 @@
       "lunch": "Lunch: 12:00–13:00",
       "drinks": "Borrel: 17:30"
     },
+    "travel": {
+      "title": "Reizen",
+      "publicTransport": {
+        "heading": "Met openbaar vervoer",
+        "intro": "Sneltramhalte Nieuwegein Stadscentrum:",
+        "lineToUtrecht": "Lijn 60/61 → Utrecht Centraal",
+        "lineToWestraven": "Of richting Nieuwegein/IJsselstein → P+R Westraven",
+        "frequency": "Tram rijdt regelmatig (~elke 7-10 min)."
+      },
+      "car": {
+        "heading": "Met de auto",
+        "shuttle": "Gratis shuttlebus elke ±15 min van/naar Parkeerterrein Sportpark Galecop",
+        "parking": "Of gratis parkeren bij NBC"
+      },
+      "farewell": {
+        "heading": "Bij vertrek",
+        "body": "Bij de uitgang staat een poffertjeskraam — neem gratis wat lekkers mee voor onderweg."
+      }
+    },
     "questions": {
       "title": "Vragen?",
       "body": "Vraag een van de vrijwilligers (te herkennen aan de Experts Live kleding) of ga naar de registratiebalie.",

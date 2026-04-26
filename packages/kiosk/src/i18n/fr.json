@@ -103,6 +103,25 @@
       "lunch": "Déjeuner: 12:00–13:00",
       "drinks": "Cocktail: 17:30"
     },
+    "travel": {
+      "title": "Trajet",
+      "publicTransport": {
+        "heading": "En transports en commun",
+        "intro": "Depuis l'arrêt de tramway Nieuwegein Stadscentrum :",
+        "lineToUtrecht": "Lignes 60/61 → Utrecht Centraal",
+        "lineToWestraven": "Ou direction Nieuwegein/IJsselstein → P+R Westraven",
+        "frequency": "Le tramway passe régulièrement (~toutes les 7 à 10 min)."
+      },
+      "car": {
+        "heading": "En voiture",
+        "shuttle": "Navette gratuite toutes les ±15 min entre le NBC et le parking Sportpark Galecop",
+        "parking": "Ou parking gratuit au NBC"
+      },
+      "farewell": {
+        "heading": "Pour la route",
+        "body": "À la sortie, un stand de poffertjes (mini-pancakes hollandais) — prenez-en gratuitement pour la route."
+      }
+    },
     "questions": {
       "title": "Questions ?",
       "body": "Demandez à un des bénévoles (reconnaissables par leur tenue Experts Live) ou rendez-vous à l'accueil.",

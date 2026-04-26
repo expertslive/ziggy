@@ -59,6 +59,30 @@ export function InfoPage() {
             <li>{t('info.times.drinks')}</li>
           </ul>
         </Card>
+        <Card title={t('info.travel.title')}>
+          <div className="space-y-4 text-el-light/80">
+            <div>
+              <h3 className="font-semibold text-el-light mb-1">{t('info.travel.publicTransport.heading')}</h3>
+              <p className="text-sm">{t('info.travel.publicTransport.intro')}</p>
+              <ul className="text-sm list-disc list-inside ml-1 mt-1 space-y-0.5">
+                <li>{t('info.travel.publicTransport.lineToUtrecht')}</li>
+                <li>{t('info.travel.publicTransport.lineToWestraven')}</li>
+              </ul>
+              <p className="text-sm mt-1 text-el-light/60">{t('info.travel.publicTransport.frequency')}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-el-light mb-1">{t('info.travel.car.heading')}</h3>
+              <ul className="text-sm list-disc list-inside ml-1 space-y-0.5">
+                <li>{t('info.travel.car.shuttle')}</li>
+                <li>{t('info.travel.car.parking')}</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-el-light mb-1">{t('info.travel.farewell.heading')}</h3>
+              <p className="text-sm">{t('info.travel.farewell.body')}</p>
+            </div>
+          </div>
+        </Card>
         <Card title={t('info.questions.title')}>
           <p className="text-el-light/80 leading-relaxed">{t('info.questions.body')}</p>
           <hr className="my-3 border-el-light/10" />
