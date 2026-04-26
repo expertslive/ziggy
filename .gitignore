@@ -31,6 +31,7 @@ coverage/
 # API key image
 api-key.png
 claude_session.txt
+claude.txt
 ziggy_tijd_testen.txt
 SECURITY-TODO.md
 infra/main.json
