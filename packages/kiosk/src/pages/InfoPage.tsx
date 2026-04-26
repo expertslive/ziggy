@@ -53,11 +53,32 @@ export function InfoPage() {
           </div>
         </Card>
         <Card title={t('info.times.title')}>
-          <ul className="text-el-light/90 space-y-1">
-            <li>{t('info.times.doorsOpen')}</li>
-            <li>{t('info.times.lunch')}</li>
-            <li>{t('info.times.drinks')}</li>
-          </ul>
+          <div className="space-y-4 text-el-light/80">
+            <div>
+              <h3 className="font-semibold text-el-light mb-1">{t('info.times.morning.heading')}</h3>
+              <ul className="text-sm space-y-0.5">
+                <li>{t('info.times.morning.registration')}</li>
+                <li>{t('info.times.morning.firstBreakout')}</li>
+                <li>{t('info.times.morning.keynote')}</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-el-light mb-1">{t('info.times.afternoon.heading')}</h3>
+              <ul className="text-sm space-y-0.5">
+                <li>{t('info.times.afternoon.morningBreakouts')}</li>
+                <li>{t('info.times.afternoon.lunch')}</li>
+                <li>{t('info.times.afternoon.afternoonBreakouts')}</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-el-light mb-1">{t('info.times.evening.heading')}</h3>
+              <ul className="text-sm space-y-0.5">
+                <li>{t('info.times.evening.prizeShow')}</li>
+                <li>{t('info.times.evening.closing')}</li>
+                <li>{t('info.times.evening.drinks')}</li>
+              </ul>
+            </div>
+          </div>
         </Card>
         <Card title={t('info.travel.title')}>
           <div className="space-y-4 text-el-light/80">
