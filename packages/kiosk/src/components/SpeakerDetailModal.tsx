@@ -57,7 +57,7 @@ export function SpeakerDetailModal({ speaker, onClose }: SpeakerDetailModalProps
             &#x2715;
           </button>
           {/* Header */}
-          <div className="flex items-start gap-5 p-6 pb-4 border-b border-el-gray">
+          <div className="flex items-start gap-5 p-6 pb-4 pr-16 border-b border-el-gray">
             <div className="w-24 h-24 rounded-full bg-el-gray-light overflow-hidden shrink-0">
               {speaker.image ? (
                 <img
@@ -82,15 +82,6 @@ export function SpeakerDetailModal({ speaker, onClose }: SpeakerDetailModalProps
                 <p className="text-sm text-el-light/40 mt-0.5">{speaker.company}</p>
               )}
             </div>
-            <button
-              onClick={() => {
-                onClose();
-                touch();
-              }}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-el-gray text-el-light active:bg-el-gray-light shrink-0"
-            >
-              &#x2715;
-            </button>
           </div>
 
           {/* Scrollable content */}

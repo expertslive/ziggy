@@ -58,13 +58,13 @@ function ShopDetailModal({ item, onClose }: { item: ShopItem; onClose: () => voi
         </button>
         <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mt-3 mb-4" />
         {item.imageUrl && (
-          <img src={item.imageUrl} alt={item.name} className="w-full h-64 object-cover" />
+          <img src={item.imageUrl} alt={item.name} className="w-full h-44 sm:h-64 object-cover" />
         )}
-        <div className="p-6 space-y-4">
-          <h2 className="text-2xl font-bold text-el-light">{item.name}</h2>
-          <p className="text-el-blue font-extrabold text-2xl">{item.priceLabel}</p>
+        <div className="p-5 sm:p-6 space-y-3 sm:space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-el-light">{item.name}</h2>
+          <p className="text-el-blue font-extrabold text-xl sm:text-2xl">{item.priceLabel}</p>
           {description && (
-            <p className="text-el-light/70 leading-relaxed whitespace-pre-line">{description}</p>
+            <p className="text-el-light/70 leading-relaxed whitespace-pre-line text-sm sm:text-base">{description}</p>
           )}
           <button
             onClick={onClose}

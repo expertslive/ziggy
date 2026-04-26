@@ -39,37 +39,35 @@ export function InfoPage() {
                 {ssid}
               </div>
               <div className="text-el-light/70 text-sm mb-1">Password</div>
-              <div className="text-3xl font-extrabold text-el-light select-text mb-2">
-                {password}
-              </div>
-              <button
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(password)
-                    setCopied(true)
-                    setTimeout(() => setCopied(false), 2000)
-                  } catch {
-                    // clipboard API unavailable — silent fallback
-                  }
-                }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-el-blue text-white text-sm font-bold active:bg-el-blue/80"
-              >
-                {copied ? (
-                  <>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <div className="flex items-center gap-3">
+                <div className="text-3xl font-extrabold text-el-light select-text">
+                  {password}
+                </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(password)
+                      setCopied(true)
+                      setTimeout(() => setCopied(false), 2000)
+                    } catch {
+                      // clipboard API unavailable — silent fallback
+                    }
+                  }}
+                  aria-label={t('info.wifi.copyPassword')}
+                  title={copied ? t('info.wifi.copied') : t('info.wifi.copyPassword')}
+                  className="w-10 h-10 shrink-0 flex items-center justify-center rounded-lg bg-el-gray text-el-light active:bg-el-gray-light"
+                >
+                  {copied ? (
+                    <svg className="w-5 h-5 text-el-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                    {t('info.wifi.copied')}
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
-                    {t('info.wifi.copyPassword')}
-                  </>
-                )}
-              </button>
+                  )}
+                </button>
+              </div>
             </div>
             <div className="bg-white rounded-xl p-3 self-center md:self-auto shrink-0">
               <QRCodeSVG

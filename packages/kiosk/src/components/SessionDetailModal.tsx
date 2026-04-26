@@ -53,8 +53,8 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
         </div>
 
         {/* Header */}
-        <div className="flex items-start justify-between px-6 pb-4 border-b border-el-gray">
-          <div className="flex-1 mr-4">
+        <div className="px-6 pb-4 border-b border-el-gray">
+          <div className="pr-12">
             <h2 className="text-xl font-extrabold text-el-light leading-tight">
               {session.title}
             </h2>
@@ -92,15 +92,6 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
               </div>
             )}
           </div>
-          <button
-            onClick={() => {
-              onClose();
-              touch();
-            }}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-el-gray text-el-light active:bg-el-gray-light"
-          >
-            &#x2715;
-          </button>
         </div>
 
         {/* Scrollable content */}
