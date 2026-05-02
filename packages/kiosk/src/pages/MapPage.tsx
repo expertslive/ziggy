@@ -252,6 +252,12 @@ function FloorMapViewer({
   }, [transform]);
 
   const viewportRef = useRef<HTMLDivElement>(null);
+  // Inner box sized to the image's aspect ratio. Pan/zoom transform applies to
+  // its content so the image always fills it (no contain bands), and bounds
+  // calculations are anchored on the actual image content — preventing the
+  // user from panning the map off-screen on devices where the outer wrapper
+  // is taller than the image (mobile portrait + min-h).
+  const imageBoxRef = useRef<HTMLDivElement>(null);
   const gestureRef = useRef<{
     mode: 'idle' | 'pan' | 'pinch';
     startTouches: { x: number; y: number }[];
@@ -287,10 +293,13 @@ function FloorMapViewer({
     setTimeout(() => setAnimating(false), 350);
   }
 
-  // Bind native touch handlers (passive:false so we can preventDefault on pinch)
+  // Bind native touch handlers (passive:false so we can preventDefault on pinch).
+  // Attached to the image box (not the outer wrapper) so taps in the bg-el-gray
+  // bands above/below the image don't accidentally start a gesture, AND so
+  // coordinates are relative to the actual image content.
   useEffect(() => {
-    if (!isMobile || !viewportRef.current) return;
-    const el = viewportRef.current;
+    if (!isMobile || !imageBoxRef.current) return;
+    const el = imageBoxRef.current;
     const opts: AddEventListenerOptions = { passive: false };
 
     function localCoords(e: TouchEvent) {
@@ -392,14 +401,14 @@ function FloorMapViewer({
 
   // Auto-zoom to highlighted hotspot (sponsor "Show on map" deeplink)
   useEffect(() => {
-    if (!isMobile || !highlightId || !imgSize || !viewportRef.current) return;
+    if (!isMobile || !highlightId || !imgSize || !imageBoxRef.current) return;
     const hotspot = map.hotspots.find((h) => h.id === highlightId);
     if (!hotspot) return;
     const xs = hotspot.points.map((p) => p[0]);
     const ys = hotspot.points.map((p) => p[1]);
     const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
     const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-    const rect = viewportRef.current.getBoundingClientRect();
+    const rect = imageBoxRef.current.getBoundingClientRect();
     const w = rect.width;
     const h = rect.height;
     const targetS = 2.5;
@@ -465,47 +474,54 @@ function FloorMapViewer({
 
       <div
         ref={viewportRef}
-        className="relative w-full bg-el-gray rounded-2xl overflow-hidden min-h-[50vh] sm:min-h-[55vh] md:min-h-[65vh] touch-none"
-        style={{
-          aspectRatio: imgSize ? `${imgSize.w}/${imgSize.h}` : '16/9',
-        }}
+        className="relative w-full bg-el-gray rounded-2xl overflow-hidden min-h-[50vh] sm:min-h-[55vh] md:min-h-[65vh] flex items-center justify-center"
       >
         {!imgSize && (
-          <div className="absolute inset-0 flex items-center justify-center text-el-light/50">
+          <div className="text-el-light/50">
             <div className="animate-pulse">{t('common.loading')}</div>
           </div>
         )}
+        {/* Inner box sized to image aspect — pan/zoom anchored on this so the
+            user can never pan the image off-screen into the gray bands. */}
         <div
-          className="absolute inset-0"
+          ref={imageBoxRef}
+          className="relative w-full overflow-hidden touch-none"
           style={{
-            transform: `translate(${transform.tx}px, ${transform.ty}px) scale(${transform.s})`,
-            transformOrigin: '0 0',
-            transition: animating ? 'transform 400ms ease-out' : 'none',
-            willChange: 'transform',
+            aspectRatio: imgSize ? `${imgSize.w}/${imgSize.h}` : '16/9',
+            display: imgSize ? 'block' : 'none',
           }}
         >
-          <img
-            src={map.imageUrl}
-            alt={map.name}
-            loading="eager"
-            decoding="async"
-            className="w-full h-full object-contain select-none pointer-events-none"
-            draggable={false}
-            onLoad={(e) => {
-              const img = e.currentTarget;
-              setImgSize({ w: img.naturalWidth, h: img.naturalHeight });
+          <div
+            className="absolute inset-0"
+            style={{
+              transform: `translate(${transform.tx}px, ${transform.ty}px) scale(${transform.s})`,
+              transformOrigin: '0 0',
+              transition: animating ? 'transform 400ms ease-out' : 'none',
+              willChange: 'transform',
             }}
-            onError={() => {
-              console.warn('[MapPage] floor map image failed to load:', map.imageUrl);
-            }}
-          />
-          {imgSize && (
-            <svg
-              className="absolute inset-0 w-full h-full"
-              viewBox="0 0 1 1"
-              preserveAspectRatio="none"
-            >
-              {map.hotspots.map((hotspot) => {
+          >
+            <img
+              src={map.imageUrl}
+              alt={map.name}
+              loading="eager"
+              decoding="async"
+              className="w-full h-full object-cover select-none pointer-events-none"
+              draggable={false}
+              onLoad={(e) => {
+                const img = e.currentTarget;
+                setImgSize({ w: img.naturalWidth, h: img.naturalHeight });
+              }}
+              onError={() => {
+                console.warn('[MapPage] floor map image failed to load:', map.imageUrl);
+              }}
+            />
+            {imgSize && (
+              <svg
+                className="absolute inset-0 w-full h-full"
+                viewBox="0 0 1 1"
+                preserveAspectRatio="none"
+              >
+                {map.hotspots.map((hotspot) => {
                 const isHighlighted =
                   hotspot.id === highlightId ||
                   (groupHighlightIds?.has(hotspot.id) ?? false);
@@ -529,7 +545,8 @@ function FloorMapViewer({
                 );
               })}
             </svg>
-          )}
+            )}
+          </div>
         </div>
 
         {isMobile && transform.s > 1.01 && (
