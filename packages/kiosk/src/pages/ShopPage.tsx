@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageContainer } from '../components/PageContainer';
@@ -33,6 +33,24 @@ function ShopCard({ item, onTap }: { item: ShopItem; onTap: () => void }) {
 function ShopDetailModal({ item, onClose }: { item: ShopItem; onClose: () => void }) {
   const { t, i18n } = useTranslation();
   const description = item.description[i18n.language] || item.description['en'] || '';
+  const images = [item.imageUrl, ...(item.galleryUrls ?? [])].filter(Boolean);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+
+  function scrollToIdx(i: number) {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const slide = el.children[i] as HTMLElement | undefined;
+    slide?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+  }
+
+  function onScroll() {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const idx = Math.round(el.scrollLeft / el.clientWidth);
+    if (idx !== activeIdx) setActiveIdx(idx);
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -57,8 +75,40 @@ function ShopDetailModal({ item, onClose }: { item: ShopItem; onClose: () => voi
           &#x2715;
         </button>
         <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mt-3 mb-4" />
-        {item.imageUrl && (
-          <img src={item.imageUrl} alt={item.name} className="w-full h-44 sm:h-64 object-cover" />
+        {images.length > 0 && (
+          <div className="relative">
+            <div
+              ref={scrollerRef}
+              onScroll={onScroll}
+              className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar"
+            >
+              {images.map((src, i) => (
+                <img
+                  key={src + i}
+                  src={src}
+                  alt={`${item.name} ${i + 1}`}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  draggable={false}
+                  className="shrink-0 w-full h-44 sm:h-64 object-cover snap-start select-none"
+                />
+              ))}
+            </div>
+            {images.length > 1 && (
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 px-2 py-1 rounded-full bg-black/40 backdrop-blur">
+                {images.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => scrollToIdx(i)}
+                    aria-label={`Show image ${i + 1}`}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${
+                      i === activeIdx ? 'bg-white w-4' : 'bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         )}
         <div className="p-5 sm:p-6 space-y-3 sm:space-y-4">
           <h2 className="text-xl sm:text-2xl font-bold text-el-light">{item.name}</h2>
@@ -91,7 +141,8 @@ export function ShopPage() {
   return (
     <PageContainer>
       <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-2">{t('shop.title')}</h1>
-      <p className="text-el-light/70 mb-4">{t('shop.subtitle')}</p>
+      <p className="text-el-light/70 mb-2">{t('shop.subtitle')}</p>
+      <p className="text-el-light/55 text-sm mb-4 italic">{t('shop.handmade')}</p>
 
       <div className="bg-el-blue/10 border border-el-blue/40 rounded-2xl p-4 mb-6">
         <h2 className="text-base font-bold text-el-blue mb-2">{t('shop.studiebeurs.heading')}</h2>

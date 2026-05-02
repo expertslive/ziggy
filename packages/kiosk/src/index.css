@@ -37,6 +37,14 @@ body {
   overscroll-behavior: contain;
 }
 
+/* Horizontal carousel: hide the scrollbar but keep the scroll */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Modal slide-up animation */
 @keyframes slide-up {
   from {

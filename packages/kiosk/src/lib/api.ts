@@ -187,6 +187,7 @@ export interface ShopItem {
   name: string;
   description: Record<string, string>;
   imageUrl: string;
+  galleryUrls?: string[];
   priceLabel: string;
   isHighlighted?: boolean;
   sortOrder: number;

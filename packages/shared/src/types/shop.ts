@@ -4,7 +4,10 @@ export interface ShopItem {
   eventSlug: string
   name: string
   description: Record<string, string>
+  /** Cover image (used in the shop grid + as the first slide in the detail gallery) */
   imageUrl: string
+  /** Optional extra images shown after the cover in the detail modal carousel */
+  galleryUrls?: string[]
   priceLabel: string
   isHighlighted?: boolean
   sortOrder: number

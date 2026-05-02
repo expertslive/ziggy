@@ -116,6 +116,7 @@ export const ShopItemSchema = z.object({
   name: z.string().min(1).max(200),
   description: i18nStringRecord,
   imageUrl: httpsUrl,
+  galleryUrls: z.array(httpsUrl).max(10).optional(),
   priceLabel: z.string().min(1).max(80),
   isHighlighted: z.boolean().optional(),
   sortOrder: z.number().int().min(0).max(10_000),
