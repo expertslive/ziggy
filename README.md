@@ -9,7 +9,7 @@ DB.
 
 ## Live URLs
 
-- Kiosk: `https://ziggy.expertslive.dev` (planned) — currently
+- Kiosk: `https://ziggy.expertslive.dev` (live) — fallback
   `https://victorious-plant-071edeb03.6.azurestaticapps.net`
 - Admin: `https://ziggy-admin.expertslive.dev` (live) — fallback
   `https://gray-hill-067f71103.1.azurestaticapps.net`

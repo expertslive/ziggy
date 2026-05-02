@@ -102,9 +102,17 @@ Navigate to **Sponsors** in the sidebar.
 
 ### Linking a sponsor to a floor-map hotspot
 
-Each sponsor can deep-link to a polygon on the floor map. When set, the
-sponsor's detail screen on the kiosk gets a "Show on map" button that pans
-to the hotspot and pulses it amber.
+Each sponsor can deep-link to a polygon on the floor map. The link works
+both ways:
+
+- **From Sponsors → Map:** the sponsor's detail screen on the kiosk gets a
+  "Show on map" button that opens the floor map and pulses the hotspot in
+  amber.
+- **From Map → Sponsor:** tapping the hotspot on the floor map opens the
+  room-detail modal with the sponsor's logo, booth number, description,
+  and website.
+
+To set the link:
 
 1. In the sponsor edit form, find the **Floor map hotspot** picker.
 2. Pick a floor map from the dropdown, then choose one of its hotspots from
@@ -112,6 +120,11 @@ to the hotspot and pulses it amber.
    floor map editor.
 3. Save the sponsor. The link takes effect on the next kiosk data refresh
    (within ~5 minutes).
+
+> **Bulk linking:** if you have many sponsors and a printed booth-number
+> map, it's often faster to PATCH each sponsor over the API. See the
+> `floorMapHotspotId` field in [data-model.md](./data-model.md) — set it to
+> the hotspot's UUID. Empty/missing values mean "no link" (no UI to draw).
 
 ### Editing Sponsors
 
@@ -155,17 +168,25 @@ Hotspots are tappable regions on the floor map that show attendees which session
 
 After drawing or selecting a hotspot:
 
-- **Room Name** — the name displayed on the kiosk map overlay (e.g. "Room 1", "Main Hall"). This should match the room name used in your run.events schedule.
-- **Color** — hex color for the overlay region (e.g. `#0082C8` for blue). Each room can have a different color to help attendees distinguish areas.
+- **Room Name** — used internally and as the title of the kiosk's room-detail modal when the hotspot is tapped (e.g. "Booth 14", "Registratie", "Merchandise"). For session rooms it should match the room name used in your run.events schedule so the kiosk can pair sessions to the hotspot.
 - **Labels** — multi-language room names shown on the kiosk
 - **Delete** — remove the hotspot entirely
 
 #### Tips for Good Hotspots
 
-- Draw polygons that closely follow the room boundaries on your map
-- Use distinct colors for different areas or floors
-- Keep room names short — they're displayed as text inside the polygon
-- Make sure room names match the names in your run.events schedule, so the kiosk can show which session is in each room
+- Hotspots are rendered **invisible** on the kiosk by default — the
+  printed venue map already shows where booths and rooms are. The yellow
+  highlight only appears when the attendee arrives from a sponsor's
+  "Show on map" deep-link. Keep this in mind: the polygon shape is a
+  *hit area*, not a label.
+- Conference booths are almost always rectangles. Two diagonally-opposite
+  taps gives you a clean rectangular hit area; freeform shapes look
+  skewed when normalized.
+- Make session-room names match the run.events schedule exactly so the
+  kiosk can show "current sessions in this room" inside the modal.
+- A hotspot named exactly **"Merchandise"** (case-insensitive) is treated
+  as a shortcut: tapping it on the kiosk jumps straight to the `/shop` tab
+  instead of opening the room-detail modal.
 
 #### Saving
 

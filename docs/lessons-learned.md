@@ -199,6 +199,65 @@ az containerapp revision restart --name ziggy-api --resource-group ziggy-rg \
     properties.latestRevisionName -o tsv)
 ```
 
+## Empty optional URL strings need explicit coercion before zod sees them
+
+`SponsorSchema` declares `website: httpsUrl.optional()` where `httpsUrl =
+z.string().url().refine(starts-with-https)`. The admin form binds the input
+to `form.website` and submits the whole object on save. When the field is
+empty, zod runs `.url()` on `""` and rejects it — every existing sponsor
+without a website couldn't be edited at all (`Failed to save sponsor` toast,
+no other clue). The fix is one line per optional URL/min(1) field:
+
+```ts
+const payload = {
+  ...form,
+  website: form.website || undefined,
+  boothNumber: form.boothNumber || undefined,
+  floorMapHotspotId: form.floorMapHotspotId || undefined,
+}
+```
+
+`.optional()` means *the key may be absent*; an empty string still
+satisfies the type-narrowing path and runs through the validator. Strip
+empties to `undefined` at the form boundary, not in the schema.
+
+## Floor-map hotspot polygons are visual debris when there are 29 of them
+
+The first floor map editor drew tappable hotspots as filled blue polygons
+with a border. With 4 sessions in 4 rooms it looked fine. With 25 booths
+plus 4 utility rooms (Merchandise, Registratie, Photo wall, Garderobe) the
+overlay obscured the printed booth labels on the venue map and made the
+plattegrond illegible. Fix: render the polygons with `fill="rgba(0,0,0,0)"`
++ `stroke="none"` by default and switch to the yellow highlight only when
+arriving via "Show on map" from a sponsor. Important: SVG polygons with
+`fill="none"` don't capture clicks — use `rgba(0,0,0,0)` (or
+`pointer-events: all`) so transparent hit-areas stay tappable. Lesson: an
+overlay's job ends the moment the underlying image already conveys the
+information; keep it for the *deep-link callout* only.
+
+## Conference floor maps are basically grids of rectangles
+
+Every booth, registratie balie, garderobe, and merchandise stand on the
+NBC Nieuwegein floor was rectangular. The polygon editor lets you trace
+freeform shapes, but the operator drew them slightly skewed so the dataset
+ended up with 29 quadrilaterals where every booth visually clearly should
+be axis-aligned. Cheap fix: walk the saved hotspots, compute each one's
+bounding box, and replace `points` with the four corner points. Future
+direction: the editor could offer a "rectangle mode" that takes two
+diagonal taps and emits `[minX,minY], [maxX,minY], [maxX,maxY],
+[minX,maxY]` directly.
+
+## A floor-map hotspot can mean "go elsewhere" instead of "open detail"
+
+The Merchandise hotspot has no sessions and no sponsor — opening the
+generic room-detail modal showed only a dead "no sessions in this room"
+message. Routing the tap to `/shop` instead is one `navigate()` call keyed
+on the hotspot's `roomName`. Pattern: not every map region needs to share
+the same modal. A short whitelist (`merchandise`, `photo wall`, etc.) that
+diverts the tap is acceptable and beats over-engineering a per-hotspot
+"action type" field on the data model. Reach for the data-model knob the
+day you have three.
+
 ## Vite doesn't copy `staticwebapp.config.json` from the package root
 
 `staticwebapp.config.json` (CSP, headers, SPA fallback) needs to land in
