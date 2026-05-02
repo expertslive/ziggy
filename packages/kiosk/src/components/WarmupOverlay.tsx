@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 const CORE_KEYS = ['agenda', 'now-sessions', 'event-config']
-const COUNTDOWN_SECONDS = 10
+const COUNTDOWN_SECONDS = 15
 
 export function WarmupOverlay() {
   const { t } = useTranslation()
