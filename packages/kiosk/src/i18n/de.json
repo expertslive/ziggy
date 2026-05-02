@@ -39,7 +39,7 @@
   "speakers": {
     "title": "Referenten",
     "sessions": "Sitzungen",
-    "sortedAZ": "{{count}} Referenten, A-Z sortiert"
+    "count": "{{count}} Referenten"
   },
   "map": {
     "title": "Lageplan",

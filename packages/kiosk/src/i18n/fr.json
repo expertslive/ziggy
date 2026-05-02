@@ -39,7 +39,7 @@
   "speakers": {
     "title": "Intervenants",
     "sessions": "Sessions",
-    "sortedAZ": "{{count}} intervenants, triés de A à Z"
+    "count": "{{count}} intervenants"
   },
   "map": {
     "title": "Plan des salles",

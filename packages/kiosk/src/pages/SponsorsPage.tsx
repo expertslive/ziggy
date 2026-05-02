@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -183,15 +183,31 @@ export function SponsorsPage() {
     (a, b) => a.sortOrder - b.sortOrder,
   );
 
-  // Group sponsors by tier
-  const sponsorsByTier = new Map<string, Sponsor[]>();
-  for (const sponsor of [...(sponsors || [])].sort(
-    (a, b) => a.sortOrder - b.sortOrder,
-  )) {
-    const list = sponsorsByTier.get(sponsor.tierId) || [];
-    list.push(sponsor);
-    sponsorsByTier.set(sponsor.tierId, list);
-  }
+  // Shuffle sponsors within each tier on a stable per-mount basis. The set of
+  // sponsor IDs is the cache key, so a TanStack background refetch that
+  // returns the same list won't reshuffle. New mount (e.g. after the
+  // inactivity reset routes back from /now) → fresh shuffle, fair rotation.
+  const sponsorIdsKey = useMemo(
+    () => (sponsors ?? []).map((s) => s.id).sort().join('|'),
+    [sponsors],
+  );
+  const sponsorsByTier = useMemo(() => {
+    const byTier = new Map<string, Sponsor[]>();
+    for (const sponsor of sponsors ?? []) {
+      const list = byTier.get(sponsor.tierId) ?? [];
+      list.push(sponsor);
+      byTier.set(sponsor.tierId, list);
+    }
+    // Fisher-Yates shuffle within each tier (no preferred ordering)
+    for (const list of byTier.values()) {
+      for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
+      }
+    }
+    return byTier;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sponsorIdsKey]);
 
   return (
     <PageContainer>

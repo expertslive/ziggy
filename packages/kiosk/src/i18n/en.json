@@ -39,7 +39,7 @@
   "speakers": {
     "title": "Speakers",
     "sessions": "Sessions",
-    "sortedAZ": "{{count}} speakers, sorted A-Z"
+    "count": "{{count}} speakers"
   },
   "map": {
     "title": "Floor Map",

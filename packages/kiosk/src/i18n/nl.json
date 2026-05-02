@@ -39,7 +39,7 @@
   "speakers": {
     "title": "Sprekers",
     "sessions": "Sessies",
-    "sortedAZ": "{{count}} sprekers, A-Z gesorteerd"
+    "count": "{{count}} sprekers"
   },
   "map": {
     "title": "Plattegrond",
