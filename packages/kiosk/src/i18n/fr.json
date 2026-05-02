@@ -154,6 +154,17 @@
       "title": "Questions ?",
       "body": "Demandez à un des bénévoles (reconnaissables par leur tenue Experts Live) ou rendez-vous à l'accueil.",
       "emergency": "Urgence médicale : signalez-le à l'accueil ou appelez le 112."
+    },
+    "access": {
+      "title": "Accessibilité",
+      "halls": "Toutes les salles sont accessibles (sauf l'espace commun entresol I). Pour les salles 3 à 10, prenez l'ascenseur à gauche du bâtiment.",
+      "captions": "Sous-titrage en direct dans Event Hall I & II et Grand Hall.",
+      "feeding": "Une salle d'allaitement est disponible au premier étage, à côté de l'entrée du balcon de la Grand Hall.",
+      "help": "Besoin d'aide ? Signalez-le à l'accueil."
+    },
+    "radio": {
+      "title": "Experts Live Radio",
+      "body": "Radio en direct depuis le NBC : interviews de speakers et sponsors, résumés de sessions, infos pratiques et musique entre les rubriques. À écouter les 1er et 2 juin."
     }
   }
 }

@@ -154,6 +154,17 @@
       "title": "Vragen?",
       "body": "Vraag een van de vrijwilligers (te herkennen aan de Experts Live kleding) of ga naar de registratiebalie.",
       "emergency": "Bij medisch nood: meld het direct bij de balie of bel 112."
+    },
+    "access": {
+      "title": "Toegankelijkheid",
+      "halls": "Alle zalen zijn toegankelijk (behalve algemene ruimte entresol I). Voor zaal 3 t/m 10 neem je de lift links van het gebouw.",
+      "captions": "Live ondertiteling in Event Hall I & II en Grand Hall.",
+      "feeding": "Kolfruimte op de eerste verdieping, naast de ingang van het balkon van de Grand Hall.",
+      "help": "Hulp nodig? Meld het bij de registratiebalie."
+    },
+    "radio": {
+      "title": "Experts Live Radio",
+      "body": "Live radio direct vanuit het NBC: interviews met sprekers en sponsors, sessie-highlights, event updates en muziek tussendoor. Te beluisteren op zowel 1 als 2 juni."
     }
   }
 }

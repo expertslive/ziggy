@@ -154,6 +154,17 @@
       "title": "Questions?",
       "body": "Ask one of the volunteers (recognizable by their Experts Live clothing) or visit the registration desk.",
       "emergency": "Medical emergency: report at the desk or call 112."
+    },
+    "access": {
+      "title": "Accessibility",
+      "halls": "All halls are accessible (except the Entresol I common area). For halls 3–10, take the lift on the left side of the building.",
+      "captions": "Live captions are provided in Event Hall I & II and Grand Hall.",
+      "feeding": "A nursing room is located on the first floor, next to the Grand Hall balcony entrance.",
+      "help": "Need assistance? Let us know at the registration desk."
+    },
+    "radio": {
+      "title": "Experts Live Radio",
+      "body": "Live radio straight from the NBC: interviews with speakers and sponsors, session highlights, event updates and music in between. Tune in on both June 1 and 2."
     }
   }
 }

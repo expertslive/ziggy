@@ -132,7 +132,29 @@ export function InfoPage() {
             </div>
           </div>
         </Card>
-        <Card title={t('info.questions.title')}>
+        <Card title={t('info.access.title')}>
+          <ul className="space-y-2 text-el-light/80 text-sm leading-relaxed list-disc list-inside ml-1">
+            <li>{t('info.access.halls')}</li>
+            <li>{t('info.access.captions')}</li>
+            <li>{t('info.access.feeding')}</li>
+            <li>{t('info.access.help')}</li>
+          </ul>
+        </Card>
+        <Card title={t('info.radio.title')}>
+          <p className="text-el-light/80 leading-relaxed mb-3">{t('info.radio.body')}</p>
+          <a
+            href="https://radio.expertslive.nl"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-el-blue text-white text-sm font-bold active:bg-el-blue/80"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19a3 3 0 11-6 0 3 3 0 016 0zm12-3a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            radio.expertslive.nl
+          </a>
+        </Card>
+        <Card title={t('info.questions.title')} wide>
           <p className="text-el-light/80 leading-relaxed">{t('info.questions.body')}</p>
           <hr className="my-3 border-el-light/10" />
           <p className="italic text-el-light/60 text-sm">{t('info.questions.emergency')}</p>

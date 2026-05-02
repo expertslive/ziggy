@@ -154,6 +154,17 @@
       "title": "Fragen?",
       "body": "Fragen Sie einen Freiwilligen (erkennbar an der Experts Live Kleidung) oder gehen Sie zur Anmeldung.",
       "emergency": "Medizinischer Notfall: melden Sie es an der Anmeldung oder rufen Sie 112."
+    },
+    "access": {
+      "title": "Barrierefreiheit",
+      "halls": "Alle Säle sind zugänglich (außer der allgemeine Bereich Entresol I). Für die Säle 3–10 nutzen Sie den Aufzug auf der linken Gebäudeseite.",
+      "captions": "Live-Untertitel in Event Hall I & II und Grand Hall.",
+      "feeding": "Stillraum im ersten Stock, neben dem Eingang zum Balkon der Grand Hall.",
+      "help": "Hilfe nötig? Melden Sie sich am Anmeldetresen."
+    },
+    "radio": {
+      "title": "Experts Live Radio",
+      "body": "Live-Radio direkt aus dem NBC: Interviews mit Sprechern und Sponsoren, Session-Highlights, Event-Updates und Musik dazwischen. Hören Sie an beiden Tagen, am 1. und 2. Juni."
     }
   }
 }
