@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/PageContainer';
-import { useFloorMaps, useNowSessions } from '../lib/hooks';
+import { useFloorMaps, useNowSessions, useSponsors } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
-import type { FloorMap, AgendaSession } from '../lib/api';
+import type { FloorMap, AgendaSession, Sponsor } from '../lib/api';
 
 interface HotspotInfo {
   id: string;
@@ -14,11 +14,13 @@ interface HotspotInfo {
 
 function RoomDetailModal({
   hotspot,
+  sponsor,
   currentSessions,
   upcomingSessions,
   onClose,
 }: {
   hotspot: HotspotInfo;
+  sponsor: Sponsor | null;
   currentSessions: AgendaSession[];
   upcomingSessions: AgendaSession[];
   onClose: () => void;
@@ -27,6 +29,9 @@ function RoomDetailModal({
   const touch = useKioskStore((s) => s.touch);
   const lang = i18n.language;
   const roomLabel = hotspot.label[lang] || hotspot.label['en'] || hotspot.roomName;
+  const sponsorDescription = sponsor
+    ? sponsor.description[lang] || sponsor.description['en'] || ''
+    : '';
 
   return (
     <div
@@ -48,6 +53,45 @@ function RoomDetailModal({
         {/* Content */}
         <div className="scrollable px-6 pb-6">
           <h2 className="text-xl font-extrabold text-el-light mb-4">{roomLabel}</h2>
+
+          {/* Sponsor card (if this hotspot is a booth) */}
+          {sponsor && (
+            <div className="mb-5 bg-el-gray rounded-2xl p-4 flex items-start gap-4">
+              {sponsor.logoUrl && (
+                <div
+                  className={`w-20 h-20 shrink-0 rounded-xl flex items-center justify-center overflow-hidden ${
+                    sponsor.logoOnDark ? 'bg-el-dark' : 'bg-white'
+                  }`}
+                >
+                  <img
+                    src={sponsor.logoUrl}
+                    alt={sponsor.name}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-extrabold text-el-light leading-tight">
+                  {sponsor.name}
+                </h3>
+                {sponsor.boothNumber && (
+                  <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-el-blue/20 text-el-blue text-xs font-bold">
+                    Booth {sponsor.boothNumber}
+                  </span>
+                )}
+                {sponsorDescription && (
+                  <p className="mt-2 text-sm text-el-light/70 leading-relaxed line-clamp-4">
+                    {sponsorDescription}
+                  </p>
+                )}
+                {sponsor.website && (
+                  <p className="mt-1 text-xs text-el-light/40 break-all">
+                    {sponsor.website.replace(/^https?:\/\//, '')}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Current sessions */}
           {currentSessions.length > 0 && (
@@ -77,12 +121,14 @@ function RoomDetailModal({
             </div>
           )}
 
-          {/* No sessions at all */}
-          {currentSessions.length === 0 && upcomingSessions.length === 0 && (
-            <p className="text-el-light/50 text-base">
-              {t('map.noCurrentSessions')}
-            </p>
-          )}
+          {/* No sessions at all (and no sponsor) */}
+          {!sponsor &&
+            currentSessions.length === 0 &&
+            upcomingSessions.length === 0 && (
+              <p className="text-el-light/50 text-base">
+                {t('map.noCurrentSessions')}
+              </p>
+            )}
         </div>
       </div>
     </div>
@@ -145,9 +191,14 @@ function FloorMapViewer({
   const touch = useKioskStore((s) => s.touch);
   const [imgSize, setImgSize] = useState<{ w: number; h: number } | null>(null);
   const [selectedHotspot, setSelectedHotspot] = useState<HotspotInfo | null>(null);
+  const { data: sponsors } = useSponsors();
 
   const currentSessions = nowData?.current ?? [];
   const upcomingSessions = nowData?.upNext ?? [];
+
+  const sponsorForSelected = selectedHotspot
+    ? (sponsors ?? []).find((s) => s.floorMapHotspotId === selectedHotspot.id) ?? null
+    : null;
 
   const currentForRoom = selectedHotspot
     ? currentSessions.filter((s) => s.roomName === selectedHotspot.roomName)
@@ -206,13 +257,10 @@ function FloorMapViewer({
                 <polygon
                   key={hotspot.id}
                   points={hotspot.points.map(([x, y]) => `${x},${y}`).join(' ')}
-                  fill={
-                    isHighlighted
-                      ? 'rgba(255, 204, 0, 0.35)'
-                      : 'rgba(0, 130, 200, 0.25)'
-                  }
-                  stroke={isHighlighted ? '#ffcc00' : '#0082C8'}
-                  strokeWidth="0.003"
+                  fill={isHighlighted ? 'rgba(255, 204, 0, 0.35)' : 'rgba(0, 0, 0, 0)'}
+                  stroke={isHighlighted ? '#ffcc00' : 'none'}
+                  strokeWidth={isHighlighted ? '0.003' : '0'}
+                  style={{ pointerEvents: 'all' }}
                   className={`cursor-pointer ${isHighlighted ? 'hotspot-pulse' : ''}`}
                   onClick={() => {
                     handleHotspotTap(hotspot);
@@ -228,6 +276,7 @@ function FloorMapViewer({
       {selectedHotspot && (
         <RoomDetailModal
           hotspot={selectedHotspot}
+          sponsor={sponsorForSelected}
           currentSessions={currentForRoom}
           upcomingSessions={upcomingForRoom}
           onClose={() => setSelectedHotspot(null)}
