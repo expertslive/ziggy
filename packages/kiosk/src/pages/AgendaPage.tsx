@@ -121,33 +121,63 @@ export function AgendaPage() {
     return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
   }, [currentDay]);
 
-  const filteredTimeslots = useMemo(() => {
+  const filteredSessions = useMemo<AgendaSession[]>(() => {
     if (!currentDay) return [];
-    if (agendaLabelFilter.length === 0) return currentDay.timeslots;
-    return currentDay.timeslots
-      .map((slot) => ({
-        ...slot,
-        sessions: slot.sessions.filter((s) =>
-          s.labels.some((l) => agendaLabelFilter.includes(l.name)),
-        ),
-      }))
-      .filter((slot) => slot.sessions.length > 0);
+    const flat: AgendaSession[] = [];
+    for (const slot of currentDay.timeslots) flat.push(...slot.sessions);
+    if (agendaLabelFilter.length === 0) return flat;
+    return flat.filter((s) =>
+      s.labels.some((l) => agendaLabelFilter.includes(l.name)),
+    );
   }, [currentDay, agendaLabelFilter]);
 
-  const timeslotRefs = useRef<Map<string, HTMLElement | null>>(new Map());
+  /** Group by start-time (HH:MM in event timezone). Within each group:
+   * keynote/closing first, then 50-min breakouts, then 20-min, then NonContent. */
+  const startTimeGroups = useMemo(() => {
+    function classify(s: AgendaSession): number {
+      const hasContent = s.speakers.length > 0 || s.labels.length > 0;
+      if (!hasContent) return 3; // noncontent
+      const isPlenary = s.labels.some(
+        (l) => l.name === 'Keynote' || l.name === 'Closing note',
+      );
+      if (isPlenary) return 0;
+      const dur = (new Date(s.endDate).getTime() - new Date(s.startDate).getTime()) / 60000;
+      return dur <= 25 ? 2 : 1;
+    }
+    function timeStr(d: string) {
+      return new Date(d).toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: timezone,
+      });
+    }
+    const map = new Map<string, AgendaSession[]>();
+    for (const s of filteredSessions) {
+      const key = timeStr(s.startDate);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(s);
+    }
+    const groups = [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    for (const [, arr] of groups) arr.sort((a, b) => classify(a) - classify(b));
+    return groups;
+  }, [filteredSessions, timezone]);
 
-  const liveTimeslot = useMemo(() => {
-    return filteredTimeslots.find((slot) =>
-      slot.sessions.some((s) => {
+  const groupRefs = useRef<Map<string, HTMLElement | null>>(new Map());
+
+  const liveStartTime = useMemo(() => {
+    const live = startTimeGroups.find(([, sessions]) =>
+      sessions.some((s) => {
         const start = new Date(s.startDate);
         const end = new Date(s.endDate);
         return now >= start && now < end;
       }),
     );
-  }, [filteredTimeslots, now]);
+    return live ? live[0] : null;
+  }, [startTimeGroups, now]);
 
   const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: timezone });
-  const showJumpToNow = currentDay?.date === todayStr && !!liveTimeslot;
+  const showJumpToNow = currentDay?.date === todayStr && !!liveStartTime;
 
   // Conditional renders AFTER all hooks have run.
   if (agendaLoading) {
@@ -234,31 +264,21 @@ export function AgendaPage() {
         </div>
       )}
 
-      {/* Timeline */}
-      {filteredTimeslots.length > 0 ? (
+      {/* Timeline — grouped by start-time, kop = werkelijke start-tijd */}
+      {startTimeGroups.length > 0 ? (
         <div className="space-y-6">
-          {filteredTimeslots.map((timeslot) => (
+          {startTimeGroups.map(([startTime, sessions]) => (
             <div
-              key={timeslot.startTimeGroup}
+              key={startTime}
               ref={(el) => {
-                timeslotRefs.current.set(timeslot.startTimeGroup, el);
+                groupRefs.current.set(startTime, el);
               }}
             >
-              {/* Time header */}
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-lg font-bold text-el-blue">
-                  {timeslot.startTimeGroup}
-                </span>
-                <span className="text-sm text-el-light/40">&mdash;</span>
-                <span className="text-sm text-el-light/40">
-                  {timeslot.endDate.substring(11, 16)}
-                </span>
-                <div className="flex-1 h-px bg-el-gray-light" />
-              </div>
-
-              {/* Session cards */}
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-3 tracking-tight">
+                {startTime}
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {timeslot.sessions.map((session) => (
+                {sessions.map((session) => (
                   <SessionCard
                     key={session.id}
                     session={session}
@@ -287,12 +307,12 @@ export function AgendaPage() {
         />
       )}
 
-      {showJumpToNow && liveTimeslot && (
+      {showJumpToNow && liveStartTime && (
         <button
           className="fixed bottom-20 right-4 px-4 py-2 sm:bottom-24 sm:right-6 sm:px-5 sm:py-3 bg-el-blue text-white rounded-full shadow-lg font-bold active:scale-95 transition-transform z-20"
           onClick={() => {
-            timeslotRefs.current
-              .get(liveTimeslot.startTimeGroup)
+            groupRefs.current
+              .get(liveStartTime)
               ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             touch();
           }}
