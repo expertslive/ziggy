@@ -131,37 +131,37 @@ export function AgendaPage() {
     );
   }, [currentDay, agendaLabelFilter]);
 
-  /** Group by start-time (HH:MM in event timezone). Within each group:
+  /** Group by start-time. The API returns ISO-like strings without a TZ offset
+   * ("2026-06-02T07:15:00") representing event-local time, so we substring HH:MM
+   * directly — using `new Date()` would parse as the *device's* local TZ which
+   * is wrong for kiosks/iPads not set to Europe/Amsterdam. Within each group:
    * keynote/closing first, then 50-min breakouts, then 20-min, then NonContent. */
   const startTimeGroups = useMemo(() => {
     function classify(s: AgendaSession): number {
       const hasContent = s.speakers.length > 0 || s.labels.length > 0;
       if (!hasContent) return 3; // noncontent
-      const isPlenary = s.labels.some(
-        (l) => l.name === 'Keynote' || l.name === 'Closing note',
-      );
-      if (isPlenary) return 0;
-      const dur = (new Date(s.endDate).getTime() - new Date(s.startDate).getTime()) / 60000;
-      return dur <= 25 ? 2 : 1;
-    }
-    function timeStr(d: string) {
-      return new Date(d).toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-        timeZone: timezone,
+      const isPlenary = s.labels.some((l) => {
+        const n = l.name?.trim().toLowerCase() ?? '';
+        return n === 'keynote' || n === 'closing note' || n === 'closing-note';
       });
+      if (isPlenary) return 0;
+      // Duration: end-time minutes - start-time minutes (within same day),
+      // independent of TZ. Strings are "YYYY-MM-DDTHH:MM:SS".
+      const startMin = parseInt(s.startDate.substring(11, 13), 10) * 60 + parseInt(s.startDate.substring(14, 16), 10);
+      const endMin = parseInt(s.endDate.substring(11, 13), 10) * 60 + parseInt(s.endDate.substring(14, 16), 10);
+      const dur = endMin - startMin;
+      return dur <= 25 ? 2 : 1;
     }
     const map = new Map<string, AgendaSession[]>();
     for (const s of filteredSessions) {
-      const key = timeStr(s.startDate);
+      const key = s.startDate.substring(11, 16); // "HH:MM" in event-local time
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(s);
     }
     const groups = [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
     for (const [, arr] of groups) arr.sort((a, b) => classify(a) - classify(b));
     return groups;
-  }, [filteredSessions, timezone]);
+  }, [filteredSessions]);
 
   const groupRefs = useRef<Map<string, HTMLElement | null>>(new Map());
 

@@ -19,13 +19,16 @@ interface SessionCardProps {
 function classifySession(session: AgendaSession): 'plenary' | 'long' | 'short' | 'noncontent' {
   const hasContent = session.speakers.length > 0 || session.labels.length > 0;
   if (!hasContent) return 'noncontent';
-  const isPlenary = session.labels.some(
-    (l) => l.name === 'Keynote' || l.name === 'Closing note',
-  );
+  const isPlenary = session.labels.some((l) => {
+    const n = l.name?.trim().toLowerCase() ?? '';
+    return n === 'keynote' || n === 'closing note' || n === 'closing-note';
+  });
   if (isPlenary) return 'plenary';
-  const start = new Date(session.startDate).getTime();
-  const end = new Date(session.endDate).getTime();
-  const minutes = (end - start) / 60000;
+  // Duration in minutes from the time portion of the ISO-like string,
+  // independent of device TZ (the API returns event-local strings).
+  const startMin = parseInt(session.startDate.substring(11, 13), 10) * 60 + parseInt(session.startDate.substring(14, 16), 10);
+  const endMin = parseInt(session.endDate.substring(11, 13), 10) * 60 + parseInt(session.endDate.substring(14, 16), 10);
+  const minutes = endMin - startMin;
   return minutes <= 25 ? 'short' : 'long';
 }
 
