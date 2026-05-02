@@ -67,9 +67,11 @@ export function SponsorsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Empty strings on optional fields would fail zod min(1); send undefined.
+    // Empty strings on optional fields would fail zod min(1) / url(); send undefined.
     const payload = {
       ...form,
+      website: form.website || undefined,
+      boothNumber: form.boothNumber || undefined,
       floorMapHotspotId: form.floorMapHotspotId || undefined,
     };
     try {
