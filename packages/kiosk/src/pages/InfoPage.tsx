@@ -142,17 +142,12 @@ export function InfoPage() {
         </Card>
         <Card title={t('info.radio.title')}>
           <p className="text-el-light/80 leading-relaxed mb-3">{t('info.radio.body')}</p>
-          <a
-            href="https://radio.expertslive.nl"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-el-blue text-white text-sm font-bold active:bg-el-blue/80"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-el-gray text-el-light text-sm font-bold select-text">
+            <svg className="w-4 h-4 text-el-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19a3 3 0 11-6 0 3 3 0 016 0zm12-3a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             radio.expertslive.nl
-          </a>
+          </div>
         </Card>
         <Card title={t('info.questions.title')} wide>
           <p className="text-el-light/80 leading-relaxed">{t('info.questions.body')}</p>
