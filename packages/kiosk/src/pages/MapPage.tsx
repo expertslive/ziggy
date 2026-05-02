@@ -39,6 +39,8 @@ function RoomDetailModal({
     if (n === 'registratie' || n === 'registratiebalie' || n === 'registration')
       return 'registration';
     if (n === 'photo wall' || n === 'photowall') return 'photoWall';
+    if (n === 'garderobe' || n === 'cloakroom' || n === 'wardrobe')
+      return 'garderobe';
     return null;
   })();
   const infoBody = infoKey ? t(`map.info.${infoKey}.body`) : '';
