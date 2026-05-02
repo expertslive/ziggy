@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/PageContainer';
@@ -41,6 +41,17 @@ function RoomDetailModal({
     if (n === 'photo wall' || n === 'photowall') return 'photoWall';
     if (n === 'garderobe' || n === 'cloakroom' || n === 'wardrobe')
       return 'garderobe';
+    if (n === 'toiletten' || n === 'toilet' || n === 'toilets' || n === 'restroom')
+      return 'toilets';
+    if (n === 'lift' || n === 'elevator')
+      return 'lift';
+    if (n === 'eten/drinken' || n === 'eten en drinken' || n === 'food' ||
+        n === 'food and drinks' || n === 'food/drinks' || n === 'catering')
+      return 'food';
+    if (n === 'dietary needs' || n === 'dieet' || n === 'dieetwensen')
+      return 'dietary';
+    if (n === 'trappen' || n === 'trap' || n === 'stairs' || n === 'staircase')
+      return 'stairs';
     return null;
   })();
   const infoBody = infoKey ? t(`map.info.${infoKey}.body`) : '';
@@ -406,6 +417,26 @@ function FloorMapViewer({
     ? (sponsors ?? []).find((s) => s.floorMapHotspotId === selectedHotspot.id) ?? null
     : null;
 
+  // When a "category" hotspot is tapped (Toiletten / Eten-drinken / Dietary
+  // needs), highlight every hotspot that shares the same roomName so the
+  // visitor sees all locations at once, not just the one they tapped.
+  const GROUP_NAMES = new Set([
+    'toiletten', 'toilet', 'toilets', 'restroom',
+    'eten/drinken', 'eten en drinken', 'food', 'food and drinks', 'food/drinks', 'catering',
+    'dietary needs', 'dieet', 'dieetwensen',
+  ]);
+  const groupHighlightIds = useMemo(() => {
+    if (!selectedHotspot) return null;
+    const name = selectedHotspot.roomName.trim().toLowerCase();
+    if (!GROUP_NAMES.has(name)) return null;
+    const ids = new Set<string>();
+    for (const h of map.hotspots) {
+      if (h.roomName.trim().toLowerCase() === name) ids.add(h.id);
+    }
+    return ids;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedHotspot, map.hotspots]);
+
   const currentForRoom = selectedHotspot
     ? currentSessions.filter((s) => s.roomName === selectedHotspot.roomName)
     : [];
@@ -469,7 +500,9 @@ function FloorMapViewer({
               preserveAspectRatio="none"
             >
               {map.hotspots.map((hotspot) => {
-                const isHighlighted = hotspot.id === highlightId;
+                const isHighlighted =
+                  hotspot.id === highlightId ||
+                  (groupHighlightIds?.has(hotspot.id) ?? false);
                 return (
                   <polygon
                     key={hotspot.id}

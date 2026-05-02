@@ -58,6 +58,21 @@
       },
       "garderobe": {
         "body": "De garderobe is tijdens het event gratis te gebruiken. Let op: het is een onbewaakte garderobe — gebruik op eigen risico."
+      },
+      "toilets": {
+        "body": "Toiletten zijn op de begane grond te vinden, en op de eerste verdieping naast de Grand Hall. Volg de bordjes."
+      },
+      "lift": {
+        "body": "De lift bevindt zich aan de linkerkant van het gebouw en geeft toegang tot zaal 3 t/m 10 op de eerste verdieping. Heb je hulp nodig? Vraag het bij de registratiebalie."
+      },
+      "food": {
+        "body": "Koffie, thee en frisdrank zijn de hele dag beschikbaar bij de cateringpunten. De lunch wordt geserveerd tussen 12:00 en 13:00; de borrel start om 17:35."
+      },
+      "dietary": {
+        "body": "Heb je dieetwensen of allergieën? Concrete instructies volgen — kom je er voor het event uit, neem dan even contact op met de organisatie via organisatie@expertslive.nl."
+      },
+      "stairs": {
+        "body": "De trap geeft toegang tot de eerste verdieping (zaal 3 t/m 10). Liever de lift? Die staat aan de linkerkant van het gebouw."
       }
     }
   },

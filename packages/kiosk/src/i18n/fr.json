@@ -58,6 +58,21 @@
       },
       "garderobe": {
         "body": "Le vestiaire est gratuit pendant l'événement. Attention : il n'est pas surveillé — utilisation à vos risques et périls."
+      },
+      "toilets": {
+        "body": "Les toilettes se trouvent au rez-de-chaussée et au premier étage à côté de la Grand Hall. Suivez les panneaux."
+      },
+      "lift": {
+        "body": "L'ascenseur se trouve à gauche du bâtiment et donne accès aux salles 3 à 10 au premier étage. Besoin d'aide ? Demandez à l'accueil."
+      },
+      "food": {
+        "body": "Café, thé et boissons fraîches sont disponibles toute la journée aux points de restauration. Le déjeuner est servi entre 12h00 et 13h00 ; le cocktail de networking commence à 17h35."
+      },
+      "dietary": {
+        "body": "Régime ou allergies ? Les infos pratiques suivront — si vous ne pouvez pas attendre, contactez l'organisation via organisatie@expertslive.nl."
+      },
+      "stairs": {
+        "body": "L'escalier mène au premier étage (salles 3 à 10). Préférez l'ascenseur ? Il est à gauche du bâtiment."
       }
     }
   },
