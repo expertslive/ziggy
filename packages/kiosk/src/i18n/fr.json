@@ -54,13 +54,13 @@
         "body": "L'accueil est ouvert toute la journée. Une question, besoin d'aide ou un souci médical ? Passez nous voir — nos bénévoles sont là pour vous. En cas d'urgence médicale réelle, composez le 112."
       },
       "photoWall": {
-        "body": "Immortalisez votre journée à notre mur à selfies ! Partagez votre photo avec #ExpertsLiveNL — on adore les voir circuler en ligne."
+        "body": "Immortalisez votre journée à notre mur à selfies ! Partagez votre photo avec #ExpertsLiveNL."
       },
       "garderobe": {
         "body": "Le vestiaire est gratuit pendant l'événement. Attention : il n'est pas surveillé — utilisation à vos risques et périls."
       },
       "toilets": {
-        "body": "Les toilettes se trouvent au rez-de-chaussée et au premier étage à côté de la Grand Hall. Suivez les panneaux."
+        "body": "Des toilettes sont disponibles à plusieurs endroits sur tous les étages. Suivez les panneaux."
       },
       "lift": {
         "body": "L'ascenseur se trouve à gauche du bâtiment et donne accès aux salles 3 à 10 au premier étage. Besoin d'aide ? Demandez à l'accueil."
@@ -69,7 +69,7 @@
         "body": "Café, thé et boissons fraîches sont disponibles toute la journée aux points de restauration. Le déjeuner est servi entre 12h00 et 13h00 ; le cocktail de networking commence à 17h35."
       },
       "dietary": {
-        "body": "Régime ou allergies ? Les infos pratiques suivront — si vous ne pouvez pas attendre, contactez l'organisation via organisatie@expertslive.nl."
+        "body": "Régime ou allergies ? Ces points de retrait dédiés vous servent vos repas. Vous ne savez pas comment faire ? Demandez à un membre de l'organisation."
       },
       "stairs": {
         "body": "L'escalier mène au premier étage (salles 3 à 10). Préférez l'ascenseur ? Il est à gauche du bâtiment."
