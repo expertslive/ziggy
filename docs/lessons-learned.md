@@ -258,6 +258,65 @@ diverts the tap is acceptable and beats over-engineering a per-hotspot
 "action type" field on the data model. Reach for the data-model knob the
 day you have three.
 
+## When the heading lies, fix the heading — not each item underneath it
+
+The agenda used run.events' timeslot grouping to draw section headings like
+"10:10 – 11:00". For sessions of mixed duration (a 50-min and a 20-min
+both starting at 10:10) the heading promised the full hour, even when half
+the cards inside ended at 10:30. Quick scanners saw "Sandra · Kickstart
+your AI journey" under "10:10 – 11:00" and assumed her session ran until
+11. We brainstormed eight per-card visual variants (badges, height proxies,
+color stripes, color-tinted backgrounds) before noticing the real bug was
+structural: *the heading was wrong*. Switching to start-time-only headings
+("10:10", "10:40", …) removed the lie at the source. The remaining per-card
+cues (blue stripe for 50-min, white for keynote, ghost "20m" badge for the
+short ones) became light decoration rather than the primary disambiguation.
+Lesson: when a UI lies, look up the hierarchy first. Fixing the lie is
+usually one structural change; trying to compensate underneath it is many
+visual changes.
+
+## Group-highlight is the right answer for spatially-repeated map hotspots
+
+The floor map has multiple toilet icons, multiple catering points, two
+"Dietary needs" panels. When a visitor taps one of those, their question
+is *"where are the toilets?"*, not *"what does this specific toilet do?"*.
+Treating same-`roomName` hotspots as a category and lighting all of them
+yellow when any one is tapped matches the question being asked.
+Implementation is one-line: a `GROUP_NAMES` set; if the selected hotspot's
+name is in it, expand the highlight set to every hotspot sharing that name.
+Booths and singleton hotspots (Lift, Trappen, Photo wall, Garderobe) keep
+the single-highlight behaviour because each is a unique destination — "Lift"
+is one place, "Booth 14" is one place. Pattern generalises: any time the
+data has an N:1 entity → category mapping and the user query is about the
+category, group-highlight is the simplest UX.
+
+## Random ordering needs a stable seed; per-render shuffles cause card-bounce
+
+For the sponsor "no-one-always-first" requirement we initially shuffled in
+JSX with a plain `Math.random()` sort — every render reordered the cards,
+so they bounced as the user scrolled. The fix isn't a global random seed
+or a state machine: it's `useMemo` keyed on a stable signature of the data
+set (sorted-and-joined sponsor IDs). The shuffle runs once when the data
+materialises and stays fixed for the lifetime of the component. New mount
+(after the 60-second inactivity reset routes back from `/now` and the user
+navigates to `/sponsors` again) → fresh shuffle → fair rotation across
+visitors. Same trick works for any "fair-but-stable" ordering need —
+randomized speaker grids, lottery draws, etc.
+
+## `pointer:coarse + width < X` is a leaky touch-device gate
+
+Earlier mobile-only pinch/zoom on `/map` gated on
+`pointer:coarse AND innerWidth < 1024`. That width cap was meant to
+exclude the 1080×1920 kiosk, which it does — but it also silently excluded
+iPad Pro (1024+) and any full-size touchscreen tablet, where pinch is
+exactly what users expect. When in doubt, prefer `pointer:coarse` alone
+and accept that touchscreen kiosks are technically included. For our
+case pinch on the kiosk is harmless: nobody pinches a stationary portrait
+screen, and the floating reset button gets them back to fit if they
+accidentally trigger it. Width caps for "is this a phone?" detection
+will keep being wrong as device sizes drift; gate on capability
+(`pointer`, `hover`) and let the design absorb the edge cases.
+
 ## Vite doesn't copy `staticwebapp.config.json` from the package root
 
 `staticwebapp.config.json` (CSP, headers, SPA fallback) needs to land in
