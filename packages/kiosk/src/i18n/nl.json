@@ -73,6 +73,9 @@
       },
       "stairs": {
         "body": "De trap geeft toegang tot de eerste verdieping (zaal 3 t/m 10). Liever de lift? Die staat aan de linkerkant van het gebouw."
+      },
+      "askTheExperts": {
+        "body": "Loop hier binnen met je vragen — gedurende de dag zijn sprekers en andere experts beschikbaar voor 1-op-1 gesprekken over de diverse Microsoft onderwerpen. Geen afspraak nodig."
       }
     }
   },

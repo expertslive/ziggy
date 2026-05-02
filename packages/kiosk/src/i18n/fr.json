@@ -73,6 +73,9 @@
       },
       "stairs": {
         "body": "L'escalier mène au premier étage (salles 3 à 10). Préférez l'ascenseur ? Il est à gauche du bâtiment."
+      },
+      "askTheExperts": {
+        "body": "Passez avec vos questions — speakers et autres experts sont disponibles toute la journée pour des échanges en tête-à-tête sur les différents sujets Microsoft. Sans rendez-vous."
       }
     }
   },

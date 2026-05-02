@@ -52,6 +52,8 @@ function RoomDetailModal({
       return 'dietary';
     if (n === 'trappen' || n === 'trap' || n === 'stairs' || n === 'staircase')
       return 'stairs';
+    if (n === 'ask the experts' || n === 'ask-the-experts' || n === 'experts')
+      return 'askTheExperts';
     return null;
   })();
   const infoBody = infoKey ? t(`map.info.${infoKey}.body`) : '';
@@ -348,17 +350,21 @@ function FloorMapViewer({
       } else if (g.mode === 'pan' && touches.length === 1 && g.startT.s > 1) {
         const dx = touches[0].x - g.startTouches[0].x;
         const dy = touches[0].y - g.startTouches[0].y;
+        // Only update the transform once movement crosses the 5px threshold.
+        // Otherwise sub-threshold finger jitter during a tap-while-zoomed
+        // shifts the wrapper a few px, the click target moves out from under
+        // the finger, and the synthetic click hits the wrong polygon.
         if (Math.hypot(dx, dy) > 5) {
           g.panMoved = true;
           e.preventDefault();
+          setTransform(
+            clampT(
+              { s: g.startT.s, tx: g.startT.tx + dx, ty: g.startT.ty + dy },
+              w,
+              h,
+            ),
+          );
         }
-        setTransform(
-          clampT(
-            { s: g.startT.s, tx: g.startT.tx + dx, ty: g.startT.ty + dy },
-            w,
-            h,
-          ),
-        );
       }
     }
 

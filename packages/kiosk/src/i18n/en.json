@@ -73,6 +73,9 @@
       },
       "stairs": {
         "body": "The staircase leads to the first floor (halls 3–10). Prefer the lift? It's on the left side of the building."
+      },
+      "askTheExperts": {
+        "body": "Drop in with your questions — speakers and other experts are available throughout the day for 1-on-1 conversations about various Microsoft topics. No appointment needed."
       }
     }
   },

@@ -73,6 +73,9 @@
       },
       "stairs": {
         "body": "Die Treppe führt in den ersten Stock (Säle 3–10). Lieber den Aufzug? Der ist auf der linken Gebäudeseite."
+      },
+      "askTheExperts": {
+        "body": "Komm vorbei mit deinen Fragen — Sprecher und andere Experten stehen dir den ganzen Tag für 1-zu-1-Gespräche zu verschiedenen Microsoft-Themen zur Verfügung. Keine Anmeldung nötig."
       }
     }
   },
