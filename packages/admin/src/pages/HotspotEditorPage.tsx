@@ -32,6 +32,12 @@ export function HotspotEditorPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [drawingPoints, setDrawingPoints] = useState<[number, number][]>([]);
   const [cursorPos, setCursorPos] = useState<[number, number] | null>(null);
+  // Drag state for reshaping/moving an already-drawn hotspot
+  const [dragState, setDragState] = useState<
+    | { hotspotId: string; mode: 'vertex'; vertexIdx: number }
+    | { hotspotId: string; mode: 'polygon'; lastNorm: [number, number]; movedSinceDown: boolean }
+    | null
+  >(null);
 
   // Image dimensions for coordinate conversion
   const containerRef = useRef<HTMLDivElement>(null);
@@ -143,14 +149,68 @@ export function HotspotEditorPage() {
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (mode !== 'draw' || !imageBounds) return;
+    if (!imageBounds) return;
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
     const px = e.clientX - rect.left;
     const py = e.clientY - rect.top;
     const norm = pixelToNorm(px, py);
-    setCursorPos(norm);
+
+    if (mode === 'draw') {
+      setCursorPos(norm);
+      return;
+    }
+
+    // mode === 'select' with active drag
+    if (!dragState || !norm) return;
+    const nx = Math.max(0, Math.min(1, norm[0]));
+    const ny = Math.max(0, Math.min(1, norm[1]));
+    if (dragState.mode === 'vertex') {
+      setHotspots((prev) =>
+        prev.map((h) =>
+          h.id === dragState.hotspotId
+            ? {
+                ...h,
+                points: h.points.map((p, i) => (i === dragState.vertexIdx ? [nx, ny] : p)),
+              }
+            : h,
+        ),
+      );
+    } else {
+      const dx = nx - dragState.lastNorm[0];
+      const dy = ny - dragState.lastNorm[1];
+      // Clamp delta so polygon stays within [0,1]
+      let cdx = dx;
+      let cdy = dy;
+      const target = hotspots.find((h) => h.id === dragState.hotspotId);
+      if (target) {
+        const xs = target.points.map((p) => p[0]);
+        const ys = target.points.map((p) => p[1]);
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        const minY = Math.min(...ys);
+        const maxY = Math.max(...ys);
+        cdx = Math.max(-minX, Math.min(1 - maxX, dx));
+        cdy = Math.max(-minY, Math.min(1 - maxY, dy));
+      }
+      if (cdx === 0 && cdy === 0) return;
+      setHotspots((prev) =>
+        prev.map((h) =>
+          h.id === dragState.hotspotId
+            ? { ...h, points: h.points.map(([x, y]) => [x + cdx, y + cdy]) }
+            : h,
+        ),
+      );
+      setDragState({ ...dragState, lastNorm: [nx, ny], movedSinceDown: true });
+    }
   };
+
+  // End any drag on global mouseup so releases outside the canvas still work
+  useEffect(() => {
+    const onUp = () => setDragState(null);
+    window.addEventListener('mouseup', onUp);
+    return () => window.removeEventListener('mouseup', onUp);
+  }, []);
 
   const completePolygon = () => {
     if (drawingPoints.length < 3) return;
@@ -331,20 +391,49 @@ export function HotspotEditorPage() {
                 preserveAspectRatio="none"
               >
                 {/* Existing hotspots */}
-                {hotspots.map((hotspot) => (
+                {hotspots.map((hotspot) => {
+                  const isSelected = selectedId === hotspot.id;
+                  return (
                   <g key={hotspot.id}>
                     <polygon
                       points={hotspot.points.map(([x, y]) => `${x},${y}`).join(' ')}
                       fill={`${hotspot.color || DEFAULT_COLOR}40`}
                       stroke={hotspot.color || DEFAULT_COLOR}
                       strokeWidth="0.003"
+                      onMouseDown={(e) => {
+                        if (mode === 'draw') return;
+                        if (!isSelected) return;
+                        // Selected polygon → start polygon-move drag
+                        e.stopPropagation();
+                        const rect = containerRef.current?.getBoundingClientRect();
+                        if (!rect || !imageBounds) return;
+                        const px = e.clientX - rect.left;
+                        const py = e.clientY - rect.top;
+                        const norm = pixelToNorm(px, py);
+                        if (!norm) return;
+                        setDragState({
+                          hotspotId: hotspot.id,
+                          mode: 'polygon',
+                          lastNorm: norm,
+                          movedSinceDown: false,
+                        });
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
+                        // If we just moved the polygon, swallow the synthetic click
+                        if (
+                          dragState &&
+                          dragState.hotspotId === hotspot.id &&
+                          dragState.mode === 'polygon' &&
+                          dragState.movedSinceDown
+                        ) {
+                          return;
+                        }
                         handleSelectHotspot(hotspot.id);
                       }}
-                      className="cursor-pointer"
+                      className={isSelected ? 'cursor-move' : 'cursor-pointer'}
                       style={
-                        selectedId === hotspot.id
+                        isSelected
                           ? { strokeDasharray: '0.01 0.005', strokeWidth: '0.004' }
                           : undefined
                       }
@@ -364,8 +453,30 @@ export function HotspotEditorPage() {
                         {hotspot.roomName}
                       </text>
                     )}
+                    {/* Vertex handles — only on the selected hotspot */}
+                    {isSelected && hotspot.points.map(([px, py], i) => (
+                      <circle
+                        key={i}
+                        cx={px}
+                        cy={py}
+                        r={0.012}
+                        fill="white"
+                        stroke={hotspot.color || DEFAULT_COLOR}
+                        strokeWidth={0.003}
+                        style={{ cursor: 'grab' }}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          setDragState({
+                            hotspotId: hotspot.id,
+                            mode: 'vertex',
+                            vertexIdx: i,
+                          });
+                        }}
+                      />
+                    ))}
                   </g>
-                ))}
+                  );
+                })}
 
                 {/* Drawing in-progress polygon */}
                 {mode === 'draw' && drawingPoints.length > 0 && (
