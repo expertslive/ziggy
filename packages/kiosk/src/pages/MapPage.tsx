@@ -33,6 +33,16 @@ function RoomDetailModal({
     ? sponsor.description[lang] || sponsor.description['en'] || ''
     : '';
 
+  // Special-purpose hotspots (no sessions, no sponsor): show a custom info blurb
+  const infoKey = (() => {
+    const n = hotspot.roomName.trim().toLowerCase();
+    if (n === 'registratie' || n === 'registratiebalie' || n === 'registration')
+      return 'registration';
+    if (n === 'photo wall' || n === 'photowall') return 'photoWall';
+    return null;
+  })();
+  const infoBody = infoKey ? t(`map.info.${infoKey}.body`) : '';
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/60"
@@ -53,6 +63,15 @@ function RoomDetailModal({
         {/* Content */}
         <div className="scrollable px-6 pb-6">
           <h2 className="text-xl font-extrabold text-el-light mb-4">{roomLabel}</h2>
+
+          {/* Info blurb for utility hotspots (registratie, photo wall, …) */}
+          {infoKey && (
+            <div className="mb-5 bg-el-blue/10 border border-el-blue/30 rounded-2xl p-4">
+              <p className="text-el-light/85 text-base leading-relaxed whitespace-pre-line">
+                {infoBody}
+              </p>
+            </div>
+          )}
 
           {/* Sponsor card (if this hotspot is a booth) */}
           {sponsor && (
@@ -121,8 +140,9 @@ function RoomDetailModal({
             </div>
           )}
 
-          {/* No sessions at all (and no sponsor) */}
+          {/* No sessions at all (and no sponsor / no info blurb) */}
           {!sponsor &&
+            !infoKey &&
             currentSessions.length === 0 &&
             upcomingSessions.length === 0 && (
               <p className="text-el-light/50 text-base">

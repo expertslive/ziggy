@@ -48,7 +48,15 @@
     "currentSessions": "Sessions en cours",
     "noCurrentSessions": "Aucune session dans cette salle pour le moment.",
     "upcomingSessions": "À venir",
-    "showOnMap": "Voir sur le plan"
+    "showOnMap": "Voir sur le plan",
+    "info": {
+      "registration": {
+        "body": "L'accueil est ouvert toute la journée. Une question, besoin d'aide ou un souci médical ? Passez nous voir — nos bénévoles sont là pour vous. En cas d'urgence médicale réelle, composez le 112."
+      },
+      "photoWall": {
+        "body": "Immortalisez votre journée à notre mur à selfies ! Partagez votre photo avec #ExpertsLiveNL — on adore les voir circuler en ligne."
+      }
+    }
   },
   "sponsors": {
     "title": "Sponsors",

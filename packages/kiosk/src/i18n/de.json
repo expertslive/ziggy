@@ -48,7 +48,15 @@
     "currentSessions": "Aktuelle Sitzungen",
     "noCurrentSessions": "Keine Sitzungen in diesem Raum im Moment.",
     "upcomingSessions": "Demnächst",
-    "showOnMap": "Auf Karte zeigen"
+    "showOnMap": "Auf Karte zeigen",
+    "info": {
+      "registration": {
+        "body": "Die Anmeldung ist den ganzen Tag geöffnet. Fragen, Hilfe nötig oder ein medizinisches Anliegen? Komm vorbei — unsere Freiwilligen helfen dir gerne. Bei einem echten medizinischen Notfall: 112 anrufen."
+      },
+      "photoWall": {
+        "body": "Halt den Moment an unserer Selfie-Wand fest! Markiere dein Foto mit #ExpertsLiveNL und teile es online — wir freuen uns, es zu sehen."
+      }
+    }
   },
   "sponsors": {
     "title": "Sponsoren",
