@@ -216,12 +216,13 @@ function FloorMapViewer({
   const { data: sponsors } = useSponsors();
 
   // ---------------- Pinch / pan / auto-zoom (mobile only) ----------------
-  // Touch-first viewports under 1024px get gestures (phones in any orientation,
-  // small tablets). The 1080×1920 kiosk has plenty of room and stays untouched.
+  // Any touch-first device (pointer:coarse) gets gestures — phones AND tablets
+  // including iPad Pro. The 1080×1920 kiosk also matches pointer:coarse, but
+  // pinch on the kiosk is harmless: people rarely need it at that size and the
+  // gesture model is consistent everywhere.
   function detectMobile() {
     if (typeof window === 'undefined') return false;
-    const coarse = window.matchMedia('(pointer: coarse)').matches;
-    return coarse && window.innerWidth < 1024;
+    return window.matchMedia('(pointer: coarse)').matches;
   }
   const [isMobile, setIsMobile] = useState(detectMobile);
   useEffect(() => {
@@ -427,7 +428,7 @@ function FloorMapViewer({
 
       <div
         ref={viewportRef}
-        className="relative w-full bg-el-gray rounded-2xl overflow-hidden min-h-[50vh] sm:min-h-[40vh] touch-none"
+        className="relative w-full bg-el-gray rounded-2xl overflow-hidden min-h-[50vh] sm:min-h-[55vh] md:min-h-[65vh] touch-none"
         style={{
           aspectRatio: imgSize ? `${imgSize.w}/${imgSize.h}` : '16/9',
         }}
