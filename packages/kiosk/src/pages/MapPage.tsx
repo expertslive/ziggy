@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/PageContainer';
@@ -215,6 +215,189 @@ function FloorMapViewer({
   const [selectedHotspot, setSelectedHotspot] = useState<HotspotInfo | null>(null);
   const { data: sponsors } = useSponsors();
 
+  // ---------------- Pinch / pan / auto-zoom (mobile only) ----------------
+  // Touch-first viewports under 1024px get gestures (phones in any orientation,
+  // small tablets). The 1080×1920 kiosk has plenty of room and stays untouched.
+  function detectMobile() {
+    if (typeof window === 'undefined') return false;
+    const coarse = window.matchMedia('(pointer: coarse)').matches;
+    return coarse && window.innerWidth < 1024;
+  }
+  const [isMobile, setIsMobile] = useState(detectMobile);
+  useEffect(() => {
+    const onResize = () => setIsMobile(detectMobile());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const [transform, setTransform] = useState({ s: 1, tx: 0, ty: 0 });
+  const [animating, setAnimating] = useState(false);
+  const transformRef = useRef(transform);
+  useEffect(() => {
+    transformRef.current = transform;
+  }, [transform]);
+
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const gestureRef = useRef<{
+    mode: 'idle' | 'pan' | 'pinch';
+    startTouches: { x: number; y: number }[];
+    startT: { s: number; tx: number; ty: number };
+    startDist: number;
+    startMid: { x: number; y: number };
+    panMoved: boolean;
+    suppressClickUntil: number;
+  }>({
+    mode: 'idle',
+    startTouches: [],
+    startT: { s: 1, tx: 0, ty: 0 },
+    startDist: 0,
+    startMid: { x: 0, y: 0 },
+    panMoved: false,
+    suppressClickUntil: 0,
+  });
+
+  function clampT(t: { s: number; tx: number; ty: number }, w: number, h: number) {
+    const s = Math.max(1, Math.min(3.5, t.s));
+    const minTx = w * (1 - s);
+    const minTy = h * (1 - s);
+    return {
+      s,
+      tx: Math.max(minTx, Math.min(0, t.tx)),
+      ty: Math.max(minTy, Math.min(0, t.ty)),
+    };
+  }
+
+  function resetZoom() {
+    setAnimating(true);
+    setTransform({ s: 1, tx: 0, ty: 0 });
+    setTimeout(() => setAnimating(false), 350);
+  }
+
+  // Bind native touch handlers (passive:false so we can preventDefault on pinch)
+  useEffect(() => {
+    if (!isMobile || !viewportRef.current) return;
+    const el = viewportRef.current;
+    const opts: AddEventListenerOptions = { passive: false };
+
+    function localCoords(e: TouchEvent) {
+      const rect = el.getBoundingClientRect();
+      return Array.from(e.touches).map((t) => ({
+        x: t.clientX - rect.left,
+        y: t.clientY - rect.top,
+      }));
+    }
+
+    function onStart(e: TouchEvent) {
+      const touches = localCoords(e);
+      const g = gestureRef.current;
+      if (touches.length === 1) {
+        g.mode = 'pan';
+        g.startTouches = touches;
+        g.startT = { ...transformRef.current };
+        g.panMoved = false;
+      } else if (touches.length >= 2) {
+        const dx = touches[1].x - touches[0].x;
+        const dy = touches[1].y - touches[0].y;
+        g.mode = 'pinch';
+        g.startTouches = touches;
+        g.startT = { ...transformRef.current };
+        g.startDist = Math.hypot(dx, dy) || 1;
+        g.startMid = {
+          x: (touches[0].x + touches[1].x) / 2,
+          y: (touches[0].y + touches[1].y) / 2,
+        };
+        g.panMoved = true; // pinch always cancels the click
+        e.preventDefault();
+      }
+    }
+
+    function onMove(e: TouchEvent) {
+      const rect = el.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      const touches = localCoords(e);
+      const g = gestureRef.current;
+      if (g.mode === 'pinch' && touches.length >= 2) {
+        e.preventDefault();
+        const dx = touches[1].x - touches[0].x;
+        const dy = touches[1].y - touches[0].y;
+        const dist = Math.hypot(dx, dy);
+        const mid = {
+          x: (touches[0].x + touches[1].x) / 2,
+          y: (touches[0].y + touches[1].y) / 2,
+        };
+        const ratio = dist / g.startDist;
+        const newS = g.startT.s * ratio;
+        const ax = g.startMid.x;
+        const ay = g.startMid.y;
+        const tx = ax - (ax - g.startT.tx) * (newS / g.startT.s) + (mid.x - g.startMid.x);
+        const ty = ay - (ay - g.startT.ty) * (newS / g.startT.s) + (mid.y - g.startMid.y);
+        setTransform(clampT({ s: newS, tx, ty }, w, h));
+      } else if (g.mode === 'pan' && touches.length === 1 && g.startT.s > 1) {
+        const dx = touches[0].x - g.startTouches[0].x;
+        const dy = touches[0].y - g.startTouches[0].y;
+        if (Math.hypot(dx, dy) > 5) {
+          g.panMoved = true;
+          e.preventDefault();
+        }
+        setTransform(
+          clampT(
+            { s: g.startT.s, tx: g.startT.tx + dx, ty: g.startT.ty + dy },
+            w,
+            h,
+          ),
+        );
+      }
+    }
+
+    function onEnd(e: TouchEvent) {
+      const g = gestureRef.current;
+      if (g.panMoved) {
+        // Suppress the synthetic click that follows the touchend
+        g.suppressClickUntil = Date.now() + 400;
+        e.preventDefault();
+      }
+      g.mode = 'idle';
+    }
+
+    el.addEventListener('touchstart', onStart, opts);
+    el.addEventListener('touchmove', onMove, opts);
+    el.addEventListener('touchend', onEnd, opts);
+    el.addEventListener('touchcancel', onEnd, opts);
+    return () => {
+      el.removeEventListener('touchstart', onStart, opts);
+      el.removeEventListener('touchmove', onMove, opts);
+      el.removeEventListener('touchend', onEnd, opts);
+      el.removeEventListener('touchcancel', onEnd, opts);
+    };
+  }, [isMobile]);
+
+  // Auto-zoom to highlighted hotspot (sponsor "Show on map" deeplink)
+  useEffect(() => {
+    if (!isMobile || !highlightId || !imgSize || !viewportRef.current) return;
+    const hotspot = map.hotspots.find((h) => h.id === highlightId);
+    if (!hotspot) return;
+    const xs = hotspot.points.map((p) => p[0]);
+    const ys = hotspot.points.map((p) => p[1]);
+    const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+    const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const rect = viewportRef.current.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+    const targetS = 2.5;
+    const tx = w / 2 - cx * w * targetS;
+    const ty = h / 2 - cy * h * targetS;
+    setAnimating(true);
+    setTransform(clampT({ s: targetS, tx, ty }, w, h));
+    const tid = setTimeout(() => setAnimating(false), 450);
+    return () => clearTimeout(tid);
+  }, [highlightId, imgSize, isMobile, map.hotspots]);
+
+  // Reset zoom whenever the active map changes (defensive)
+  useEffect(() => {
+    setTransform({ s: 1, tx: 0, ty: 0 });
+  }, [map.id]);
+
   const currentSessions = nowData?.current ?? [];
   const upcomingSessions = nowData?.upNext ?? [];
 
@@ -243,7 +426,8 @@ function FloorMapViewer({
       <p className="text-el-light/40 text-sm mb-3">{t('map.tapRoom')}</p>
 
       <div
-        className="relative w-full bg-el-gray rounded-2xl overflow-hidden min-h-[50vh] sm:min-h-[40vh]"
+        ref={viewportRef}
+        className="relative w-full bg-el-gray rounded-2xl overflow-hidden min-h-[50vh] sm:min-h-[40vh] touch-none"
         style={{
           aspectRatio: imgSize ? `${imgSize.w}/${imgSize.h}` : '16/9',
         }}
@@ -253,45 +437,78 @@ function FloorMapViewer({
             <div className="animate-pulse">{t('common.loading')}</div>
           </div>
         )}
-        <img
-          src={map.imageUrl}
-          alt={map.name}
-          loading="eager"
-          decoding="async"
-          className="w-full h-full object-contain"
-          onLoad={(e) => {
-            const img = e.currentTarget;
-            setImgSize({ w: img.naturalWidth, h: img.naturalHeight });
+        <div
+          className="absolute inset-0"
+          style={{
+            transform: `translate(${transform.tx}px, ${transform.ty}px) scale(${transform.s})`,
+            transformOrigin: '0 0',
+            transition: animating ? 'transform 400ms ease-out' : 'none',
+            willChange: 'transform',
           }}
-          onError={() => {
-            console.warn('[MapPage] floor map image failed to load:', map.imageUrl);
-          }}
-        />
-        {imgSize && (
-          <svg
-            className="absolute inset-0 w-full h-full"
-            viewBox="0 0 1 1"
-            preserveAspectRatio="none"
+        >
+          <img
+            src={map.imageUrl}
+            alt={map.name}
+            loading="eager"
+            decoding="async"
+            className="w-full h-full object-contain select-none pointer-events-none"
+            draggable={false}
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              setImgSize({ w: img.naturalWidth, h: img.naturalHeight });
+            }}
+            onError={() => {
+              console.warn('[MapPage] floor map image failed to load:', map.imageUrl);
+            }}
+          />
+          {imgSize && (
+            <svg
+              className="absolute inset-0 w-full h-full"
+              viewBox="0 0 1 1"
+              preserveAspectRatio="none"
+            >
+              {map.hotspots.map((hotspot) => {
+                const isHighlighted = hotspot.id === highlightId;
+                return (
+                  <polygon
+                    key={hotspot.id}
+                    points={hotspot.points.map(([x, y]) => `${x},${y}`).join(' ')}
+                    fill={isHighlighted ? 'rgba(255, 204, 0, 0.35)' : 'rgba(0, 0, 0, 0)'}
+                    stroke={isHighlighted ? '#ffcc00' : 'none'}
+                    strokeWidth={isHighlighted ? '0.003' : '0'}
+                    vectorEffect="non-scaling-stroke"
+                    style={{ pointerEvents: 'all' }}
+                    className={`cursor-pointer ${isHighlighted ? 'hotspot-pulse' : ''}`}
+                    onClick={() => {
+                      // Pan/pinch gestures briefly suppress the synthetic click
+                      if (Date.now() < gestureRef.current.suppressClickUntil) return;
+                      handleHotspotTap(hotspot);
+                      onHighlightCleared();
+                    }}
+                  />
+                );
+              })}
+            </svg>
+          )}
+        </div>
+
+        {isMobile && transform.s > 1.01 && (
+          <button
+            onClick={() => {
+              resetZoom();
+              touch();
+            }}
+            aria-label="Reset zoom"
+            className="absolute bottom-3 right-3 z-10 w-11 h-11 rounded-full bg-el-dark/85 backdrop-blur text-el-light flex items-center justify-center shadow-lg active:bg-el-dark"
           >
-            {map.hotspots.map((hotspot) => {
-              const isHighlighted = hotspot.id === highlightId;
-              return (
-                <polygon
-                  key={hotspot.id}
-                  points={hotspot.points.map(([x, y]) => `${x},${y}`).join(' ')}
-                  fill={isHighlighted ? 'rgba(255, 204, 0, 0.35)' : 'rgba(0, 0, 0, 0)'}
-                  stroke={isHighlighted ? '#ffcc00' : 'none'}
-                  strokeWidth={isHighlighted ? '0.003' : '0'}
-                  style={{ pointerEvents: 'all' }}
-                  className={`cursor-pointer ${isHighlighted ? 'hotspot-pulse' : ''}`}
-                  onClick={() => {
-                    handleHotspotTap(hotspot);
-                    onHighlightCleared();
-                  }}
-                />
-              );
-            })}
-          </svg>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 9V5H5m0 0l4 4M15 9V5h4m0 0l-4 4M9 15v4H5m0 0l4-4M15 15v4h4m0 0l-4-4"
+              />
+            </svg>
+          </button>
         )}
       </div>
 
