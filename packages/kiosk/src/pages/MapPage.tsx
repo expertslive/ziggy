@@ -474,7 +474,7 @@ function FloorMapViewer({
 
       <div
         ref={viewportRef}
-        className="relative w-full bg-el-gray rounded-2xl overflow-hidden min-h-[50vh] sm:min-h-[55vh] md:min-h-[65vh] flex items-center justify-center"
+        className="relative w-full bg-el-gray rounded-2xl overflow-hidden sm:min-h-[55vh] md:min-h-[65vh] flex items-center justify-center"
       >
         {!imgSize && (
           <div className="text-el-light/50">
