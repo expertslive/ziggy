@@ -529,9 +529,9 @@ function FloorMapViewer({
                   <polygon
                     key={hotspot.id}
                     points={hotspot.points.map(([x, y]) => `${x},${y}`).join(' ')}
-                    fill={isHighlighted ? 'rgba(255, 204, 0, 0.35)' : 'rgba(0, 0, 0, 0)'}
-                    stroke={isHighlighted ? '#ffcc00' : 'none'}
-                    strokeWidth={isHighlighted ? '0.003' : '0'}
+                    fill={isHighlighted ? 'rgba(236, 72, 153, 0.5)' : 'rgba(0, 0, 0, 0)'}
+                    stroke={isHighlighted ? '#EC4899' : 'none'}
+                    strokeWidth={isHighlighted ? '0.005' : '0'}
                     vectorEffect="non-scaling-stroke"
                     style={{ pointerEvents: 'all' }}
                     className={`cursor-pointer ${isHighlighted ? 'hotspot-pulse' : ''}`}
