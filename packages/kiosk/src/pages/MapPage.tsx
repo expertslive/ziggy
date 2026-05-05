@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/PageContainer';
@@ -58,7 +59,7 @@ function RoomDetailModal({
   })();
   const infoBody = infoKey ? t(`map.info.${infoKey}.body`) : '';
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/60"
       onClick={() => {
@@ -166,7 +167,8 @@ function RoomDetailModal({
             )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

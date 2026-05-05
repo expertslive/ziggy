@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useKioskStore } from '../store/kiosk';
@@ -24,7 +25,7 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
     (h) => h.roomGuid === session.roomGuid,
   );
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/60"
       onClick={() => {
@@ -158,6 +159,7 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

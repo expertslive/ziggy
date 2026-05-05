@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -78,7 +79,7 @@ function SponsorDetailModal({
     m.hotspots?.some((h) => h.id === sponsor.floorMapHotspotId),
   );
 
-  return (
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -150,7 +151,8 @@ function SponsorDetailModal({
           Close
         </button>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body,
   );
 }
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useKioskStore } from '../store/kiosk';
 import { useAgenda } from '../lib/hooks';
@@ -32,7 +33,7 @@ export function SpeakerDetailModal({ speaker, onClose }: SpeakerDetailModalProps
     }
   }
 
-  return (
+  return createPortal(
     <>
       <div
         className="fixed inset-0 z-50 flex items-end justify-center bg-black/60"
@@ -126,6 +127,7 @@ export function SpeakerDetailModal({ speaker, onClose }: SpeakerDetailModalProps
           onClose={() => setSelectedSession(null)}
         />
       )}
-    </>
+    </>,
+    document.body,
   );
 }
