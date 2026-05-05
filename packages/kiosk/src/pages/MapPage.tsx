@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../components/PageContainer';
 import { useFloorMaps, useNowSessions, useSponsors } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
+import { cleanSessionTitle } from '../lib/title';
 import type { FloorMap, AgendaSession, Sponsor } from '../lib/api';
 
 interface HotspotInfo {
@@ -176,7 +177,7 @@ function SessionMiniCard({ session }: { session: AgendaSession }) {
   return (
     <div className="bg-el-gray rounded-xl p-4">
       <h4 className="text-base font-bold text-el-light leading-tight mb-1 line-clamp-2">
-        {session.title}
+        {cleanSessionTitle(session.title)}
       </h4>
       <div className="text-xs text-el-light/40 mb-1">
         {session.startTimeGroup} &mdash; {session.endDate.substring(11, 16)}

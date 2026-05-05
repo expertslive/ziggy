@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { AgendaSession } from '../lib/api';
+import { cleanSessionTitle } from '../lib/title';
 
 interface SessionCardProps {
   session: AgendaSession;
@@ -76,7 +77,7 @@ export function SessionCard({ session, now, forceState, onTap }: SessionCardProp
       )}
 
       <h3 className="text-base font-bold text-el-light leading-tight mb-2 line-clamp-2 pr-12">
-        {session.title}
+        {cleanSessionTitle(session.title)}
       </h3>
 
       <div className="flex items-center gap-1.5 mb-2">

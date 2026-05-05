@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useKioskStore } from '../store/kiosk';
 import { useFloorMaps } from '../lib/hooks';
+import { cleanSessionTitle } from '../lib/title';
 import type { AgendaSession } from '../lib/api';
 
 interface SessionDetailModalProps {
@@ -57,7 +58,7 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
         <div className="px-6 pb-4 border-b border-el-gray">
           <div className="pr-12">
             <h2 className="text-xl font-extrabold text-el-light leading-tight">
-              {session.title}
+              {cleanSessionTitle(session.title)}
             </h2>
             <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-el-light/60">
               <span>
