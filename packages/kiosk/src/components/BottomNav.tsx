@@ -92,7 +92,7 @@ export function BottomNav() {
   const touch = useKioskStore((s) => s.touch);
 
   return (
-    <nav className="flex items-stretch bg-el-dark border-t border-el-gray shrink-0">
+    <nav className="relative z-10 flex items-stretch bg-el-dark border-t border-el-gray shrink-0">
       {NAV_ITEMS.map((item) => (
         <NavLink
           key={item.to}

@@ -90,7 +90,7 @@ function ShopDetailModal({ item, onClose }: { item: ShopItem; onClose: () => voi
                   loading={i === 0 ? 'eager' : 'lazy'}
                   decoding="async"
                   draggable={false}
-                  className="shrink-0 w-full h-44 sm:h-64 object-cover snap-start select-none"
+                  className="shrink-0 w-full h-60 sm:h-80 object-contain snap-start select-none bg-el-darker"
                 />
               ))}
             </div>
@@ -140,39 +140,47 @@ export function ShopPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-2">{t('shop.title')}</h1>
-      <p className="text-el-light/70 mb-2">{t('shop.subtitle')}</p>
-      <p className="text-el-light/55 text-sm mb-4 italic">{t('shop.handmade')}</p>
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">{t('shop.title')}</h1>
 
-      <div className="bg-el-blue/10 border border-el-blue/40 rounded-2xl p-4 mb-6">
-        <h2 className="text-base font-bold text-el-blue mb-2">{t('shop.studiebeurs.heading')}</h2>
-        <p className="text-el-light/80 text-sm leading-relaxed">
-          {t('shop.studiebeurs.body1')} {t('shop.studiebeurs.body2')}
-        </p>
+      {/* Hero row: featured item on the left, combined info+studiebeurs on the right (md+).
+          On mobile they stack with featured first. Both sides stretch to equal height. */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 items-stretch">
+        {highlighted.length > 0 ? (
+          <div className="flex flex-col">
+            <h2 className="text-xl font-bold text-el-light mb-3">{t('shop.featured')}</h2>
+            <div className="flex-1 grid grid-cols-1 gap-4">
+              {highlighted.map((item) => (
+                <ShopCard
+                  key={item.id}
+                  item={item}
+                  onTap={() => {
+                    setSelected(item);
+                    touch();
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div /> /* placeholder so the info block keeps its right-side position */
+        )}
+
+        {/* Combined info block — subtitle, handmade, studiebeurs in one card */}
+        <div className="bg-el-blue/10 border border-el-blue/40 rounded-2xl p-5 flex flex-col gap-3">
+          <p className="text-el-light/85 leading-relaxed">{t('shop.subtitle')}</p>
+          <p className="text-el-light/65 italic leading-relaxed text-sm">{t('shop.handmade')}</p>
+          <hr className="border-el-blue/30 my-1" />
+          <h2 className="text-base font-bold text-el-blue">{t('shop.studiebeurs.heading')}</h2>
+          <p className="text-el-light/80 text-sm leading-relaxed">
+            {t('shop.studiebeurs.body1')} {t('shop.studiebeurs.body2')}
+          </p>
+        </div>
       </div>
 
       {isLoading && <p className="text-el-light/60">{t('common.loading')}</p>}
 
       {!isLoading && items.length === 0 && (
         <p className="text-el-light/60 text-lg">{t('shop.empty')}</p>
-      )}
-
-      {highlighted.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-xl font-bold text-el-light mb-3">{t('shop.featured')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {highlighted.map((item) => (
-              <ShopCard
-                key={item.id}
-                item={item}
-                onTap={() => {
-                  setSelected(item);
-                  touch();
-                }}
-              />
-            ))}
-          </div>
-        </section>
       )}
 
       {regular.length > 0 && (
