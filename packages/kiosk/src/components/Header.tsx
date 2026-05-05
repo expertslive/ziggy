@@ -41,9 +41,8 @@ export function Header() {
         {logoUrl ? (
           <img src={logoUrl} alt={config?.name || 'Experts Live'} className="h-8 sm:h-10 w-auto" />
         ) : (
-          <span className="text-xl sm:text-2xl font-extrabold tracking-tight">
-            <span className="text-el-navy">Experts</span>
-            <span className="text-el-blue"> Live</span>
+          <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-el-blue">
+            Experts Live
           </span>
         )}
       </Link>
