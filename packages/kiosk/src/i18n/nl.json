@@ -49,6 +49,7 @@
     "noCurrentSessions": "Geen sessies in deze ruimte op dit moment.",
     "upcomingSessions": "Binnenkort",
     "showOnMap": "Toon op plattegrond",
+    "showOnMapBooth": "Booth {{booth}} op plattegrond",
     "info": {
       "registration": {
         "body": "De registratiebalie is de hele dag open. Vragen, hulp nodig of een medisch voorval? Loop hier even langs; onze vrijwilligers helpen je graag verder. Bij echte medische nood: bel 112."

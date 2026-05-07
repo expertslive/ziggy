@@ -49,6 +49,7 @@
     "noCurrentSessions": "No sessions in this room right now.",
     "upcomingSessions": "Coming Up",
     "showOnMap": "Show on map",
+    "showOnMapBooth": "Booth {{booth}} on map",
     "info": {
       "registration": {
         "body": "The registration desk is open all day. Got a question, need help, or have a medical issue? Stop by — our volunteers are happy to help. For a real medical emergency, call 112."

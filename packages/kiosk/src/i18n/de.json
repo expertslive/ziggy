@@ -49,6 +49,7 @@
     "noCurrentSessions": "Keine Sitzungen in diesem Raum im Moment.",
     "upcomingSessions": "Demnächst",
     "showOnMap": "Auf Karte zeigen",
+    "showOnMapBooth": "Booth {{booth}} auf Karte",
     "info": {
       "registration": {
         "body": "Die Anmeldung ist den ganzen Tag geöffnet. Fragen, Hilfe nötig oder ein medizinisches Anliegen? Komm vorbei — unsere Freiwilligen helfen dir gerne. Bei einem echten medizinischen Notfall: 112 anrufen."

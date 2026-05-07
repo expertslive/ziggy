@@ -2,9 +2,38 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useKioskStore } from '../store/kiosk';
-import { useFloorMaps } from '../lib/hooks';
+import { useFloorMaps, useSponsors } from '../lib/hooks';
 import { cleanSessionTitle } from '../lib/title';
-import type { AgendaSession } from '../lib/api';
+import type { AgendaSession, Sponsor } from '../lib/api';
+
+/** Find the sponsor that owns a sponsor session, by matching speaker.company
+ * against sponsor names (bidirectional substring after normalising). Returns
+ * the sponsor record if (a) the session is labelled "Sponsor" and (b) one of
+ * the speakers' companies maps to a sponsor with a floor-map hotspot. */
+function findSessionSponsor(
+  session: AgendaSession,
+  sponsors: Sponsor[] | undefined,
+): Sponsor | null {
+  if (!sponsors || sponsors.length === 0) return null;
+  if (!session.labels.some((l) => l.name === 'Sponsor')) return null;
+  const norm = (s: string | null | undefined) =>
+    (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  for (const sp of session.speakers) {
+    const c = norm(sp.company);
+    if (!c) continue;
+    // Exact match wins
+    let hit = sponsors.find((s) => norm(s.name) === c);
+    if (hit) return hit;
+    // Bidirectional substring (handles "Recast" ↔ "Recast Software",
+    // "Silverside B.V." ↔ "Silverside")
+    hit = sponsors.find((s) => {
+      const sn = norm(s.name);
+      return sn.length > 2 && (c.includes(sn) || sn.includes(c));
+    });
+    if (hit) return hit;
+  }
+  return null;
+}
 
 interface SessionDetailModalProps {
   session: AgendaSession;
@@ -17,6 +46,7 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
   const touch = useKioskStore((s) => s.touch);
   const setSelectedMap = useKioskStore((s) => s.setSelectedMap);
   const { data: floorMaps } = useFloorMaps();
+  const { data: sponsors } = useSponsors();
   const visibleLabels = session.labels.filter((l) => l.showInElement);
 
   const matchingMap = (floorMaps ?? []).find((m) =>
@@ -25,6 +55,15 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
   const matchingHotspot = matchingMap?.hotspots.find(
     (h) => h.roomGuid === session.roomGuid,
   );
+
+  // For sponsor sessions: find the sponsor + their booth on the floor map.
+  const sessionSponsor = findSessionSponsor(session, sponsors);
+  const sponsorMap =
+    sessionSponsor && sessionSponsor.floorMapHotspotId
+      ? (floorMaps ?? []).find((m) =>
+          m.hotspots?.some((h) => h.id === sessionSponsor.floorMapHotspotId),
+        )
+      : null;
 
   return createPortal(
     <div
@@ -67,18 +106,39 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
               <span className="text-el-light/30">|</span>
               <span>&#x1F4CD; {session.roomName}</span>
             </div>
-            {matchingMap && matchingHotspot && (
-              <button
-                onClick={() => {
-                  setSelectedMap(matchingMap.id, matchingHotspot.id);
-                  onClose();
-                  navigate('/map');
-                  touch();
-                }}
-                className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-el-blue/20 text-el-blue text-xs font-bold active:bg-el-blue/30"
-              >
-                &#x1F5FA; {t('map.showOnMap')}
-              </button>
+            {(matchingMap || sponsorMap) && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {matchingMap && matchingHotspot && (
+                  <button
+                    onClick={() => {
+                      setSelectedMap(matchingMap.id, matchingHotspot.id);
+                      onClose();
+                      navigate('/map');
+                      touch();
+                    }}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-el-blue/20 text-el-blue text-xs font-bold active:bg-el-blue/30"
+                  >
+                    &#x1F5FA; {t('map.showOnMap')}
+                  </button>
+                )}
+                {sponsorMap && sessionSponsor?.floorMapHotspotId && (
+                  <button
+                    onClick={() => {
+                      setSelectedMap(sponsorMap.id, sessionSponsor.floorMapHotspotId!);
+                      onClose();
+                      navigate('/map');
+                      touch();
+                    }}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-el-blue/20 text-el-blue text-xs font-bold active:bg-el-blue/30"
+                  >
+                    &#x1F4CD;{' '}
+                    {t('map.showOnMapBooth', {
+                      booth: sessionSponsor.boothNumber || sessionSponsor.name,
+                      defaultValue: 'Booth {{booth}} on map',
+                    })}
+                  </button>
+                )}
+              </div>
             )}
             {visibleLabels.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">
