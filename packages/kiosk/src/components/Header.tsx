@@ -51,7 +51,11 @@ export function Header() {
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-el-dark border-b border-el-gray shrink-0">
       {/* Left: Logo */}
-      <Link to="/info" onClick={touch} className="flex items-center gap-2 active:opacity-70 transition-opacity">
+      <Link
+        to={{ pathname: '/info', search: typeof window !== 'undefined' ? window.location.search : '' }}
+        onClick={touch}
+        className="flex items-center gap-2 active:opacity-70 transition-opacity"
+      >
         {logoUrl ? (
           <img src={logoUrl} alt={config?.name || 'Experts Live'} className="h-8 sm:h-10 w-auto" />
         ) : (

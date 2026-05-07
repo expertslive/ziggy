@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigateKeepingSearch } from '../lib/nav';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageContainer } from '../components/PageContainer';
 import { useSponsors, useSponsorTiers, useFloorMaps } from '../lib/hooks';
@@ -68,7 +68,7 @@ function SponsorDetailModal({
   onClose: () => void;
 }) {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useNavigateKeepingSearch();
   const setSelectedMap = useKioskStore((s) => s.setSelectedMap);
   const { data: floorMaps } = useFloorMaps();
   const lang = i18n.language;
@@ -158,7 +158,7 @@ function SponsorDetailModal({
 
 export function SponsorsPage() {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useNavigateKeepingSearch();
   const touch = useKioskStore((s) => s.touch);
   const setSelectedMap = useKioskStore((s) => s.setSelectedMap);
   const { data: sponsors, isLoading: sponsorsLoading } = useSponsors();

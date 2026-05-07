@@ -1,8 +1,8 @@
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { useKioskStore } from '../store/kiosk';
 import { useFloorMaps, useSponsors } from '../lib/hooks';
+import { useNavigateKeepingSearch } from '../lib/nav';
 import { cleanSessionTitle } from '../lib/title';
 import type { AgendaSession, Sponsor } from '../lib/api';
 
@@ -42,7 +42,7 @@ interface SessionDetailModalProps {
 
 export function SessionDetailModal({ session, onClose }: SessionDetailModalProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useNavigateKeepingSearch();
   const touch = useKioskStore((s) => s.touch);
   const setSelectedMap = useKioskStore((s) => s.setSelectedMap);
   const { data: floorMaps } = useFloorMaps();

@@ -90,13 +90,18 @@ const NAV_ITEMS: NavItem[] = [
 export function BottomNav() {
   const { t } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
+  // Preserve query string (e.g. ?now=...) across tab navigation so test
+  // mode survives clicks on Nu / Agenda / etc. Returns "" when there's no
+  // query so production navigation isn't visually affected.
+  const search =
+    typeof window !== 'undefined' ? window.location.search : '';
 
   return (
     <nav className="relative z-10 flex items-stretch bg-el-dark border-t border-el-gray shrink-0">
       {NAV_ITEMS.map((item) => (
         <NavLink
           key={item.to}
-          to={item.to}
+          to={{ pathname: item.to, search }}
           onClick={touch}
           aria-label={t(item.labelKey)}
           className={({ isActive }) =>

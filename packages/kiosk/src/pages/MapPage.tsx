@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigateKeepingSearch } from '../lib/nav';
 import { PageContainer } from '../components/PageContainer';
 import { useFloorMaps, useNowSessions, useSponsors } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
@@ -231,7 +231,7 @@ function FloorMapViewer({
   onHighlightCleared: () => void;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useNavigateKeepingSearch();
   const touch = useKioskStore((s) => s.touch);
   const [imgSize, setImgSize] = useState<{ w: number; h: number } | null>(null);
   const [selectedHotspot, setSelectedHotspot] = useState<HotspotInfo | null>(null);
