@@ -434,6 +434,19 @@ function FloorMapViewer({
     setTransform({ s: 1, tx: 0, ty: 0 });
   }, [map.id]);
 
+  // When a sponsor/session deeplink lands on /map with a highlighted hotspot,
+  // scroll the floor-map viewport into view so the user lands directly on the
+  // highlighted booth — without this they'd see the page header + tabs and
+  // would have to scroll down themselves to find the pulsing magenta marker.
+  useEffect(() => {
+    if (!highlightId || !viewportRef.current) return;
+    // Defer so the map image has had a layout pass first
+    const tid = setTimeout(() => {
+      viewportRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
+    return () => clearTimeout(tid);
+  }, [highlightId]);
+
   const currentSessions = nowData?.current ?? [];
   const upcomingSessions = nowData?.upNext ?? [];
 
