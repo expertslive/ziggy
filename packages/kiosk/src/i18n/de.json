@@ -121,6 +121,7 @@
     "minChars": "Geben Sie mindestens 4 Zeichen ein, um zu suchen.",
     "sectionSessions": "Sitzungen",
     "sectionSpeakers": "Sprecher",
+    "sectionPlaces": "Orte",
     "keepTyping": "Weitertippen für Sitzungen (mindestens 4 Zeichen)",
     "showAll": "Alle {{count}} anzeigen",
     "tapToType": "Tippen zum Schreiben",

@@ -121,6 +121,7 @@
     "minChars": "Typ minimaal 4 tekens om te zoeken.",
     "sectionSessions": "Sessies",
     "sectionSpeakers": "Sprekers",
+    "sectionPlaces": "Plekken",
     "keepTyping": "Blijf typen voor sessies (minimaal 4 tekens)",
     "showAll": "Toon alle {{count}}",
     "tapToType": "Tik om te typen",

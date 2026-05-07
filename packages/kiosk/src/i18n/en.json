@@ -121,6 +121,7 @@
     "minChars": "Type at least 4 characters to search.",
     "sectionSessions": "Sessions",
     "sectionSpeakers": "Speakers",
+    "sectionPlaces": "Places",
     "keepTyping": "Keep typing for sessions (need ≥4 characters)",
     "showAll": "Show all {{count}}",
     "tapToType": "Tap to type",

@@ -5,15 +5,27 @@ import { SessionDetailModal } from '../components/SessionDetailModal';
 import { SpeakerCard } from '../components/SpeakerCard';
 import { SpeakerDetailModal } from '../components/SpeakerDetailModal';
 import { VirtualKeyboard } from '../components/VirtualKeyboard';
-import { useSearch, useSpeakers } from '../lib/hooks';
+import { useFloorMaps, useSearch, useSpeakers } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
-import type { AgendaSession, Speaker } from '../lib/api';
+import { getMapInfoKey } from '../lib/mapInfo';
+import { useNavigateKeepingSearch } from '../lib/nav';
+import type { AgendaSession, FloorMap, Speaker } from '../lib/api';
+
+interface PlaceHit {
+  hotspotId: string;
+  mapId: string;
+  mapName: string;
+  roomName: string;
+  label: string;
+}
 
 const INITIAL_LIMIT = 6;
 
 export function SearchPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
+  const setSelectedMap = useKioskStore((s) => s.setSelectedMap);
+  const navigate = useNavigateKeepingSearch();
   const query = useKioskStore((s) => s.searchQuery);
   const setQuery = useKioskStore((s) => s.setSearchQuery);
   const openSessionId = useKioskStore((s) => s.openSessionId);
@@ -23,6 +35,7 @@ export function SearchPage() {
 
   const sessionsQ = useSearch(query);
   const speakersQ = useSpeakers();
+  const floorMapsQ = useFloorMaps();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -45,9 +58,43 @@ export function SearchPage() {
   }, [speakersQ.data, q]);
 
   const sessions: AgendaSession[] = sessionsQ.data ?? [];
-  const hasAny = sessions.length > 0 || speakers.length > 0;
+
+  const places = useMemo<PlaceHit[]>(() => {
+    if (!q || !floorMapsQ.data) return [];
+    const lang = i18n.language;
+    const out: PlaceHit[] = [];
+    for (const m of floorMapsQ.data as FloorMap[]) {
+      const mapName = m.label?.[lang] || m.label?.['en'] || m.name;
+      for (const h of m.hotspots) {
+        const labelText = h.label?.[lang] || h.label?.['en'] || '';
+        const infoKey = getMapInfoKey(h.roomName);
+        const blurb = infoKey ? t(`map.info.${infoKey}.body`) : '';
+        const corpus = `${h.roomName} ${labelText} ${blurb}`.toLowerCase();
+        if (corpus.includes(q)) {
+          out.push({
+            hotspotId: h.id,
+            mapId: m.id,
+            mapName,
+            roomName: h.roomName,
+            label: labelText || h.roomName,
+          });
+        }
+      }
+    }
+    // Dedupe identical hotspot-name across maps (e.g. multiple "Toiletten")
+    // Keep first occurrence per (roomName, mapId)
+    const seen = new Set<string>();
+    return out.filter((p) => {
+      const key = `${p.roomName}::${p.mapId}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [floorMapsQ.data, q, i18n.language, t]);
+
+  const hasAny = sessions.length > 0 || speakers.length > 0 || places.length > 0;
   const showKeepTyping =
-    q.length > 0 && q.length < 4 && speakers.length === 0;
+    q.length > 0 && q.length < 4 && speakers.length === 0 && places.length === 0;
 
   // Auto-collapse virtual keyboard after 4s of no typing IF results are showing.
   useEffect(() => {
@@ -232,6 +279,39 @@ export function SearchPage() {
                 {t('search.showAll', { count: speakers.length })}
               </button>
             )}
+          </section>
+        )}
+
+        {places.length > 0 && (
+          <section>
+            <h2 className="text-xl font-bold text-el-light mb-3">
+              {t('search.sectionPlaces', { defaultValue: 'Plekken' })} ({places.length})
+            </h2>
+            <div className="flex flex-col gap-2">
+              {places.map((p) => (
+                <button
+                  key={p.hotspotId}
+                  onClick={() => {
+                    setSelectedMap(p.mapId, p.hotspotId);
+                    touch();
+                    navigate('/map');
+                  }}
+                  className="text-left bg-el-gray rounded-xl px-4 py-3 active:bg-el-gray-light transition-colors flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <div className="text-base font-bold text-el-light truncate">
+                      {p.label}
+                    </div>
+                    <div className="text-xs text-el-light/50 mt-0.5 truncate">
+                      &#x1F4CD; {p.mapName}
+                    </div>
+                  </div>
+                  <svg className="w-5 h-5 text-el-light/40 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              ))}
+            </div>
           </section>
         )}
 

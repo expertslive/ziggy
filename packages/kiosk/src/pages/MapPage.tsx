@@ -6,6 +6,7 @@ import { PageContainer } from '../components/PageContainer';
 import { useFloorMaps, useNowSessions, useSponsors } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
 import { cleanSessionTitle } from '../lib/title';
+import { getMapInfoKey } from '../lib/mapInfo';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import type { FloorMap, AgendaSession, Sponsor } from '../lib/api';
 
@@ -43,35 +44,7 @@ function RoomDetailModal({
     : '';
 
   // Special-purpose hotspots (no sessions, no sponsor): show a custom info blurb
-  const infoKey = (() => {
-    const n = hotspot.roomName.trim().toLowerCase();
-    if (n === 'registratie' || n === 'registratiebalie' || n === 'registration')
-      return 'registration';
-    if (n === 'photo wall' || n === 'photowall') return 'photoWall';
-    if (n === 'garderobe' || n === 'cloakroom' || n === 'wardrobe')
-      return 'garderobe';
-    if (n === 'toiletten' || n === 'toilet' || n === 'toilets' || n === 'restroom')
-      return 'toilets';
-    if (n === 'lift' || n === 'elevator')
-      return 'lift';
-    if (n === 'eten/drinken' || n === 'eten en drinken' || n === 'food' ||
-        n === 'food and drinks' || n === 'food/drinks' || n === 'catering')
-      return 'food';
-    if (n === 'dietary needs' || n === 'dieet' || n === 'dieetwensen')
-      return 'dietary';
-    if (n === 'trappen' || n === 'trap' || n === 'stairs' || n === 'staircase')
-      return 'stairs';
-    if (n === 'ask the experts' || n === 'ask-the-experts' || n === 'experts')
-      return 'askTheExperts';
-    if (n === 'zaal 12') return 'zaal12';
-    if (n === 'focus booths' || n === 'focus booth' || n === 'focusbooths' || n === 'focusbooth')
-      return 'focusBooths';
-    if (n === 'game area' || n === 'gaming area' || n === 'gamearea' || n === 'gaminggebied')
-      return 'gameArea';
-    if (n === 'lounge' || n === 'lounge area') return 'lounge';
-    if (n === 'radio' || n === 'experts live radio') return 'radio';
-    return null;
-  })();
+  const infoKey = getMapInfoKey(hotspot.roomName);
   const infoBody = infoKey ? t(`map.info.${infoKey}.body`) : '';
 
   return createPortal(
