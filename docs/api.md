@@ -195,6 +195,65 @@ Live Studiebeurs** (a €5,000 Microsoft certification package).
 Error codes: `400` (no file / unsupported type / too large), `500` (storage
 failure).
 
+## Analytics endpoints
+
+### `POST /api/analytics/event`
+
+Public, ingest-only. Accepts a batch of anonymous kiosk events.
+
+Body:
+```json
+{
+  "events": [
+    {
+      "v": 1,
+      "type": "session_open",
+      "ts": 1717322400000,
+      "kioskId": "kiosk-registratie",
+      "sessionId": "<anonymous uuid>",
+      "payload": { "sessionId": 12345 }
+    }
+  ]
+}
+```
+
+- `events`: 1–200 entries per request.
+- `type`: one of `kiosk_loaded`, `kiosk_alive`, `pageview`, `session_open`,
+  `speaker_open`, `sponsor_open`, `shop_item_open`, `hotspot_tap`,
+  `floor_switch`, `pinch_zoom_used`, `deeplink_room`, `deeplink_booth`,
+  `deeplink_map`, `search_query`, `search_no_results`, `search_result_tap`,
+  `language_switch`, `refresh_button`, `session_end`, `data_fetch_error`.
+- `kioskId`: must start with `kiosk-`. The server-side ingest uses it as the
+  Cosmos partition key.
+- `sessionId`: anonymous per-visitor UUID, regenerated on inactivity reset.
+- Writes are fire-and-forget per item — a single failed write does not fail
+  the batch. Returns `{ ok: true, accepted: <n> }`.
+- The `analytics` Cosmos container is lazily created on first ingest with
+  `defaultTtl = 7776000` (90 days). No manual provisioning step is needed.
+
+### `GET /api/admin/analytics/summary` (Bearer JWT)
+
+Returns the live mini-dashboard payload. Auto-refreshed every 30s by the
+admin UI.
+
+```json
+{
+  "now": 1717322400000,
+  "totalLastHour": 412,
+  "perKiosk": [{ "kioskId": "kiosk-registratie", "count": 87 }],
+  "topSessions": [{ "sessionId": 12345, "count": 23 }],
+  "searchNoResults": [{ "len": 7, "count": 4 }],
+  "lastHeartbeats": { "kiosk-registratie": 1717322390000 }
+}
+```
+
+- `totalLastHour`, `perKiosk`: 1-hour window.
+- `topSessions`, `searchNoResults`: 24-hour window. We never store the
+  search query text — only its length, as a privacy-preserving proxy.
+- `lastHeartbeats`: most recent `kiosk_alive`/`kiosk_loaded` timestamp per
+  kiosk. The admin UI considers a kiosk "online" if its heartbeat is
+  within the last 3 minutes.
+
 ## Cross-cutting behavior
 
 ### Body size limit

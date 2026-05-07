@@ -216,9 +216,13 @@ erDiagram
     FLOOR_MAPS ||--o{ BOOTH_OVERRIDES : "linked via floorMapHotspotId"
 ```
 
-All containers except `events` and `admins` partition on `eventSlug`. `events`
-partitions on `slug` (effectively the same value). `admins` partitions on
-`email`.
+All containers except `events`, `admins`, and `analytics` partition on
+`eventSlug`. `events` partitions on `slug` (effectively the same value).
+`admins` partitions on `email`. `analytics` partitions on `kioskId` and
+has a 90-day TTL — anonymous events expire automatically so we don't have
+to garbage-collect them ourselves. The analytics container is lazily
+created on first ingest (see `ensureAnalyticsContainer` in `cosmos.ts`),
+so a brand-new env doesn't need a separate provisioning step.
 
 ## See also
 

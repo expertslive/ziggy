@@ -317,6 +317,49 @@ accidentally trigger it. Width caps for "is this a phone?" detection
 will keep being wrong as device sizes drift; gate on capability
 (`pointer`, `hover`) and let the design absorb the edge cases.
 
+## Pair-based analytics gating beats date-gating
+
+We considered turning analytics on by date ("only on event day"), then
+realised the right gate is "only when the kiosk has been paired to a
+known location." A test laptop opening the URL is indistinguishable from
+a kiosk on the day-of unless we tag the device. Pairing solves both:
+the kiosk registers its location, *and* tracking turns on. No date logic
+needed, and dev/test devices silently no-op forever. The cost is one
+extra step on event morning (drop the URL, pick the location) — much
+cheaper than wiring date checks across every track call site.
+
+## Cosmos `defaultTtl` removes the need for a cleanup job
+
+The analytics container is born with `defaultTtl: 7776000` (90 days).
+Every doc auto-expires; there is no cron, no purge endpoint, no manual
+"oh right, GDPR" scramble nine months later. For ephemeral, append-only
+event streams this is dramatically simpler than building retention.
+Set TTL at container creation — it cannot be retrofitted onto existing
+docs without a write.
+
+## TS narrows `crypto` to `never` after a guarded early-return
+
+```ts
+if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
+crypto.getRandomValues(a) // TS2339: 'getRandomValues' does not exist on type 'never'
+```
+
+The `'randomUUID' in crypto` check narrows the type so aggressively that
+the *false* branch ends up typed as `never`. Re-binding to a typed local
+fixes it: `const c: Crypto | undefined = typeof crypto !== 'undefined' ? crypto : undefined`.
+Don't fight the narrowing with `as Crypto` casts inside the conditional —
+they survive the build but get re-narrowed in incremental rebuilds.
+
+## Lazy `createIfNotExists` beats up-front Bicep provisioning for new containers
+
+When we added the `analytics` Cosmos container we *also* added it to
+Bicep, but Bicep only runs on a deliberate `az deployment` — the GH
+Actions deploy doesn't apply infra. Calling `db.containers.createIfNotExists()`
+on the first ingest means the container shows up the moment the first
+real kiosk pairs, with the right partition key and TTL, regardless of
+whether infra was redeployed. Bicep is still the source of truth, but
+the runtime check guards against drift.
+
 ## Vite doesn't copy `staticwebapp.config.json` from the package root
 
 `staticwebapp.config.json` (CSP, headers, SPA fallback) needs to land in
