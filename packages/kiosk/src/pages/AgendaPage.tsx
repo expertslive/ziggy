@@ -5,7 +5,7 @@ import { useAgenda, useEventConfig } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { SessionCard } from '../components/SessionCard';
-import { useClockTick, getSimulatedNow } from '../lib/clock';
+import { useClockTick, getSimulatedNow, eventLocalToDate } from '../lib/clock';
 import type { AgendaSession, AgendaDay } from '../lib/api';
 
 interface DayTab {
@@ -172,8 +172,8 @@ export function AgendaPage() {
     const isLiveContent = (s: AgendaSession) => {
       const isContent = s.speakers.length > 0 || s.labels.length > 0;
       if (!isContent) return false;
-      const start = new Date(s.startDate);
-      const end = new Date(s.endDate);
+      const start = eventLocalToDate(s.startDate);
+      const end = eventLocalToDate(s.endDate);
       return now >= start && now < end;
     };
     const liveContent = startTimeGroups.find(([, sessions]) =>
@@ -182,8 +182,8 @@ export function AgendaPage() {
     if (liveContent) return liveContent[0];
     const anyLive = startTimeGroups.find(([, sessions]) =>
       sessions.some((s) => {
-        const start = new Date(s.startDate);
-        const end = new Date(s.endDate);
+        const start = eventLocalToDate(s.startDate);
+        const end = eventLocalToDate(s.endDate);
         return now >= start && now < end;
       }),
     );

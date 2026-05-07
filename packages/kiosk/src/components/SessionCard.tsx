@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { AgendaSession } from '../lib/api';
 import { cleanSessionTitle } from '../lib/title';
+import { eventLocalToDate } from '../lib/clock';
 
 interface SessionCardProps {
   session: AgendaSession;
@@ -39,8 +40,8 @@ export function SessionCard({ session, now, forceState, onTap }: SessionCardProp
   const kind = classifySession(session);
 
   const current = now ?? new Date();
-  const start = new Date(session.startDate);
-  const end = new Date(session.endDate);
+  const start = eventLocalToDate(session.startDate);
+  const end = eventLocalToDate(session.endDate);
   const isLive = forceState === 'live' || (forceState === undefined && current >= start && current < end);
   const isPast = forceState === 'past' || (forceState === undefined && current >= end);
 
