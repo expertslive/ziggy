@@ -11,6 +11,10 @@ import type { FloorMap, AgendaSession, Sponsor } from '../lib/api';
 interface HotspotInfo {
   id: string;
   roomName: string;
+  /** When set, used to match sessions in the room-detail modal — preferred
+   * over the loose roomName match because run.events room names like
+   * "Session Room 16 - 20 minutes (80)" don't equal the printed "Zaal 16". */
+  roomGuid?: string;
   label: Record<string, string>;
 }
 
@@ -474,11 +478,15 @@ function FloorMapViewer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedHotspot, map.hotspots]);
 
+  // Match sessions by roomGuid when the hotspot has one (preferred — exact),
+  // fall back to roomName for hotspots that aren't wired (utility rooms etc).
+  const matchesRoom = (s: AgendaSession, h: HotspotInfo) =>
+    h.roomGuid ? s.roomGuid === h.roomGuid : s.roomName === h.roomName;
   const currentForRoom = selectedHotspot
-    ? currentSessions.filter((s) => s.roomName === selectedHotspot.roomName)
+    ? currentSessions.filter((s) => matchesRoom(s, selectedHotspot))
     : [];
   const upcomingForRoom = selectedHotspot
-    ? upcomingSessions.filter((s) => s.roomName === selectedHotspot.roomName)
+    ? upcomingSessions.filter((s) => matchesRoom(s, selectedHotspot))
     : [];
 
   function handleHotspotTap(hotspot: HotspotInfo) {

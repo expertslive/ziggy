@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageContainer } from '../components/PageContainer';
 import { useAgenda, useEventConfig } from '../lib/hooks';
@@ -176,8 +176,23 @@ export function AgendaPage() {
     return live ? live[0] : null;
   }, [startTimeGroups, now]);
 
-  const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: timezone });
+  // Use the (possibly simulated) `now` for the date check too, so the
+  // "jump to now" button + auto-scroll work in test mode (`?now=` override).
+  const todayStr = now.toLocaleDateString('sv-SE', { timeZone: timezone });
   const showJumpToNow = currentDay?.date === todayStr && !!liveStartTime;
+
+  // Auto-scroll to the live timeslot on the agenda when the visitor arrives
+  // mid-event — saves them scrolling past the morning. Only does anything
+  // when the live group exists on the currently-selected day.
+  useEffect(() => {
+    if (!liveStartTime || currentDay?.date !== todayStr) return;
+    const tid = setTimeout(() => {
+      groupRefs.current
+        .get(liveStartTime)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+    return () => clearTimeout(tid);
+  }, [liveStartTime, currentDay?.date, todayStr]);
 
   // Conditional renders AFTER all hooks have run.
   if (agendaLoading) {
