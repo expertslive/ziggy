@@ -117,8 +117,11 @@ events.get('/api/events/:slug/sessions/now', async (c) => {
     // when an unencoded `+` came in as a space (URL form-encoding gotcha):
     // `?now=...T11:15:00+02:00` → arrives as `...T11:15:00 02:00`.
     const overrideStrRaw = c.req.query('now')
+    // Collapse any whitespace + `+` combo back into a single `+` before the
+    // HH:MM offset; depending on the URL round-trip we may receive
+    // `T11:15:00 02:00`, `T11:15:00 +02:00`, or `T11:15:00  02:00`.
     const overrideStr = overrideStrRaw
-      ? overrideStrRaw.replace(/ (\d\d:\d\d)$/, '+$1')
+      ? overrideStrRaw.replace(/[\s+]+(\d\d:\d\d)$/, '+$1')
       : undefined
     const override = overrideStr ? new Date(overrideStr) : null
     const now = override && !Number.isNaN(override.getTime()) ? override : new Date()
