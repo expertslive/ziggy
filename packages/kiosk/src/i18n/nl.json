@@ -76,6 +76,18 @@
       },
       "askTheExperts": {
         "body": "Loop hier binnen met je vragen — gedurende de dag zijn sprekers en andere experts beschikbaar voor 1-op-1 gesprekken over de diverse Microsoft onderwerpen. Geen afspraak nodig."
+      },
+      "focusBooths": {
+        "body": "Hier zijn enkele stilteruimtes waar je ongestoord kunt werken of even kunt ontprikkelen tussen de sessies door."
+      },
+      "gameArea": {
+        "body": "Spelletjes en plezier — onder andere Nintendo Switch 2 met Mario Kart. Mede mogelijk gemaakt door Experts Inside."
+      },
+      "lounge": {
+        "body": "Comfortabele banken en stoelen waar je even kunt uitrusten of bijpraten met mede-Experts."
+      },
+      "radio": {
+        "body": "Hier zit Experts Live Radio. Loop binnen, luister mee, en zwaai naar de host. Live te beluisteren via radio.expertslive.nl."
       }
     }
   },

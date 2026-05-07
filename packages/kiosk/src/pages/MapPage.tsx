@@ -56,6 +56,12 @@ function RoomDetailModal({
       return 'stairs';
     if (n === 'ask the experts' || n === 'ask-the-experts' || n === 'experts')
       return 'askTheExperts';
+    if (n === 'focus booths' || n === 'focus booth' || n === 'focusbooths' || n === 'focusbooth')
+      return 'focusBooths';
+    if (n === 'game area' || n === 'gaming area' || n === 'gamearea' || n === 'gaminggebied')
+      return 'gameArea';
+    if (n === 'lounge' || n === 'lounge area') return 'lounge';
+    if (n === 'radio' || n === 'experts live radio') return 'radio';
     return null;
   })();
   const infoBody = infoKey ? t(`map.info.${infoKey}.body`) : '';

@@ -76,6 +76,18 @@
       },
       "askTheExperts": {
         "body": "Passez avec vos questions — speakers et autres experts sont disponibles toute la journée pour des échanges en tête-à-tête sur les différents sujets Microsoft. Sans rendez-vous."
+      },
+      "focusBooths": {
+        "body": "Quelques espaces calmes pour travailler tranquillement — ou souffler un peu entre deux sessions."
+      },
+      "gameArea": {
+        "body": "Jeux et bonne ambiance — avec notamment la Nintendo Switch 2 et Mario Kart. Présenté par Experts Inside."
+      },
+      "lounge": {
+        "body": "Canapés et fauteuils confortables pour faire une pause ou discuter avec vos confrères Experts."
+      },
+      "radio": {
+        "body": "C'est ici qu'émet Experts Live Radio. Passez, écoutez, saluez l'animateur. À écouter en direct sur radio.expertslive.nl."
       }
     }
   },

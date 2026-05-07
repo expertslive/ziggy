@@ -76,6 +76,18 @@
       },
       "askTheExperts": {
         "body": "Drop in with your questions — speakers and other experts are available throughout the day for 1-on-1 conversations about various Microsoft topics. No appointment needed."
+      },
+      "focusBooths": {
+        "body": "A few quiet rooms where you can get some uninterrupted work done — or just decompress between sessions."
+      },
+      "gameArea": {
+        "body": "Games and good vibes — including Nintendo Switch 2 with Mario Kart. Brought to you by Experts Inside."
+      },
+      "lounge": {
+        "body": "Comfy couches and chairs where you can take a break or catch up with your fellow Experts."
+      },
+      "radio": {
+        "body": "This is where Experts Live Radio broadcasts from. Drop by, tune in, wave at the host. Stream live at radio.expertslive.nl."
       }
     }
   },

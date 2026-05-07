@@ -76,6 +76,18 @@
       },
       "askTheExperts": {
         "body": "Komm vorbei mit deinen Fragen — Sprecher und andere Experten stehen dir den ganzen Tag für 1-zu-1-Gespräche zu verschiedenen Microsoft-Themen zur Verfügung. Keine Anmeldung nötig."
+      },
+      "focusBooths": {
+        "body": "Einige Ruheräume, in denen du ungestört arbeiten oder zwischen den Sessions kurz abschalten kannst."
+      },
+      "gameArea": {
+        "body": "Spiele und gute Stimmung — mit Nintendo Switch 2 und Mario Kart. Mit freundlicher Unterstützung von Experts Inside."
+      },
+      "lounge": {
+        "body": "Bequeme Sofas und Sessel, in denen du eine Pause einlegen oder mit anderen Experts plaudern kannst."
+      },
+      "radio": {
+        "body": "Hier sendet Experts Live Radio. Komm vorbei, hör zu, winke dem Host zu. Livestream auf radio.expertslive.nl."
       }
     }
   },
