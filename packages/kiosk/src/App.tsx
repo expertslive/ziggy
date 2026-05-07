@@ -47,7 +47,7 @@ export function App() {
           </div>
         }>
           <Routes>
-            <Route path="/" element={<Navigate to="/now" replace />} />
+            <Route path="/" element={<Navigate to={{ pathname: '/now', search: typeof window !== 'undefined' ? window.location.search : '' }} replace />} />
             <Route path="/now" element={<ErrorBoundary><NowPage /></ErrorBoundary>} />
             <Route path="/agenda" element={<ErrorBoundary><AgendaPage /></ErrorBoundary>} />
             <Route path="/speakers" element={<ErrorBoundary><SpeakersPage /></ErrorBoundary>} />

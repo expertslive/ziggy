@@ -7,27 +7,24 @@ import { AccessibilityMenu } from './AccessibilityMenu';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
 function useHeaderClock(): { display: string; simulated: boolean } {
+  // Re-read URL on every render so the override stays in sync with location
+  // changes (incl. the / → /now redirect that may briefly include or drop
+  // the query string).
   const override =
     typeof window !== 'undefined'
       ? new URLSearchParams(window.location.search).get('now')
       : null;
   const simulated = !!override;
-  const [display, setDisplay] = useState(() =>
-    formatTime(getSimulatedNow(override)),
-  );
-
+  // Use a tick counter to force re-renders for the live clock (when no
+  // override). When override is set, we don't tick — display is frozen.
+  const [, setTick] = useState(0);
   useEffect(() => {
-    if (simulated) {
-      // Frozen at the simulated instant — no ticking.
-      setDisplay(formatTime(getSimulatedNow(override)));
-      return;
-    }
-    const timer = setInterval(() => {
-      setDisplay(formatTime(new Date()));
-    }, 1_000);
-    return () => clearInterval(timer);
-  }, [override, simulated]);
+    if (simulated) return;
+    const t = setInterval(() => setTick((n) => n + 1), 1_000);
+    return () => clearInterval(t);
+  }, [simulated]);
 
+  const display = formatTime(getSimulatedNow(override));
   return { display, simulated };
 }
 
