@@ -113,8 +113,13 @@ events.get('/api/events/:slug/sessions/now', async (c) => {
     const eventTimezone = items[0]?.timeZone || 'Europe/Amsterdam'
 
     // Optional ?now= override for test/preview. Always falls back to real time
-    // if the param is missing or unparseable.
-    const overrideStr = c.req.query('now')
+    // if the param is missing or unparseable. Repair the trailing offset
+    // when an unencoded `+` came in as a space (URL form-encoding gotcha):
+    // `?now=...T11:15:00+02:00` → arrives as `...T11:15:00 02:00`.
+    const overrideStrRaw = c.req.query('now')
+    const overrideStr = overrideStrRaw
+      ? overrideStrRaw.replace(/ (\d\d:\d\d)$/, '+$1')
+      : undefined
     const override = overrideStr ? new Date(overrideStr) : null
     const now = override && !Number.isNaN(override.getTime()) ? override : new Date()
     const nowStr = now.toLocaleString('sv-SE', { timeZone: eventTimezone })

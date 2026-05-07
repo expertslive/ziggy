@@ -2,20 +2,33 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useKioskStore } from '../store/kiosk';
 import { useEventConfig } from '../lib/hooks';
+import { getSimulatedNow } from '../lib/clock';
 import { AccessibilityMenu } from './AccessibilityMenu';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
-function useClock(): string {
-  const [time, setTime] = useState(() => formatTime(new Date()));
+function useHeaderClock(): { display: string; simulated: boolean } {
+  const override =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('now')
+      : null;
+  const simulated = !!override;
+  const [display, setDisplay] = useState(() =>
+    formatTime(getSimulatedNow(override)),
+  );
 
   useEffect(() => {
+    if (simulated) {
+      // Frozen at the simulated instant — no ticking.
+      setDisplay(formatTime(getSimulatedNow(override)));
+      return;
+    }
     const timer = setInterval(() => {
-      setTime(formatTime(new Date()));
+      setDisplay(formatTime(new Date()));
     }, 1_000);
     return () => clearInterval(timer);
-  }, []);
+  }, [override, simulated]);
 
-  return time;
+  return { display, simulated };
 }
 
 function formatTime(date: Date): string {
@@ -23,6 +36,7 @@ function formatTime(date: Date): string {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
+    timeZone: 'Europe/Amsterdam',
   });
 }
 
@@ -30,7 +44,7 @@ export function Header() {
   const touch = useKioskStore((s) => s.touch);
   const { data: config } = useEventConfig();
 
-  const time = useClock();
+  const { display: time, simulated } = useHeaderClock();
   const logoUrl = config?.branding?.logoUrl;
   const languages = config?.languages ?? ['nl', 'en'];
 
@@ -47,9 +61,14 @@ export function Header() {
         )}
       </Link>
 
-      {/* Center: Clock */}
-      <div className="hidden sm:block text-3xl font-bold tabular-nums text-el-light">
-        {time}
+      {/* Center: Clock (with TEST badge when ?now= override is active) */}
+      <div className="hidden sm:flex items-center gap-2">
+        {simulated && (
+          <span className="rounded-full bg-pink-500/20 text-pink-300 text-[10px] font-bold px-2 py-0.5 uppercase tracking-wide">
+            Test
+          </span>
+        )}
+        <span className="text-3xl font-bold tabular-nums text-el-light">{time}</span>
       </div>
 
       {/* Right: Language switcher */}

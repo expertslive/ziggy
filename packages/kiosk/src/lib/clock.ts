@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 
 export function getSimulatedNow(override: string | undefined | null): Date {
   if (!override) return new Date()
-  const parsed = new Date(override)
+  // URL query strings decode `+` as a space, so `?now=...T11:15:00+02:00`
+  // arrives as `...T11:15:00 02:00`. Restore the leading `+` on a trailing
+  // `HH:MM` offset so the user can paste either form.
+  const repaired = override.replace(/ (\d\d:\d\d)$/, '+$1')
+  const parsed = new Date(repaired)
   if (Number.isNaN(parsed.getTime())) return new Date()
   return parsed
 }
