@@ -89,6 +89,9 @@
       },
       "radio": {
         "body": "This is where Experts Live Radio broadcasts from. Drop by, tune in, wave at the host. Stream live at radio.expertslive.nl."
+      },
+      "zaal12": {
+        "body": "Hall 12 is a quiet workspace. Chairs, desks, and solid WiFi — perfect for getting some work done or taking a call between sessions."
       }
     }
   },

@@ -6,6 +6,7 @@ import { PageContainer } from '../components/PageContainer';
 import { useFloorMaps, useNowSessions, useSponsors } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
 import { cleanSessionTitle } from '../lib/title';
+import { SessionDetailModal } from '../components/SessionDetailModal';
 import type { FloorMap, AgendaSession, Sponsor } from '../lib/api';
 
 interface HotspotInfo {
@@ -23,12 +24,14 @@ function RoomDetailModal({
   sponsor,
   currentSessions,
   upcomingSessions,
+  onSessionTap,
   onClose,
 }: {
   hotspot: HotspotInfo;
   sponsor: Sponsor | null;
   currentSessions: AgendaSession[];
   upcomingSessions: AgendaSession[];
+  onSessionTap: (session: AgendaSession) => void;
   onClose: () => void;
 }) {
   const { t, i18n } = useTranslation();
@@ -60,6 +63,7 @@ function RoomDetailModal({
       return 'stairs';
     if (n === 'ask the experts' || n === 'ask-the-experts' || n === 'experts')
       return 'askTheExperts';
+    if (n === 'zaal 12') return 'zaal12';
     if (n === 'focus booths' || n === 'focus booth' || n === 'focusbooths' || n === 'focusbooth')
       return 'focusBooths';
     if (n === 'game area' || n === 'gaming area' || n === 'gamearea' || n === 'gaminggebied')
@@ -147,7 +151,7 @@ function RoomDetailModal({
               </h3>
               <div className="space-y-3">
                 {currentSessions.map((session) => (
-                  <SessionMiniCard key={session.id} session={session} />
+                  <SessionMiniCard key={session.id} session={session} onTap={() => onSessionTap(session)} />
                 ))}
               </div>
             </div>
@@ -161,7 +165,7 @@ function RoomDetailModal({
               </h3>
               <div className="space-y-3">
                 {upcomingSessions.map((session) => (
-                  <SessionMiniCard key={session.id} session={session} />
+                  <SessionMiniCard key={session.id} session={session} onTap={() => onSessionTap(session)} />
                 ))}
               </div>
             </div>
@@ -183,9 +187,12 @@ function RoomDetailModal({
   );
 }
 
-function SessionMiniCard({ session }: { session: AgendaSession }) {
+function SessionMiniCard({ session, onTap }: { session: AgendaSession; onTap: () => void }) {
   return (
-    <div className="bg-el-gray rounded-xl p-4">
+    <button
+      onClick={onTap}
+      className="block w-full text-left bg-el-gray rounded-xl p-4 active:bg-el-gray-light transition-colors"
+    >
       <h4 className="text-base font-bold text-el-light leading-tight mb-1 line-clamp-2">
         {cleanSessionTitle(session.title)}
       </h4>
@@ -219,7 +226,7 @@ function SessionMiniCard({ session }: { session: AgendaSession }) {
           </span>
         </div>
       )}
-    </div>
+    </button>
   );
 }
 
@@ -239,6 +246,7 @@ function FloorMapViewer({
   const touch = useKioskStore((s) => s.touch);
   const [imgSize, setImgSize] = useState<{ w: number; h: number } | null>(null);
   const [selectedHotspot, setSelectedHotspot] = useState<HotspotInfo | null>(null);
+  const [selectedSession, setSelectedSession] = useState<AgendaSession | null>(null);
   const { data: sponsors } = useSponsors();
 
   // ---------------- Pinch / pan / auto-zoom (mobile only) ----------------
@@ -605,7 +613,14 @@ function FloorMapViewer({
           sponsor={sponsorForSelected}
           currentSessions={currentForRoom}
           upcomingSessions={upcomingForRoom}
+          onSessionTap={(s) => setSelectedSession(s)}
           onClose={() => setSelectedHotspot(null)}
+        />
+      )}
+      {selectedSession && (
+        <SessionDetailModal
+          session={selectedSession}
+          onClose={() => setSelectedSession(null)}
         />
       )}
     </>

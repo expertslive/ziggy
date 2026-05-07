@@ -89,6 +89,9 @@
       },
       "radio": {
         "body": "Hier sendet Experts Live Radio. Komm vorbei, hör zu, winke dem Host zu. Livestream auf radio.expertslive.nl."
+      },
+      "zaal12": {
+        "body": "Saal 12 ist ein ruhiger Arbeitsbereich. Stühle, Schreibtische und solides WLAN — ideal, um zwischen Sessions kurz zu arbeiten oder zu telefonieren."
       }
     }
   },

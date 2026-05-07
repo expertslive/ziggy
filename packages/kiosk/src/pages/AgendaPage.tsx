@@ -166,14 +166,28 @@ export function AgendaPage() {
   const groupRefs = useRef<Map<string, HTMLElement | null>>(new Map());
 
   const liveStartTime = useMemo(() => {
-    const live = startTimeGroups.find(([, sessions]) =>
+    // Prefer groups that contain a *content* session (skip Registratie which
+    // spans the whole day and would otherwise always win). Fall back to any
+    // live group only if there's no content live.
+    const isLiveContent = (s: AgendaSession) => {
+      const isContent = s.speakers.length > 0 || s.labels.length > 0;
+      if (!isContent) return false;
+      const start = new Date(s.startDate);
+      const end = new Date(s.endDate);
+      return now >= start && now < end;
+    };
+    const liveContent = startTimeGroups.find(([, sessions]) =>
+      sessions.some(isLiveContent),
+    );
+    if (liveContent) return liveContent[0];
+    const anyLive = startTimeGroups.find(([, sessions]) =>
       sessions.some((s) => {
         const start = new Date(s.startDate);
         const end = new Date(s.endDate);
         return now >= start && now < end;
       }),
     );
-    return live ? live[0] : null;
+    return anyLive ? anyLive[0] : null;
   }, [startTimeGroups, now]);
 
   // Use the (possibly simulated) `now` for the date check too, so the

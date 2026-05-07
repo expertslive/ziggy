@@ -89,6 +89,9 @@
       },
       "radio": {
         "body": "C'est ici qu'émet Experts Live Radio. Passez, écoutez, saluez l'animateur. À écouter en direct sur radio.expertslive.nl."
+      },
+      "zaal12": {
+        "body": "La salle 12 est un espace de travail calme. Chaises, bureaux et bon WiFi — idéal pour travailler ou prendre un appel entre les sessions."
       }
     }
   },
