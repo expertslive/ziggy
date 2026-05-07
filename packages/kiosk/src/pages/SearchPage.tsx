@@ -10,6 +10,7 @@ import { useKioskStore } from '../store/kiosk';
 import { getMapInfoKey } from '../lib/mapInfo';
 import { useNavigateKeepingSearch } from '../lib/nav';
 import type { AgendaSession, FloorMap, Speaker } from '../lib/api';
+import { track } from '../lib/analytics';
 
 interface PlaceHit {
   hotspotId: string;
@@ -106,6 +107,18 @@ export function SearchPage() {
     }, 4000);
     return () => clearTimeout(timer);
   }, [query, hasAny, keyboardOpen]);
+
+  // Track "search led to no results" — debounced so we only emit once after the
+  // user pauses typing on a 4+ char query that yielded nothing.
+  useEffect(() => {
+    if (q.length < 4) return
+    if (sessionsQ.isFetching) return
+    if (hasAny) return
+    const timer = setTimeout(() => {
+      track('search_no_results', { len: q.length })
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [q, hasAny, sessionsQ.isFetching])
 
   // Discoverability hint: show after 2s of focus on empty query, while keyboard is closed.
   useEffect(() => {
@@ -229,6 +242,7 @@ export function SearchPage() {
                     key={session.id}
                     session={session}
                     onTap={() => {
+                      track('search_result_tap', { kind: 'session', id: session.id });
                       openSession(session.id);
                       touch();
                     }}
@@ -262,6 +276,7 @@ export function SearchPage() {
                     key={speaker.id}
                     speaker={speaker}
                     onTap={() => {
+                      track('search_result_tap', { kind: 'speaker', id: speaker.id });
                       openSpeaker(speaker.id);
                       touch();
                     }}
@@ -292,6 +307,7 @@ export function SearchPage() {
                 <button
                   key={p.hotspotId}
                   onClick={() => {
+                    track('search_result_tap', { kind: 'place', hotspotId: p.hotspotId });
                     setSelectedMap(p.mapId, p.hotspotId);
                     touch();
                     navigate('/map');

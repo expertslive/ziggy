@@ -1,6 +1,6 @@
 /** Cosmos DB client and CRUD helpers */
 
-import { CosmosClient, type Container } from '@azure/cosmos'
+import { CosmosClient, PartitionKeyKind, type Container } from '@azure/cosmos'
 import { getEnv } from '../env.js'
 
 let client: CosmosClient | null = null
@@ -20,6 +20,20 @@ const DATABASE_NAME = 'ziggy'
 
 export function getContainer(name: string): Container {
   return getClient().database(DATABASE_NAME).container(name)
+}
+
+/** Ensure the analytics container exists with /kioskId partition + 90-day TTL.
+ * Idempotent — does nothing if it already exists. */
+let analyticsEnsured = false
+export async function ensureAnalyticsContainer(): Promise<void> {
+  if (analyticsEnsured) return
+  const db = getClient().database(DATABASE_NAME)
+  await db.containers.createIfNotExists({
+    id: 'analytics',
+    partitionKey: { paths: ['/kioskId'], kind: PartitionKeyKind.Hash },
+    defaultTtl: 7776000, // 90 days
+  })
+  analyticsEnsured = true
 }
 
 // ---------------------------------------------------------------------------

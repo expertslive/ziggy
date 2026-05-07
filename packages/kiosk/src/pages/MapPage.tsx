@@ -9,6 +9,7 @@ import { cleanSessionTitle } from '../lib/title';
 import { getMapInfoKey } from '../lib/mapInfo';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import type { FloorMap, AgendaSession, Sponsor } from '../lib/api';
+import { track } from '../lib/analytics';
 
 interface HotspotInfo {
   id: string;
@@ -241,9 +242,15 @@ function FloorMapViewer({
   const [transform, setTransform] = useState({ s: 1, tx: 0, ty: 0 });
   const [animating, setAnimating] = useState(false);
   const transformRef = useRef(transform);
+  const pinchTrackedRef = useRef(false);
   useEffect(() => {
     transformRef.current = transform;
-  }, [transform]);
+    if (transform.s > 1.05 && !pinchTrackedRef.current) {
+      pinchTrackedRef.current = true;
+      track('pinch_zoom_used', { mapId: map.id });
+    }
+    if (transform.s <= 1.01) pinchTrackedRef.current = false;
+  }, [transform, map.id]);
 
   const viewportRef = useRef<HTMLDivElement>(null);
   // Inner box sized to the image's aspect ratio. Pan/zoom transform applies to
@@ -472,6 +479,11 @@ function FloorMapViewer({
 
   function handleHotspotTap(hotspot: HotspotInfo) {
     touch();
+    track('hotspot_tap', {
+      mapId: map.id,
+      hotspotId: hotspot.id,
+      roomName: hotspot.roomName,
+    });
     if (hotspot.roomName.trim().toLowerCase() === 'merchandise') {
       navigate('/shop');
       return;
@@ -679,6 +691,7 @@ export function MapPage() {
               <button
                 key={map.id}
                 onClick={() => {
+                  track('floor_switch', { mapId: map.id });
                   setSelectedMap(map.id);
                   touch();
                 }}

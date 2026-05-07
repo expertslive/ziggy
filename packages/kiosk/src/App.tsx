@@ -1,11 +1,14 @@
-import { lazy, Suspense, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { I18nOverrideLoader } from './components/I18nOverrideLoader';
+import { PairOverlay } from './components/PairOverlay';
 import { ReconnectingBanner } from './components/ReconnectingBanner';
 import { WarmupOverlay } from './components/WarmupOverlay';
+import { getKioskId } from './lib/kiosks';
+import { startAnalytics, track } from './lib/analytics';
 import { useInactivityReset } from './hooks/useInactivityReset';
 import { useKioskStore } from './store/kiosk';
 
@@ -24,9 +27,34 @@ export function App() {
   const theme = useKioskStore((s) => s.theme);
   useInactivityReset();
 
+  // Pair-overlay shows on first paint when there's no kiosk-ID yet AND
+  // there's a `?kiosk=` URL param OR `?pair=1` (manual trigger). Otherwise
+  // we hide it so test devices (laptops, dev iPads) aren't bothered.
+  const [pairOpen, setPairOpen] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('kiosk') || params.has('pair')) return true;
+    return false;
+  });
+  const initialKioskId = typeof window !== 'undefined' ? getKioskId() : null;
+
   useEffect(() => {
     document.documentElement.style.fontSize = `${fontScale * 18}px`;
   }, [fontScale]);
+
+  // Start the analytics flusher + heartbeat. Both no-op on un-paired devices.
+  useEffect(() => {
+    startAnalytics();
+    track('kiosk_loaded', { loadDurationMs: Math.round(performance.now()) });
+    const hb = setInterval(() => track('kiosk_alive'), 60_000);
+    return () => clearInterval(hb);
+  }, []);
+
+  // Page-view tracking: emit when route pathname changes
+  const location = useLocation();
+  useEffect(() => {
+    track('pageview', { path: location.pathname });
+  }, [location.pathname]);
 
   return (
     <div
@@ -38,6 +66,12 @@ export function App() {
       <ReconnectingBanner />
       <WarmupOverlay />
       <I18nOverrideLoader />
+      {pairOpen && (
+        <PairOverlay
+          initialId={initialKioskId}
+          onClose={() => setPairOpen(false)}
+        />
+      )}
       <Header />
 
       <main className="flex-1 min-h-0">

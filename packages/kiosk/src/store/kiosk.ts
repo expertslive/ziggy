@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { track } from '../lib/analytics'
 
 type Theme = 'default' | 'high-contrast'
 type FontScale = 1 | 1.2 | 1.4
@@ -57,12 +58,29 @@ export const useKioskStore = create<KioskState>()((set) => ({
   ...INITIAL_SESSION,
 
   touch: () => set({ lastInteraction: Date.now() }),
-  setLanguage: (language) => set({ language }),
-  openSession: (openSessionId) => set({ openSessionId }),
-  openSpeaker: (openSpeakerId) => set({ openSpeakerId }),
-  setSearchQuery: (searchQuery) => set({ searchQuery }),
+  setLanguage: (language) => {
+    track('language_switch', { lang: language })
+    set({ language })
+  },
+  openSession: (openSessionId) => {
+    if (openSessionId != null) track('session_open', { sessionId: openSessionId })
+    set({ openSessionId })
+  },
+  openSpeaker: (openSpeakerId) => {
+    if (openSpeakerId != null) track('speaker_open', { speakerId: openSpeakerId })
+    set({ openSpeakerId })
+  },
+  setSearchQuery: (searchQuery) => {
+    // Don't log the query itself (privacy) — only its length, and only when
+    // it's a "real" search (≥2 chars), to avoid 1-event-per-keystroke spam.
+    if (searchQuery.length >= 2) track('search_query', { len: searchQuery.length })
+    set({ searchQuery })
+  },
   setSelectedDayIndex: (selectedDayIndex) => set({ selectedDayIndex }),
-  setSelectedMap: (selectedMapId, mapHighlightId = null) => set({ selectedMapId, mapHighlightId }),
+  setSelectedMap: (selectedMapId, mapHighlightId = null) => {
+    if (mapHighlightId) track('deeplink_map', { mapId: selectedMapId, hotspotId: mapHighlightId })
+    set({ selectedMapId, mapHighlightId })
+  },
   setMapHighlight: (mapHighlightId) => set({ mapHighlightId }),
   toggleLabelFilter: (name) =>
     set((s) => ({

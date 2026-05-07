@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { PageContainer } from '../components/PageContainer'
+import { findKioskEntry, getKioskId, setKioskId } from '../lib/kiosks'
 
 function Card({
   title,
@@ -155,6 +156,57 @@ export function InfoPage() {
           <p className="italic text-el-light/60 text-sm">{t('info.questions.emergency')}</p>
         </Card>
       </div>
+      <DeviceInfo />
     </PageContainer>
+  )
+}
+
+/** Subtle row at the bottom of /info showing whether this device is paired
+ * to a kiosk location (with a green status dot when active) and a reset
+ * link for the volunteer who picked the wrong one. */
+function DeviceInfo() {
+  const [id, setId] = useState<string | null>(typeof window !== 'undefined' ? getKioskId() : null)
+  // Re-read on mount in case localStorage was changed elsewhere this session.
+  useEffect(() => {
+    setId(getKioskId())
+  }, [])
+  const entry = findKioskEntry(id)
+  const paired = !!id
+
+  function handleReset() {
+    if (!confirm('Apparaat opnieuw instellen? De pair-overlay verschijnt zodat je een andere locatie kunt kiezen.')) return
+    setKioskId(null)
+    // Reload with ?pair=1 so the overlay opens immediately
+    const url = new URL(window.location.href)
+    url.searchParams.set('pair', '1')
+    window.location.href = url.toString()
+  }
+
+  return (
+    <div className="mt-10 pt-6 border-t border-el-gray flex items-center justify-between text-xs text-el-light/40">
+      <div className="flex items-center gap-2">
+        {paired && (
+          <span
+            className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgb(52,211,153)]"
+            aria-label="Tracking actief"
+            title="Tracking actief"
+          />
+        )}
+        <span>
+          Apparaat:{' '}
+          {paired ? (
+            <span className="text-el-light/70 font-semibold">{entry?.label || id}</span>
+          ) : (
+            <span className="italic">niet ingesteld</span>
+          )}
+        </span>
+      </div>
+      <button
+        onClick={handleReset}
+        className="text-el-light/30 hover:text-el-light/60 underline-offset-2 hover:underline"
+      >
+        {paired ? 'Apparaat opnieuw instellen' : 'Apparaat instellen'}
+      </button>
+    </div>
   )
 }

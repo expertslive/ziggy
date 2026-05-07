@@ -105,6 +105,22 @@ resource cosmosContainers 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/co
   }
 ]
 
+// Analytics container — partitioned by kioskId, 90-day TTL on every doc.
+resource analyticsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-05-15' = {
+  parent: cosmosDatabase
+  name: 'analytics'
+  properties: {
+    resource: {
+      id: 'analytics'
+      partitionKey: {
+        paths: ['/kioskId']
+        kind: 'Hash'
+      }
+      defaultTtl: 7776000 // 90 days
+    }
+  }
+}
+
 // ─── Storage Account (blob for images) ────────────────────────────────
 resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageAccountName

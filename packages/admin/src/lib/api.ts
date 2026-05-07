@@ -140,6 +140,19 @@ export function deleteShopItem(id: string) {
   return fetchJson(`/api/admin/events/${slug}/shop-items/${id}`, { method: 'DELETE' });
 }
 
+// Analytics
+export interface AnalyticsSummary {
+  now: number
+  totalLastHour: number
+  perKiosk: { kioskId: string; count: number }[]
+  topSessions: { sessionId: number; count: number }[]
+  searchNoResults: { len: number; count: number }[]
+  lastHeartbeats: Record<string, number>
+}
+export function fetchAnalyticsSummary() {
+  return fetchJson<AnalyticsSummary>('/api/admin/analytics/summary')
+}
+
 // I18n Overrides
 export function fetchI18nOverrides() {
   return fetchJson<any[]>(`/api/admin/events/${slug}/i18n-overrides`);
