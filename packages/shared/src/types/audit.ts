@@ -27,6 +27,7 @@ export type AuditTarget =
   | 'event-config'
   | 'admin'
   | 'snapshot'
+  | 'auction'
 
 export interface AuditEntry {
   /** ts-actor-target-recordId-random — synthetic for ordering. */

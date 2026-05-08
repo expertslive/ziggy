@@ -137,6 +137,22 @@ resource auditContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/cont
   }
 }
 
+// Auction bids — append-only PII, 90-day TTL (charity bid data).
+resource auctionContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-05-15' = {
+  parent: cosmosDatabase
+  name: 'auction-bids'
+  properties: {
+    resource: {
+      id: 'auction-bids'
+      partitionKey: {
+        paths: ['/eventSlug']
+        kind: 'Hash'
+      }
+      defaultTtl: 7776000 // 90 days
+    }
+  }
+}
+
 // ─── Storage Account (blob for images) ────────────────────────────────
 resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageAccountName

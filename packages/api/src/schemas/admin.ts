@@ -113,6 +113,14 @@ export const BoothOverrideSchema = z.object({
   floorMapHotspotId: z.string().min(1).max(100).optional(),
 })
 
+export const AuctionConfigSchema = z.object({
+  /** EUR cents, must be > 0. */
+  minStartBid: z.number().int().positive().max(10_000_00),
+  minIncrement: z.number().int().positive().max(10_000_00),
+  endsAt: z.string().min(10),
+  closedAt: z.string().optional(),
+})
+
 export const ShopItemSchema = z.object({
   name: z.string().min(1).max(200),
   description: i18nStringRecord,
@@ -121,4 +129,5 @@ export const ShopItemSchema = z.object({
   priceLabel: z.string().min(1).max(80),
   isHighlighted: z.boolean().optional(),
   sortOrder: z.number().int().min(0).max(10_000),
+  auction: AuctionConfigSchema.optional(),
 })

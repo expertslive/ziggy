@@ -838,6 +838,7 @@ admin.post('/api/admin/events/:slug/shop-items', async (c) => {
     priceLabel: data.priceLabel,
     isHighlighted: data.isHighlighted,
     sortOrder: data.sortOrder,
+    ...(data.auction !== undefined && { auction: data.auction }),
     createdAt: now,
     updatedAt: now,
   }
@@ -877,6 +878,7 @@ admin.put('/api/admin/events/:slug/shop-items/:id', async (c) => {
     ...(patch.priceLabel !== undefined && { priceLabel: patch.priceLabel }),
     ...(patch.isHighlighted !== undefined && { isHighlighted: patch.isHighlighted }),
     ...(patch.sortOrder !== undefined && { sortOrder: patch.sortOrder }),
+    ...(patch.auction !== undefined && { auction: patch.auction }),
     id,
     eventSlug: slug,
     updatedAt: new Date().toISOString(),
@@ -1002,6 +1004,55 @@ admin.delete('/api/admin/events/:slug/trash/:target/:id', async (c) => {
     summary: `Permanently deleted ${cfg.auditTarget} "${existing?.name ?? id}" from trash`,
   })
   return c.json({ ok: true })
+})
+
+// ---------------------------------------------------------------------------
+// Auction (admin) — full PII rows + close.
+// ---------------------------------------------------------------------------
+
+/** GET /api/admin/events/:slug/shop-items/:id/auction — full bid rows. */
+admin.get('/api/admin/events/:slug/shop-items/:id/auction', async (c) => {
+  const slug = c.req.param('slug')
+  const id = c.req.param('id')
+  const item = await findById<ShopItem>('shop-items', id, slug)
+  if (!item || !item.auction) return c.json({ error: 'Auction not found' }, 404)
+  // Use the helper from auction lib so we don't duplicate the query.
+  const { listBidsForItem } = await import('../lib/auction.js')
+  const bids = await listBidsForItem(slug, id)
+  return c.json({
+    config: item.auction,
+    isOpen: !item.auction.closedAt && Date.now() < new Date(item.auction.endsAt).getTime(),
+    bids,
+  })
+})
+
+/** POST /api/admin/events/:slug/shop-items/:id/auction/close — set
+ * closedAt on the shop-item's auction config. Idempotent. */
+admin.post('/api/admin/events/:slug/shop-items/:id/auction/close', async (c) => {
+  const slug = c.req.param('slug')
+  const id = c.req.param('id')
+  const item = await findById<ShopItem>('shop-items', id, slug)
+  if (!item || !item.auction) return c.json({ error: 'Auction not found' }, 404)
+  if (item.auction.closedAt) {
+    return c.json({ ok: true, alreadyClosed: true, closedAt: item.auction.closedAt })
+  }
+  const closedAt = new Date().toISOString()
+  const updated: ShopItem = {
+    ...item,
+    auction: { ...item.auction, closedAt },
+    updatedAt: closedAt,
+  }
+  await upsert('shop-items', updated)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'update',
+    target: 'auction',
+    recordId: id,
+    summary: `Closed auction on "${item.name}"`,
+    meta: { closedAt },
+  })
+  return c.json({ ok: true, closedAt })
 })
 
 // ---------------------------------------------------------------------------

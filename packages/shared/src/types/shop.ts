@@ -11,6 +11,15 @@ export interface ShopItem {
   priceLabel: string
   isHighlighted?: boolean
   sortOrder: number
+  /** Optional auction config — when present, the kiosk renders the
+   * auction split-pane on this item instead of the regular price label.
+   * Each amount is in EUR cents; endsAt is ISO datetime. */
+  auction?: {
+    minStartBid: number
+    minIncrement: number
+    endsAt: string
+    closedAt?: string
+  }
   createdAt: string
   updatedAt: string
   /** Soft-delete marker — set on DELETE, cleared on restore. */

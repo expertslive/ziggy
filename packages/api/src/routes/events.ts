@@ -16,6 +16,8 @@ import { getEnv } from '../env.js'
 import * as runEvents from '../lib/run-events.js'
 import * as cache from '../lib/cache.js'
 import { findAll, findActive, findById } from '../lib/cosmos.js'
+import { listBidsForItem, placeBid, publicState } from '../lib/auction.js'
+import { z } from 'zod'
 
 const events = new Hono()
 
@@ -297,6 +299,83 @@ events.get('/api/events/:slug/i18n-overrides', async (c) => {
     // Cosmos DB not available — return empty array
     return c.json([] as I18nOverrides[])
   }
+})
+
+// ---------------------------------------------------------------------------
+// Auction (public): read state + place a bid for a shop item with auction
+// configured (e.g. the Octocat).
+// ---------------------------------------------------------------------------
+
+/** GET /api/events/:slug/shop-items/:id/auction — public state, PII-free. */
+events.get('/api/events/:slug/shop-items/:id/auction', async (c) => {
+  const slug = c.req.param('slug')
+  const id = c.req.param('id')
+  const item = await findById<ShopItem>('shop-items', id, slug)
+  if (!item || !item.auction) {
+    return c.json({ error: 'Auction not found' }, 404)
+  }
+  const bids = await listBidsForItem(slug, id)
+  const state = publicState(item, bids)
+  if (!state) return c.json({ error: 'Auction not found' }, 404)
+  return c.json(state)
+})
+
+const bidSchema = z.object({
+  amount: z.number().int().positive(),
+  name: z.string().min(2).max(100),
+  email: z.string().email().max(200),
+  phone: z
+    .string()
+    .regex(/^06\d{8}$/, 'Mobiel nummer moet 06 + 8 cijfers zijn (bv. 0612345678)'),
+  kioskId: z.string().min(8).max(64).regex(/^kiosk-/).optional(),
+  sessionId: z.string().min(8).max(64).optional(),
+  /** Client must explicitly accept the bid is binding. */
+  binding: z.literal(true),
+})
+
+/** POST /api/events/:slug/shop-items/:id/auction — place a new bid. */
+events.post('/api/events/:slug/shop-items/:id/auction', async (c) => {
+  const slug = c.req.param('slug')
+  const id = c.req.param('id')
+  const item = await findById<ShopItem>('shop-items', id, slug)
+  if (!item || !item.auction) return c.json({ error: 'Auction not found' }, 404)
+
+  let body: unknown
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ error: 'Invalid JSON' }, 400)
+  }
+  const parsed = bidSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid payload', issues: parsed.error.issues }, 400)
+  }
+
+  // Strip the digit grouping the form might have sent (10000 cents only).
+  // Phone normalisation: drop spaces/hyphens before validating.
+  const result = await placeBid({
+    eventSlug: slug,
+    item,
+    amountCents: parsed.data.amount,
+    name: parsed.data.name.trim(),
+    email: parsed.data.email.trim().toLowerCase(),
+    phone: parsed.data.phone.replace(/\D/g, ''),
+    kioskId: parsed.data.kioskId,
+    sessionId: parsed.data.sessionId,
+  })
+  if (!result.ok) {
+    return c.json({ error: result.error }, result.status as 400 | 409 | 410)
+  }
+  // Public response — strip PII.
+  const b = result.bid
+  return c.json(
+    {
+      amount: b.amount,
+      displayName: b.displayName,
+      ts: b.ts,
+    },
+    201,
+  )
 })
 
 export default events

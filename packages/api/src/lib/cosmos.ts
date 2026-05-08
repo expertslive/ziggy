@@ -50,6 +50,21 @@ export async function ensureAuditContainer(): Promise<void> {
   auditEnsured = true
 }
 
+/** Ensure the auction-bids container exists. Partitioned by eventSlug
+ * (matches the rest of admin-managed data). 90-day TTL — bids are PII
+ * and we don't need them past two months post-event. */
+let auctionEnsured = false
+export async function ensureAuctionContainer(): Promise<void> {
+  if (auctionEnsured) return
+  const db = getClient().database(DATABASE_NAME)
+  await db.containers.createIfNotExists({
+    id: 'auction-bids',
+    partitionKey: { paths: ['/eventSlug'], kind: PartitionKeyKind.Hash },
+    defaultTtl: 7_776_000, // 90 days
+  })
+  auctionEnsured = true
+}
+
 // ---------------------------------------------------------------------------
 // CRUD helpers
 // ---------------------------------------------------------------------------
