@@ -4,6 +4,7 @@ import { SlideOver } from '../components/SlideOver';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useToast } from '../components/Toast';
 import { FieldError, FormError } from '../components/FieldError';
+import { I18nDot } from '../components/I18nDot';
 import { SUPPORTED_LANGUAGES } from '@ziggy/shared';
 
 interface SponsorForm {
@@ -141,6 +142,7 @@ export function SponsorsPage() {
               <th className="px-6 py-3">Name</th>
               <th className="px-6 py-3">Tier</th>
               <th className="px-6 py-3">Booth</th>
+              <th className="px-6 py-3">i18n</th>
               <th className="px-6 py-3">Sort Order</th>
               <th className="px-6 py-3 text-right">Actions</th>
             </tr>
@@ -148,14 +150,14 @@ export function SponsorsPage() {
           <tbody className="divide-y divide-border">
             {sponsors.isLoading && (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-400">
+                <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-400">
                   Loading...
                 </td>
               </tr>
             )}
             {sponsors.data?.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-sm text-gray-400">
+                <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-400">
                   No sponsors yet. Add one to get started.
                 </td>
               </tr>
@@ -182,6 +184,9 @@ export function SponsorsPage() {
                   {tierMap.get(sponsor.tierId) || '-'}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-600">{sponsor.boothNumber || '-'}</td>
+                <td className="px-6 py-4">
+                  <I18nDot record={sponsor.description} />
+                </td>
                 <td className="px-6 py-4 text-sm text-gray-600">{sponsor.sortOrder}</td>
                 <td className="px-6 py-4 text-right">
                   <button

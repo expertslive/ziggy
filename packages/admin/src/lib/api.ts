@@ -273,6 +273,25 @@ export function permanentDelete(target: TrashTarget, id: string) {
   )
 }
 
+// Image library
+export interface ImageBlob {
+  name: string
+  url: string
+  contentType?: string
+  sizeBytes: number
+  uploadedAt?: string
+  usedBy: { kind: string; recordId: string; label: string }[]
+}
+export function fetchImages() {
+  return fetchJson<ImageBlob[]>(`/api/admin/events/${slug}/images`)
+}
+export function deleteImageBlob(name: string) {
+  return fetchJson<{ ok: boolean }>(
+    `/api/admin/events/${slug}/images/${encodeURIComponent(name)}`,
+    { method: 'DELETE' },
+  )
+}
+
 // Cache + readiness (dashboard)
 export interface CacheStatusEntry {
   key: string

@@ -18,6 +18,41 @@ function client(): BlobServiceClient {
 }
 
 /**
+ * List images currently in the blob container. Used by the admin image
+ * library so admins can reuse a logo without re-uploading. Returns blobs
+ * sorted by lastModified descending. */
+export interface ImageBlobInfo {
+  name: string
+  url: string
+  contentType?: string
+  sizeBytes: number
+  uploadedAt?: string
+}
+export async function listImages(): Promise<ImageBlobInfo[]> {
+  const container = client().getContainerClient(CONTAINER)
+  const out: ImageBlobInfo[] = []
+  for await (const blob of container.listBlobsFlat()) {
+    out.push({
+      name: blob.name,
+      url: container.getBlobClient(blob.name).url,
+      contentType: blob.properties.contentType,
+      sizeBytes: blob.properties.contentLength ?? 0,
+      uploadedAt: blob.properties.createdOn?.toISOString(),
+    })
+  }
+  out.sort((a, b) =>
+    (a.uploadedAt ?? '') < (b.uploadedAt ?? '') ? 1 : -1,
+  )
+  return out
+}
+
+/** Hard-delete a single image blob (used by the orphan-cleanup button). */
+export async function deleteImage(name: string): Promise<void> {
+  const container = client().getContainerClient(CONTAINER)
+  await container.getBlobClient(name).deleteIfExists()
+}
+
+/**
  * Upload a validated image buffer to Azure Blob Storage.
  * Blob name is a random UUID plus extension derived from the sniffed type —
  * the user-supplied filename is never used.

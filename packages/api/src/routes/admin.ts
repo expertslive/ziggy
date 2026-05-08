@@ -26,7 +26,7 @@ import {
   deleteItem,
   getContainer,
 } from '../lib/cosmos.js'
-import { uploadImage } from '../lib/storage.js'
+import { uploadImage, listImages, deleteImage } from '../lib/storage.js'
 import { detectImageType } from '../lib/magic-bytes.js'
 import * as runEvents from '../lib/run-events.js'
 import * as cache from '../lib/cache.js'
@@ -1106,6 +1106,100 @@ admin.delete('/api/admin/events/:slug/snapshots/:name{.+}', async (c) => {
     target: 'snapshot',
     recordId: name,
     summary: `Deleted snapshot ${name.split('/').pop()}`,
+  })
+  return c.json({ ok: true })
+})
+
+// ---------------------------------------------------------------------------
+// Image library — list every blob with usage counts so admins can reuse
+// logos and clean up orphans.
+// ---------------------------------------------------------------------------
+
+/** GET /api/admin/events/:slug/images — every blob in the images container,
+ * with a `usedBy` count of references from Cosmos sponsors / shop-items /
+ * floor-maps. */
+admin.get('/api/admin/events/:slug/images', async (c) => {
+  const slug = c.req.param('slug')
+  const [blobs, sponsors, shopItems, floorMaps] = await Promise.all([
+    listImages().catch(() => [] as Awaited<ReturnType<typeof listImages>>),
+    findActive<Sponsor>('sponsors', 'eventSlug', slug),
+    findActive<ShopItem>('shop-items', 'eventSlug', slug),
+    findActive<FloorMap>('floor-maps', 'eventSlug', slug),
+  ])
+
+  // Build a usage index keyed by blob URL.
+  const usage = new Map<
+    string,
+    Array<{ kind: string; recordId: string; label: string }>
+  >()
+  function record(url: string, kind: string, recordId: string, label: string) {
+    if (!url) return
+    const list = usage.get(url) ?? []
+    list.push({ kind, recordId, label })
+    usage.set(url, list)
+  }
+  for (const s of sponsors) record(s.logoUrl, 'sponsor', s.id, s.name)
+  for (const it of shopItems) record(it.imageUrl, 'shop-item', it.id, it.name)
+  for (const it of shopItems) {
+    for (const u of it.galleryUrls ?? []) {
+      record(u, 'shop-item', it.id, `${it.name} (gallery)`)
+    }
+  }
+  for (const m of floorMaps) record(m.imageUrl, 'floor-map', m.id, m.name)
+
+  const enriched = blobs.map((b) => ({
+    ...b,
+    usedBy: usage.get(b.url) ?? [],
+  }))
+  return c.json(enriched)
+})
+
+/** DELETE /api/admin/events/:slug/images/:name — hard-delete a single blob.
+ * Refuses if any record still references it (admin must un-link first). */
+admin.delete('/api/admin/events/:slug/images/:name{.+}', async (c) => {
+  const slug = c.req.param('slug')
+  const name = decodeURIComponent(c.req.param('name'))
+
+  // Find the URL we'd be deleting and verify nothing references it.
+  const blobs = await listImages().catch(() => [] as Awaited<ReturnType<typeof listImages>>)
+  const target = blobs.find((b) => b.name === name)
+  if (!target) return c.json({ error: 'Blob not found' }, 404)
+
+  const [sponsors, shopItems, floorMaps] = await Promise.all([
+    findActive<Sponsor>('sponsors', 'eventSlug', slug),
+    findActive<ShopItem>('shop-items', 'eventSlug', slug),
+    findActive<FloorMap>('floor-maps', 'eventSlug', slug),
+  ])
+  const refs: string[] = []
+  for (const s of sponsors) {
+    if (s.logoUrl === target.url) refs.push(`sponsor:${s.name}`)
+  }
+  for (const it of shopItems) {
+    if (it.imageUrl === target.url) refs.push(`shop-item:${it.name}`)
+    if ((it.galleryUrls ?? []).includes(target.url))
+      refs.push(`shop-item-gallery:${it.name}`)
+  }
+  for (const m of floorMaps) {
+    if (m.imageUrl === target.url) refs.push(`floor-map:${m.name}`)
+  }
+  if (refs.length > 0) {
+    return c.json(
+      {
+        error: 'Image still referenced — un-link these first',
+        references: refs,
+      },
+      409,
+    )
+  }
+
+  await deleteImage(name)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'delete',
+    target: 'snapshot', // re-using closest enum value; not worth a new one
+    recordId: name,
+    summary: `Deleted unreferenced image ${name.slice(0, 24)}…`,
   })
   return c.json({ ok: true })
 })
