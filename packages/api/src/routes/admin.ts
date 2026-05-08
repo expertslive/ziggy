@@ -441,6 +441,7 @@ admin.put('/api/admin/events/:slug/floor-maps/:id', async (c) => {
         id: h.id,
         roomName: h.roomName,
         ...(h.roomGuid !== undefined && { roomGuid: h.roomGuid }),
+        ...(h.roomGuids !== undefined && { roomGuids: h.roomGuids }),
         label: stripUndefined(h.label),
         points: h.points,
       })),
