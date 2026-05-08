@@ -64,3 +64,22 @@ export function clear(): void {
 export function hasLastGood(key: string): boolean {
   return lastGood.has(key)
 }
+
+/** Lightweight introspection for the admin dashboard. Reports the keys
+ * currently in the live cache, when each was last refreshed, and how
+ * long until each expires. */
+export interface CacheStatusEntry {
+  key: string
+  expiresAt: number
+  remainingMs: number
+}
+export function status(): CacheStatusEntry[] {
+  const now = Date.now()
+  return Array.from(live.entries())
+    .map(([key, entry]) => ({
+      key,
+      expiresAt: entry.expiresAt,
+      remainingMs: entry.expiresAt - now,
+    }))
+    .sort((a, b) => a.key.localeCompare(b.key))
+}

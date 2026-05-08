@@ -273,6 +273,33 @@ export function permanentDelete(target: TrashTarget, id: string) {
   )
 }
 
+// Cache + readiness (dashboard)
+export interface CacheStatusEntry {
+  key: string
+  expiresAt: number
+  remainingMs: number
+}
+export function fetchCacheStatus() {
+  return fetchJson<{ now: number; entries: CacheStatusEntry[] }>('/api/admin/cache')
+}
+export function refreshCache() {
+  return fetchJson<{ ok: boolean; cleared: number }>('/api/admin/cache/refresh', {
+    method: 'POST',
+  })
+}
+
+export interface ReadinessCheck {
+  id: string
+  label: string
+  status: 'ok' | 'warn' | 'fail'
+  detail: string
+}
+export function fetchReadiness() {
+  return fetchJson<{ checks: ReadinessCheck[]; i18nOverrideCount: number }>(
+    `/api/admin/events/${slug}/readiness`,
+  )
+}
+
 // Audit log
 export interface AuditEntry {
   id: string

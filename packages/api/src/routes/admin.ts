@@ -29,6 +29,7 @@ import {
 import { uploadImage } from '../lib/storage.js'
 import { detectImageType } from '../lib/magic-bytes.js'
 import * as runEvents from '../lib/run-events.js'
+import * as cache from '../lib/cache.js'
 import { writeAudit, recentAudit } from '../lib/audit.js'
 import {
   takeSnapshot,
@@ -1107,6 +1108,158 @@ admin.delete('/api/admin/events/:slug/snapshots/:name{.+}', async (c) => {
     summary: `Deleted snapshot ${name.split('/').pop()}`,
   })
   return c.json({ ok: true })
+})
+
+// ---------------------------------------------------------------------------
+// Cache status + manual refresh — for the dashboard "sync health" card.
+// ---------------------------------------------------------------------------
+
+/** GET /api/admin/cache — returns live cache entries with expiry. */
+admin.get('/api/admin/cache', async (c) => {
+  return c.json({ now: Date.now(), entries: cache.status() })
+})
+
+/** POST /api/admin/cache/refresh — nukes the in-memory cache. Next request
+ * for any cached key will hit run.events. Used when admins suspect stale
+ * data and don't want to wait for the 5-min TTL. */
+admin.post('/api/admin/cache/refresh', async (c) => {
+  const before = cache.status().length
+  cache.clear()
+  void writeAudit({
+    eventSlug: getEnv().eventSlug,
+    actor: actorEmail(c),
+    action: 'update',
+    target: 'event-config',
+    summary: `Cleared run.events cache (${before} entries)`,
+  })
+  return c.json({ ok: true, cleared: before })
+})
+
+// ---------------------------------------------------------------------------
+// Pre-event readiness — derived snapshot of what's missing/incomplete.
+// ---------------------------------------------------------------------------
+
+/** GET /api/admin/events/:slug/readiness — checklist powering the dashboard.
+ *
+ * Each check returns { id, label, status: 'ok'|'warn'|'fail', detail }.
+ * Failures are blockers (no sponsors at all); warnings are common gaps that
+ * don't crash anything (one sponsor missing a logo). */
+admin.get('/api/admin/events/:slug/readiness', async (c) => {
+  const slug = c.req.param('slug')
+  type Check = {
+    id: string
+    label: string
+    status: 'ok' | 'warn' | 'fail'
+    detail: string
+  }
+  const checks: Check[] = []
+
+  const [sponsors, tiers, floorMaps, shopItems, eventConfig, i18n] =
+    await Promise.all([
+      findActive<Sponsor>('sponsors', 'eventSlug', slug),
+      findActive<SponsorTier>('sponsor-tiers', 'eventSlug', slug),
+      findActive<FloorMap>('floor-maps', 'eventSlug', slug),
+      findActive<ShopItem>('shop-items', 'eventSlug', slug),
+      findById<AdminEventConfig>('events', slug, slug),
+      findAll<I18nOverrides>('i18n-overrides', 'eventSlug', slug),
+    ])
+
+  checks.push({
+    id: 'event-config',
+    label: 'Event config',
+    status: eventConfig ? 'ok' : 'fail',
+    detail: eventConfig ? `Set: ${eventConfig.name}` : 'Missing — kiosk has no event metadata',
+  })
+
+  checks.push({
+    id: 'sponsors-count',
+    label: 'Sponsors',
+    status: sponsors.length === 0 ? 'fail' : sponsors.length < 5 ? 'warn' : 'ok',
+    detail: `${sponsors.length} sponsors`,
+  })
+
+  const missingTier = sponsors.filter((s) => !tiers.find((t) => t.id === s.tierId))
+  if (missingTier.length > 0) {
+    checks.push({
+      id: 'sponsor-tier-link',
+      label: 'Sponsor tier links',
+      status: 'fail',
+      detail: `${missingTier.length} sponsor(s) reference an unknown tier`,
+    })
+  }
+
+  const noLogo = sponsors.filter((s) => !s.logoUrl)
+  if (noLogo.length > 0) {
+    checks.push({
+      id: 'sponsor-logos',
+      label: 'Sponsor logos',
+      status: 'warn',
+      detail: `${noLogo.length} sponsor(s) without a logo`,
+    })
+  }
+
+  checks.push({
+    id: 'floor-maps',
+    label: 'Floor maps',
+    status: floorMaps.length === 0 ? 'fail' : 'ok',
+    detail: `${floorMaps.length} map(s), ${floorMaps.reduce(
+      (s, m) => s + (m.hotspots?.length ?? 0),
+      0,
+    )} hotspots total`,
+  })
+
+  const orphanedSponsors = sponsors.filter(
+    (s) =>
+      s.floorMapHotspotId &&
+      !floorMaps.some((m) =>
+        m.hotspots.some((h) => h.id === s.floorMapHotspotId),
+      ),
+  )
+  if (orphanedSponsors.length > 0) {
+    checks.push({
+      id: 'sponsor-hotspot-links',
+      label: 'Sponsor → hotspot links',
+      status: 'warn',
+      detail: `${orphanedSponsors.length} sponsor(s) point at a hotspot that no longer exists`,
+    })
+  }
+
+  checks.push({
+    id: 'shop-items',
+    label: 'Shop items',
+    status: shopItems.length === 0 ? 'warn' : 'ok',
+    detail: `${shopItems.length} item(s)`,
+  })
+
+  // i18n coverage: count records that lack a description in any supported lang
+  const langs = ['nl', 'en', 'de', 'fr']
+  const sponsorMissing = sponsors.filter((s) =>
+    langs.some((l) => !s.description || !s.description[l]),
+  )
+  if (sponsorMissing.length > 0) {
+    checks.push({
+      id: 'sponsor-i18n',
+      label: 'Sponsor translations',
+      status: 'warn',
+      detail: `${sponsorMissing.length} sponsor(s) missing one or more languages`,
+    })
+  }
+  const shopMissing = shopItems.filter((s) =>
+    langs.some((l) => !s.description || !s.description[l]),
+  )
+  if (shopMissing.length > 0) {
+    checks.push({
+      id: 'shop-i18n',
+      label: 'Shop item translations',
+      status: 'warn',
+      detail: `${shopMissing.length} shop item(s) missing one or more languages`,
+    })
+  }
+
+  return c.json({
+    checks,
+    i18nOverrideCount: i18n.length,
+  })
 })
 
 // ---------------------------------------------------------------------------
