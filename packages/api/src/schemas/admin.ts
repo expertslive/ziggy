@@ -62,6 +62,7 @@ const HotspotSchema = z.object({
   id: z.string().min(1).max(100),
   roomName: z.string().max(200),
   roomGuid: z.string().max(100).optional(),
+  roomGuids: z.array(z.string().max(100)).max(10).optional(),
   label: i18nLabelRecord,
   points: z.array(point).min(3).max(50),
 })

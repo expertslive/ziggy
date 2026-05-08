@@ -18,6 +18,10 @@ interface HotspotInfo {
    * over the loose roomName match because run.events room names like
    * "Session Room 16 - 20 minutes (80)" don't equal the printed "Zaal 16". */
   roomGuid?: string;
+  /** When set, the hotspot represents multiple run.events rooms — used for
+   * Event Hall 1/2 which also serve the combined "Event Hall 1+2" room
+   * during the keynote / closing-note / Politie session. */
+  roomGuids?: string[];
   label: Record<string, string>;
 }
 
@@ -466,10 +470,15 @@ function FloorMapViewer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedHotspot, map.hotspots]);
 
-  // Match sessions by roomGuid when the hotspot has one (preferred — exact),
-  // fall back to roomName for hotspots that aren't wired (utility rooms etc).
-  const matchesRoom = (s: AgendaSession, h: HotspotInfo) =>
-    h.roomGuid ? s.roomGuid === h.roomGuid : s.roomName === h.roomName;
+  // Match sessions by roomGuid(s) when wired (preferred — exact), fall back
+  // to roomName for utility rooms. roomGuids[] supports a single hotspot
+  // representing multiple run.events rooms — Event Hall 1 matches both the
+  // EH1 GUID and the combined "EH1+2" GUID used for the keynote/closing.
+  const matchesRoom = (s: AgendaSession, h: HotspotInfo) => {
+    if (h.roomGuids && h.roomGuids.length > 0) return h.roomGuids.includes(s.roomGuid);
+    if (h.roomGuid) return s.roomGuid === h.roomGuid;
+    return s.roomName === h.roomName;
+  };
   const currentForRoom = selectedHotspot
     ? currentSessions.filter((s) => matchesRoom(s, selectedHotspot))
     : [];
