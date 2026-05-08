@@ -1,7 +1,9 @@
 import { useState } from 'react'
 
-/** Live kiosk preview — embeds the public kiosk in an iframe so admins
- *  can see what attendees see while editing. */
+/** Live kiosk preview — embeds the public kiosk in an iframe. The iframe
+ *  is rendered at the device's actual viewport size (so the kiosk SPA
+ *  thinks it's running at native resolution), then CSS-scaled to fit
+ *  the admin layout. That way 1080×1920 stays 9:16 visually too. */
 
 const KIOSK_BASE =
   (import.meta.env.VITE_KIOSK_URL as string | undefined) ||
@@ -18,17 +20,30 @@ const PAGES: { path: string; label: string }[] = [
   { path: '/speakers', label: 'Speakers' },
 ]
 
+/** Native device viewports. The iframe renders at these exact px so
+ *  the kiosk SPA's responsive logic behaves the same as in the field. */
 const DEVICES = {
-  kiosk: { w: 540, h: 960, label: 'Kiosk (1080×1920 @ 50%)' },
-  tablet: { w: 600, h: 800, label: 'Tablet portrait' },
-  phone: { w: 375, h: 700, label: 'Phone' },
+  kiosk: { w: 1080, h: 1920, label: 'Kiosk · 1080×1920 (9:16)' },
+  'ipad-portrait': { w: 768, h: 1024, label: 'iPad portrait · 768×1024 (3:4)' },
+  'ipad-landscape': { w: 1024, h: 768, label: 'iPad landscape · 1024×768 (4:3)' },
+  iphone: { w: 390, h: 844, label: 'iPhone · 390×844' },
 } as const
+
+type DeviceKey = keyof typeof DEVICES
+
+/** Cap visual height so the preview never blows past the viewport. The
+ *  scale comes out of: max display height / native height. */
+const MAX_DISPLAY_HEIGHT = 720
 
 export function PreviewPage() {
   const [active, setActive] = useState('/now')
   const [iframeKey, setIframeKey] = useState(0)
-  const [device, setDevice] = useState<keyof typeof DEVICES>('kiosk')
+  const [device, setDevice] = useState<DeviceKey>('kiosk')
+
   const dims = DEVICES[device]
+  const scale = Math.min(MAX_DISPLAY_HEIGHT / dims.h, 1)
+  const displayW = Math.round(dims.w * scale)
+  const displayH = Math.round(dims.h * scale)
 
   return (
     <div>
@@ -36,8 +51,8 @@ export function PreviewPage() {
         <div>
           <h1 className="text-2xl font-bold text-secondary">Kiosk preview</h1>
           <p className="mt-1 text-sm text-gray-500">
-            See what attendees see — useful for verifying admin changes
-            without walking to a kiosk.
+            Iframe rendered at native device resolution and scaled down — what
+            you see is what attendees see.
           </p>
         </div>
         <button
@@ -62,34 +77,51 @@ export function PreviewPage() {
             {p.label}
           </button>
         ))}
-        <div className="ml-auto flex items-center gap-2">
-          {(Object.keys(DEVICES) as (keyof typeof DEVICES)[]).map((d) => (
+        <div className="ml-auto flex flex-wrap items-center gap-1.5">
+          {(Object.keys(DEVICES) as DeviceKey[]).map((d) => (
             <button
               key={d}
               onClick={() => setDevice(d)}
-              className={`rounded-md px-2.5 py-1 text-[11px] font-semibold capitalize ${
+              className={`rounded-md px-2.5 py-1 text-[11px] font-semibold ${
                 device === d
                   ? 'bg-secondary text-white'
                   : 'bg-white text-gray-600 ring-1 ring-border'
               }`}
             >
-              {d}
+              {d.replace('ipad-', 'iPad ').replace(/^./, (m) => m.toUpperCase())}
             </button>
           ))}
         </div>
       </div>
 
       <div className="flex justify-center rounded-xl border border-border bg-gray-100 p-6 shadow-inner">
-        <iframe
-          key={`${active}-${iframeKey}-${device}`}
-          src={`${KIOSK_BASE}${active}?adminPreview=1`}
-          title={`Kiosk preview ${active}`}
-          className="rounded-lg border-4 border-gray-800 bg-black shadow-lg"
-          style={{ width: dims.w, height: dims.h, border: 0 }}
-        />
+        {/* Outer wrapper takes the *display* size — so layout reserves only
+         *  the space the scaled iframe actually occupies. */}
+        <div
+          className="relative overflow-hidden rounded-lg border-4 border-gray-800 bg-black shadow-lg"
+          style={{ width: displayW, height: displayH }}
+        >
+          <iframe
+            key={`${active}-${iframeKey}-${device}`}
+            src={`${KIOSK_BASE}${active}?adminPreview=1`}
+            title={`Kiosk preview ${active}`}
+            style={{
+              width: dims.w,
+              height: dims.h,
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+              border: 0,
+              display: 'block',
+            }}
+          />
+        </div>
       </div>
       <p className="mt-3 text-center text-[11px] text-gray-400">
-        {dims.label} · <span className="font-mono">{KIOSK_BASE}{active}</span>
+        {dims.label} · scaled to {Math.round(scale * 100)}% ·{' '}
+        <span className="font-mono">
+          {KIOSK_BASE}
+          {active}
+        </span>
       </p>
     </div>
   )
