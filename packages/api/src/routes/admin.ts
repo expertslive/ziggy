@@ -20,7 +20,9 @@ import { signToken, hashPassword, comparePassword } from '../lib/auth.js'
 import { findAll, findById, upsert, deleteItem, getContainer } from '../lib/cosmos.js'
 import { uploadImage } from '../lib/storage.js'
 import { detectImageType } from '../lib/magic-bytes.js'
+import { writeAudit, recentAudit } from '../lib/audit.js'
 import { getEnv } from '../env.js'
+import type { TokenPayload } from '../lib/auth.js'
 import {
   SponsorSchema,
   SponsorTierSchema,
@@ -37,6 +39,14 @@ function clientIp(c: Context): string {
     c.req.header('x-real-ip') ||
     'unknown'
   )
+}
+
+/** Pull the authenticated admin's email from the request. Routes mounted
+ * under requireAuth always have this; for routes that don't (login/setup
+ * fall back to the supplied email or '<system>'). */
+function actorEmail(c: Context, fallback = '<system>'): string {
+  const payload = c.get('admin') as TokenPayload | undefined
+  return payload?.email || fallback
 }
 
 /**
@@ -85,18 +95,40 @@ admin.post('/api/auth/login', async (c) => {
   const adminUser = resources[0]
   if (!adminUser) {
     loginRateLimiter.recordFailure(ip, emailRaw)
+    void writeAudit({
+      eventSlug: getEnv().eventSlug,
+      actor: emailRaw,
+      action: 'login-failed',
+      target: 'admin',
+      summary: `Login failed (no such account) from ${ip}`,
+    })
     return c.json({ error: 'Invalid email or password' }, 401)
   }
 
   const valid = await comparePassword(body.password, adminUser.passwordHash)
   if (!valid) {
     loginRateLimiter.recordFailure(ip, emailRaw)
+    void writeAudit({
+      eventSlug: getEnv().eventSlug,
+      actor: emailRaw,
+      action: 'login-failed',
+      target: 'admin',
+      summary: `Login failed (bad password) from ${ip}`,
+    })
     return c.json({ error: 'Invalid email or password' }, 401)
   }
 
   loginRateLimiter.recordSuccess(ip, emailRaw)
   const token = signToken(adminUser)
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+  void writeAudit({
+    eventSlug: getEnv().eventSlug,
+    actor: adminUser.email,
+    action: 'login',
+    target: 'admin',
+    recordId: adminUser.id,
+    summary: `Logged in from ${ip}`,
+  })
 
   return c.json({ token, expiresAt })
 })
@@ -238,6 +270,14 @@ admin.post('/api/admin/events/:slug/sponsors', async (c) => {
   }
 
   const created = await upsert('sponsors', sponsor)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'create',
+    target: 'sponsor',
+    recordId: created.id,
+    summary: `Created sponsor "${data.name}"`,
+  })
   return c.json(created, 201)
 })
 
@@ -276,6 +316,15 @@ admin.put('/api/admin/events/:slug/sponsors/:id', async (c) => {
   }
 
   const result = await upsert('sponsors', updated)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'update',
+    target: 'sponsor',
+    recordId: id,
+    summary: `Updated sponsor "${updated.name}"`,
+    meta: { fields: Object.keys(patch) },
+  })
   return c.json(result)
 })
 
@@ -283,12 +332,21 @@ admin.put('/api/admin/events/:slug/sponsors/:id', async (c) => {
 admin.delete('/api/admin/events/:slug/sponsors/:id', async (c) => {
   const slug = c.req.param('slug')
   const id = c.req.param('id')
+  const existing = await findById<Sponsor>('sponsors', id, slug)
 
   try {
     await deleteItem('sponsors', id, slug)
   } catch {
     return c.json({ error: 'Sponsor not found' }, 404)
   }
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'delete',
+    target: 'sponsor',
+    recordId: id,
+    summary: `Deleted sponsor "${existing?.name ?? id}"`,
+  })
   return c.json({ ok: true })
 })
 
@@ -326,6 +384,14 @@ admin.post('/api/admin/events/:slug/sponsor-tiers', async (c) => {
   }
 
   const created = await upsert('sponsor-tiers', tier)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'create',
+    target: 'sponsor-tier',
+    recordId: created.id,
+    summary: `Created sponsor tier "${data.name}"`,
+  })
   return c.json(created, 201)
 })
 
@@ -355,6 +421,15 @@ admin.put('/api/admin/events/:slug/sponsor-tiers/:id', async (c) => {
   }
 
   const result = await upsert('sponsor-tiers', updated)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'update',
+    target: 'sponsor-tier',
+    recordId: id,
+    summary: `Updated sponsor tier "${updated.name}"`,
+    meta: { fields: Object.keys(patch) },
+  })
   return c.json(result)
 })
 
@@ -362,12 +437,21 @@ admin.put('/api/admin/events/:slug/sponsor-tiers/:id', async (c) => {
 admin.delete('/api/admin/events/:slug/sponsor-tiers/:id', async (c) => {
   const slug = c.req.param('slug')
   const id = c.req.param('id')
+  const existing = await findById<SponsorTier>('sponsor-tiers', id, slug)
 
   try {
     await deleteItem('sponsor-tiers', id, slug)
   } catch {
     return c.json({ error: 'Sponsor tier not found' }, 404)
   }
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'delete',
+    target: 'sponsor-tier',
+    recordId: id,
+    summary: `Deleted sponsor tier "${existing?.name ?? id}"`,
+  })
   return c.json({ ok: true })
 })
 
@@ -413,6 +497,14 @@ admin.post('/api/admin/events/:slug/floor-maps', async (c) => {
   }
 
   const created = await upsert('floor-maps', floorMap)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'create',
+    target: 'floor-map',
+    recordId: created.id,
+    summary: `Created floor map "${data.name}" (${floorMap.hotspots.length} hotspots)`,
+  })
   return c.json(created, 201)
 })
 
@@ -452,6 +544,24 @@ admin.put('/api/admin/events/:slug/floor-maps/:id', async (c) => {
   }
 
   const result = await upsert('floor-maps', updated)
+  // Hotspot diff is the most-watched signal here — flag big swings so the
+  // audit feed makes "you replaced the whole map" obvious at a glance.
+  const beforeCount = existing.hotspots?.length ?? 0
+  const afterCount = updated.hotspots.length
+  const fields = Object.keys(patch)
+  const summary =
+    patch.hotspots !== undefined
+      ? `Updated floor map "${updated.name}" — hotspots: ${beforeCount} → ${afterCount}`
+      : `Updated floor map "${updated.name}"`
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'update',
+    target: 'floor-map',
+    recordId: id,
+    summary,
+    meta: { fields, beforeCount, afterCount },
+  })
   return c.json(result)
 })
 
@@ -459,12 +569,21 @@ admin.put('/api/admin/events/:slug/floor-maps/:id', async (c) => {
 admin.delete('/api/admin/events/:slug/floor-maps/:id', async (c) => {
   const slug = c.req.param('slug')
   const id = c.req.param('id')
+  const existing = await findById<FloorMap>('floor-maps', id, slug)
 
   try {
     await deleteItem('floor-maps', id, slug)
   } catch {
     return c.json({ error: 'Floor map not found' }, 404)
   }
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'delete',
+    target: 'floor-map',
+    recordId: id,
+    summary: `Deleted floor map "${existing?.name ?? id}"`,
+  })
   return c.json({ ok: true })
 })
 
@@ -514,6 +633,15 @@ admin.put('/api/admin/events/:slug/config', async (c) => {
   }
 
   const result = await upsert('events', config)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'update',
+    target: 'event-config',
+    recordId: slug,
+    summary: `Updated event config`,
+    meta: { fields: Object.keys(patch) },
+  })
   return c.json(result)
 })
 
@@ -552,6 +680,14 @@ admin.put('/api/admin/events/:slug/i18n-overrides/:lang', async (c) => {
   }
 
   const result = await upsert('i18n-overrides', doc)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'update',
+    target: 'i18n-overrides',
+    recordId: id,
+    summary: `Updated ${lang} translation overrides (${Object.keys(data.overrides).length} keys)`,
+  })
   return c.json(result)
 })
 
@@ -584,6 +720,14 @@ admin.put('/api/admin/events/:slug/booth-overrides/:boothId', async (c) => {
     updatedAt: now,
   }
   const result = await upsert('booth-overrides', doc)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'update',
+    target: 'booth-override',
+    recordId: doc.id,
+    summary: `Set booth ${boothId} → hotspot ${parsed.data.floorMapHotspotId ?? '(none)'}`,
+  })
   return c.json(result)
 })
 
@@ -622,6 +766,14 @@ admin.post('/api/admin/events/:slug/shop-items', async (c) => {
     updatedAt: now,
   }
   const created = await upsert('shop-items', item)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'create',
+    target: 'shop-item',
+    recordId: created.id,
+    summary: `Created shop item "${data.name || created.id}"`,
+  })
   return c.json(created, 201)
 })
 
@@ -654,6 +806,15 @@ admin.put('/api/admin/events/:slug/shop-items/:id', async (c) => {
     updatedAt: new Date().toISOString(),
   }
   const result = await upsert('shop-items', updated)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'update',
+    target: 'shop-item',
+    recordId: id,
+    summary: `Updated shop item "${updated.name || id}"`,
+    meta: { fields: Object.keys(patch) },
+  })
   return c.json(result)
 })
 
@@ -661,12 +822,34 @@ admin.put('/api/admin/events/:slug/shop-items/:id', async (c) => {
 admin.delete('/api/admin/events/:slug/shop-items/:id', async (c) => {
   const slug = c.req.param('slug')
   const id = c.req.param('id')
+  const existing = await findById<ShopItem>('shop-items', id, slug)
   try {
     await deleteItem('shop-items', id, slug)
   } catch {
     return c.json({ error: 'Shop item not found' }, 404)
   }
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'delete',
+    target: 'shop-item',
+    recordId: id,
+    summary: `Deleted shop item "${existing?.name || id}"`,
+  })
   return c.json({ ok: true })
+})
+
+// ---------------------------------------------------------------------------
+// Audit log feed (read-only)
+// ---------------------------------------------------------------------------
+
+/** GET /api/admin/events/:slug/audit-log?limit=50 */
+admin.get('/api/admin/events/:slug/audit-log', async (c) => {
+  const slug = c.req.param('slug')
+  const raw = c.req.query('limit')
+  const limit = Math.min(Math.max(parseInt(raw || '50', 10) || 50, 1), 500)
+  const entries = await recentAudit(slug, limit)
+  return c.json(entries)
 })
 
 export default admin

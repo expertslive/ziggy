@@ -16,6 +16,24 @@ export function isAuthenticated(): boolean {
   return !!getToken();
 }
 
+/** A zod-issue-aware error so admin forms can render per-field errors.
+ * `issues` is the raw `parsed.error.issues` array the API returns on
+ * 400 — each issue has `path: (string|number)[]` and `message`. */
+export interface ZodIssue {
+  path: (string | number)[]
+  message: string
+  code?: string
+}
+export class ApiError extends Error {
+  status: number
+  issues?: ZodIssue[]
+  constructor(status: number, message: string, issues?: ZodIssue[]) {
+    super(message)
+    this.status = status
+    this.issues = issues
+  }
+}
+
 async function fetchJson<T>(path: string, options?: RequestInit): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
@@ -28,10 +46,35 @@ async function fetchJson<T>(path: string, options?: RequestInit): Promise<T> {
   if (res.status === 401) {
     clearToken();
     window.location.href = '/login';
-    throw new Error('Unauthorized');
+    throw new ApiError(401, 'Unauthorized');
   }
-  if (!res.ok) throw new Error(`API error ${res.status}`);
+  if (!res.ok) {
+    let body: { error?: string; issues?: ZodIssue[] } = {}
+    try {
+      body = await res.json()
+    } catch {
+      // non-JSON error body — fall through with empty
+    }
+    throw new ApiError(res.status, body.error || `API error ${res.status}`, body.issues)
+  }
   return res.json() as Promise<T>;
+}
+
+/** Find the first error message for a given form-field path within a
+ * thrown ApiError. Returns undefined if there's no error there.
+ * Pass the dotted/array path the form uses, e.g. `['description', 'nl']`
+ * or `'name'`. */
+export function fieldErrorAt(
+  err: unknown,
+  path: string | (string | number)[],
+): string | undefined {
+  if (!(err instanceof ApiError) || !err.issues) return undefined
+  const target = Array.isArray(path) ? path : [path]
+  const hit = err.issues.find((i) => {
+    if (i.path.length < target.length) return false
+    return target.every((seg, idx) => String(i.path[idx]) === String(seg))
+  })
+  return hit?.message
 }
 
 // Auth

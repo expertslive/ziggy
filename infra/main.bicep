@@ -121,6 +121,22 @@ resource analyticsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/
   }
 }
 
+// Audit-log container — append-only admin actions, 365-day TTL.
+resource auditContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-05-15' = {
+  parent: cosmosDatabase
+  name: 'audit-log'
+  properties: {
+    resource: {
+      id: 'audit-log'
+      partitionKey: {
+        paths: ['/eventSlug']
+        kind: 'Hash'
+      }
+      defaultTtl: 31536000 // 365 days
+    }
+  }
+}
+
 // ─── Storage Account (blob for images) ────────────────────────────────
 resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageAccountName

@@ -3,6 +3,7 @@ import { useSponsors, useSponsorTiers, useCreateSponsor, useUpdateSponsor, useDe
 import { SlideOver } from '../components/SlideOver';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useToast } from '../components/Toast';
+import { FieldError, FormError } from '../components/FieldError';
 import { SUPPORTED_LANGUAGES } from '@ziggy/shared';
 
 interface SponsorForm {
@@ -42,6 +43,7 @@ export function SponsorsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<SponsorForm>(emptyForm);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [submitError, setSubmitError] = useState<unknown>(null);
 
   const openCreate = () => {
     setEditingId(null);
@@ -67,6 +69,7 @@ export function SponsorsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
     // Empty strings on optional fields would fail zod min(1) / url(); send undefined.
     const payload = {
       ...form,
@@ -83,7 +86,8 @@ export function SponsorsPage() {
         toast('success', 'Sponsor created');
       }
       setPanelOpen(false);
-    } catch {
+    } catch (err) {
+      setSubmitError(err);
       toast('error', 'Failed to save sponsor');
     }
   };
@@ -206,6 +210,8 @@ export function SponsorsPage() {
         onClose={() => setPanelOpen(false)}
       >
         <form onSubmit={handleSubmit} className="space-y-5">
+          <FormError error={submitError} />
+
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700">Name *</label>
             <input
@@ -214,6 +220,7 @@ export function SponsorsPage() {
               onChange={(e) => setField('name', e.target.value)}
               className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
+            <FieldError error={submitError} path="name" />
           </div>
 
           <div>
@@ -231,6 +238,7 @@ export function SponsorsPage() {
                 </option>
               ))}
             </select>
+            <FieldError error={submitError} path="tierId" />
           </div>
 
           <div>
@@ -242,6 +250,7 @@ export function SponsorsPage() {
               className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="https://..."
             />
+            <FieldError error={submitError} path="logoUrl" />
           </div>
 
           <div>
@@ -268,6 +277,7 @@ export function SponsorsPage() {
               className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="https://..."
             />
+            <FieldError error={submitError} path="website" />
           </div>
 
           <div>
@@ -278,6 +288,7 @@ export function SponsorsPage() {
               className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="e.g. A12"
             />
+            <FieldError error={submitError} path="boothNumber" />
           </div>
 
           <div>
@@ -311,6 +322,7 @@ export function SponsorsPage() {
               onChange={(e) => setField('sortOrder', parseInt(e.target.value) || 0)}
               className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
+            <FieldError error={submitError} path="sortOrder" />
           </div>
 
           {/* Description per language */}
@@ -327,6 +339,7 @@ export function SponsorsPage() {
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                     placeholder={`Description in ${lang}`}
                   />
+                  <FieldError error={submitError} path={['description', lang]} />
                 </div>
               ))}
             </div>

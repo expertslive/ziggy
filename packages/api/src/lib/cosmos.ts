@@ -36,6 +36,20 @@ export async function ensureAnalyticsContainer(): Promise<void> {
   analyticsEnsured = true
 }
 
+/** Ensure the audit-log container exists with /eventSlug partition + 365-day TTL.
+ * Idempotent. */
+let auditEnsured = false
+export async function ensureAuditContainer(): Promise<void> {
+  if (auditEnsured) return
+  const db = getClient().database(DATABASE_NAME)
+  await db.containers.createIfNotExists({
+    id: 'audit-log',
+    partitionKey: { paths: ['/eventSlug'], kind: PartitionKeyKind.Hash },
+    defaultTtl: 31_536_000, // 365 days
+  })
+  auditEnsured = true
+}
+
 // ---------------------------------------------------------------------------
 // CRUD helpers
 // ---------------------------------------------------------------------------
