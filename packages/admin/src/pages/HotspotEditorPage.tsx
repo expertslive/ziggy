@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { fetchFloorMap, updateFloorMap } from '../lib/api';
 import { SUPPORTED_LANGUAGES } from '@ziggy/shared';
 import type { Hotspot } from '@ziggy/shared';
+import { DiffConfirm } from '../components/DiffConfirm';
 
 const DEFAULT_COLOR = '#E30613';
 
@@ -23,9 +24,13 @@ export function HotspotEditorPage() {
   const [mapName, setMapName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
+  // Snapshot of hotspots as loaded from the server, used to compute the
+  // pre-save diff so the admin sees exactly what's about to change.
+  const [originalHotspots, setOriginalHotspots] = useState<Hotspot[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [diffOpen, setDiffOpen] = useState(false);
 
   // Editor state
   const [mode, setMode] = useState<Mode>('select');
@@ -52,7 +57,9 @@ export function HotspotEditorPage() {
       .then((map: any) => {
         setMapName(map.name || '');
         setImageUrl(map.imageUrl || '');
-        setHotspots(map.hotspots || []);
+        const loaded: Hotspot[] = map.hotspots || [];
+        setHotspots(loaded);
+        setOriginalHotspots(loaded);
       })
       .catch(() => setError('Failed to load floor map'))
       .finally(() => setLoading(false));
@@ -242,17 +249,39 @@ export function HotspotEditorPage() {
     setHotspots((prev) => prev.map((h) => (h.id === hotspotId ? { ...h, ...updates } : h)));
   };
 
-  const handleSave = async () => {
+  // Diff between loaded vs current hotspots — feeds the confirmation modal.
+  const computeDiff = useCallback(() => {
+    const orig = new Map(originalHotspots.map((h) => [h.id, h]));
+    const curr = new Map(hotspots.map((h) => [h.id, h]));
+    const added = hotspots.filter((h) => !orig.has(h.id));
+    const removed = originalHotspots.filter((h) => !curr.has(h.id));
+    const changed = hotspots.filter((h) => {
+      const o = orig.get(h.id);
+      if (!o) return false;
+      return JSON.stringify(o) !== JSON.stringify(h);
+    });
+    return {
+      added: added.map((h) => ({ id: h.id, name: h.roomName || '(unnamed)' })),
+      removed: removed.map((h) => ({ id: h.id, name: h.roomName || '(unnamed)' })),
+      changed: changed.map((h) => ({ id: h.id, name: h.roomName || '(unnamed)' })),
+    };
+  }, [hotspots, originalHotspots]);
+
+  const performSave = async () => {
     if (!id) return;
     setSaving(true);
     try {
       await updateFloorMap(id, { hotspots });
+      setDiffOpen(false);
       navigate('/floor-maps');
     } catch {
       setError('Failed to save hotspots');
-    } finally {
       setSaving(false);
     }
+  };
+
+  const handleSave = () => {
+    setDiffOpen(true);
   };
 
   const handleCancel = () => {
@@ -677,6 +706,29 @@ export function HotspotEditorPage() {
           )}
         </div>
       </div>
+
+      {(() => {
+        const diff = computeDiff();
+        const heavySwing = diff.removed.length > 5 || diff.changed.length > 10;
+        return (
+          <DiffConfirm
+            open={diffOpen}
+            title="Save floor map changes?"
+            added={diff.added}
+            removed={diff.removed}
+            changed={diff.changed}
+            warning={
+              heavySwing
+                ? 'Large change — an automatic snapshot is taken before this save, but double-check before confirming.'
+                : undefined
+            }
+            confirmLabel="Save"
+            saving={saving}
+            onConfirm={performSave}
+            onCancel={() => setDiffOpen(false)}
+          />
+        );
+      })()}
     </div>
   );
 }
