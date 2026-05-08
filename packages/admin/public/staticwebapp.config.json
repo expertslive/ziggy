@@ -3,7 +3,7 @@
     "rewrite": "/index.html"
   },
   "globalHeaders": {
-    "Content-Security-Policy": "default-src 'self'; img-src 'self' https: data:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'",
+    "Content-Security-Policy": "default-src 'self'; img-src 'self' https: data:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https:; frame-src 'self' https://ziggy.expertslive.dev https://victorious-plant-071edeb03.6.azurestaticapps.net; frame-ancestors 'none'; base-uri 'self'",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "geolocation=(), camera=(), microphone=()",
