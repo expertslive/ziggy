@@ -319,12 +319,69 @@ export function deleteSnapshot(name: string) {
   )
 }
 
+// Analytics — extra reports
+export interface HourlySeriesPoint {
+  bucket: string // e.g. "2026-06-02T14"
+  events: number
+  pageviews: number
+}
+export interface HourlyResponse {
+  now: number
+  hours: number
+  tz: string
+  series: HourlySeriesPoint[]
+}
+export function fetchHourly(hours = 24) {
+  return fetchJson<HourlyResponse>(`/api/admin/analytics/hourly?hours=${hours}`)
+}
+
+export interface HotspotTap {
+  hotspotId: string
+  mapId?: string
+  roomName?: string
+  count: number
+}
+export function fetchHotspotHeatmap() {
+  return fetchJson<{ since: number; taps: HotspotTap[] }>(
+    '/api/admin/analytics/hotspot-heatmap',
+  )
+}
+
+export interface SearchFunnel {
+  since: number
+  searches: number
+  noResults: number
+  resultTaps: number
+}
+export function fetchSearchFunnel() {
+  return fetchJson<SearchFunnel>('/api/admin/analytics/search-funnel')
+}
+
+export interface LangSplit {
+  since: number
+  langs: { lang: string; count: number }[]
+}
+export function fetchLanguageSplit() {
+  return fetchJson<LangSplit>('/api/admin/analytics/language-split')
+}
+
+export interface KioskTimeline {
+  since: number
+  hours: number
+  events: { kioskId: string; ts: number; path?: string }[]
+}
+export function fetchKioskTimeline(hours = 6) {
+  return fetchJson<KioskTimeline>(
+    `/api/admin/analytics/kiosk-timeline?hours=${hours}`,
+  )
+}
+
 // Analytics
 export interface AnalyticsSummary {
   now: number
   totalLastHour: number
   perKiosk: { kioskId: string; count: number }[]
-  topSessions: { sessionId: number; count: number }[]
+  topSessions: { sessionId: number; count: number; title?: string }[]
   searchNoResults: { len: number; count: number }[]
   lastHeartbeats: Record<string, number>
 }

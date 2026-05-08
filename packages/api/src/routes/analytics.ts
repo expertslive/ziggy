@@ -4,6 +4,8 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { ensureAnalyticsContainer, getContainer } from '../lib/cosmos.js'
 import { requireAuth } from '../middleware/auth.js'
+import { getEnv } from '../env.js'
+import * as runEvents from '../lib/run-events.js'
 
 const analytics = new Hono()
 
@@ -126,9 +128,28 @@ analytics.get('/api/admin/analytics/summary', requireAuth, async (c) => {
     .fetchAll()
     .then((r) => r.resources)
     .catch(() => [])
-  const topSessions = ((topSessionsRaw as Array<{ sessionId: number; count: number }>) || [])
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5)
+  const topSessionRows =
+    ((topSessionsRaw as Array<{ sessionId: number; count: number }>) || [])
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8)
+
+  // Look up titles for the top sessions so the UI doesn't display bare ids.
+  const env = getEnv()
+  const slug = env.eventSlug
+  const titleById = new Map<number, string>()
+  try {
+    const items = await runEvents.fetchRawAgenda(slug, env.runEventsApiKey)
+    for (const it of items as Array<{ id: number; title: string }>) {
+      titleById.set(it.id, it.title)
+    }
+  } catch {
+    // run.events upstream missing — fall back to id-only labels
+  }
+  const topSessions = topSessionRows.map((r) => ({
+    sessionId: r.sessionId,
+    count: r.count,
+    title: titleById.get(r.sessionId),
+  }))
 
   // No-result searches (last 24h): bucket by query length as a proxy for
   // "people searched for things that didn't exist". We deliberately don't log
@@ -172,6 +193,177 @@ analytics.get('/api/admin/analytics/summary', requireAuth, async (c) => {
     searchNoResults,
     lastHeartbeats,
   })
+})
+
+// ---------------------------------------------------------------------------
+// Detailed reports — power the new analytics dashboard sections.
+// ---------------------------------------------------------------------------
+
+/** Events bucketed into hourly windows for the last 24h.
+ *
+ * Aggregates in JS rather than letting Cosmos do the time-bucketing — the
+ * agg query syntax differs by SDK version and JS over a few hundred docs
+ * is comfortably fast at our event volumes. */
+analytics.get('/api/admin/analytics/hourly', requireAuth, async (c) => {
+  const container = getContainer('analytics')
+  const now = Date.now()
+  const hours = Math.min(parseInt(c.req.query('hours') || '24', 10) || 24, 72)
+  const since = now - hours * 60 * 60 * 1000
+  let rows: Array<{ ts: number; type: string }> = []
+  try {
+    const { resources } = await container.items
+      .query<{ ts: number; type: string }>({
+        query: 'SELECT c.ts, c.type FROM c WHERE c.ts >= @t',
+        parameters: [{ name: '@t', value: since }],
+      })
+      .fetchAll()
+    rows = resources
+  } catch {
+    rows = []
+  }
+
+  // Bucket by hour of day in Europe/Amsterdam
+  const tz = 'Europe/Amsterdam'
+  const fmt = new Intl.DateTimeFormat('en-GB', {
+    timeZone: tz,
+    hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+  })
+  const counts = new Map<string, { events: number; pageviews: number }>()
+  for (const r of rows) {
+    const parts = fmt.formatToParts(new Date(r.ts))
+    const y = parts.find((p) => p.type === 'year')?.value
+    const m = parts.find((p) => p.type === 'month')?.value
+    const d = parts.find((p) => p.type === 'day')?.value
+    const h = parts.find((p) => p.type === 'hour')?.value
+    const key = `${y}-${m}-${d}T${h}`
+    const cell = counts.get(key) || { events: 0, pageviews: 0 }
+    cell.events += 1
+    if (r.type === 'pageview') cell.pageviews += 1
+    counts.set(key, cell)
+  }
+
+  const series = Array.from(counts.entries())
+    .map(([bucket, v]) => ({
+      bucket,
+      events: v.events,
+      pageviews: v.pageviews,
+    }))
+    .sort((a, b) => (a.bucket < b.bucket ? -1 : 1))
+
+  return c.json({ now, hours, tz, series })
+})
+
+/** Tap counts per hotspot (last 24h). UI joins with floor-maps to color
+ * polygons and label them. */
+analytics.get('/api/admin/analytics/hotspot-heatmap', requireAuth, async (c) => {
+  const container = getContainer('analytics')
+  const now = Date.now()
+  const since = now - 24 * 60 * 60 * 1000
+  let rows: Array<{ hotspotId: string; mapId?: string; roomName?: string; count: number }> = []
+  try {
+    const { resources } = await container.items
+      .query<{ hotspotId: string; mapId?: string; roomName?: string; count: number }>({
+        query: `SELECT c.payload.hotspotId AS hotspotId,
+                       c.payload.mapId AS mapId,
+                       c.payload.roomName AS roomName,
+                       COUNT(1) AS count
+                  FROM c
+                  WHERE c.type = 'hotspot_tap' AND c.ts >= @t
+                    AND IS_DEFINED(c.payload.hotspotId)
+                  GROUP BY c.payload.hotspotId, c.payload.mapId, c.payload.roomName`,
+        parameters: [{ name: '@t', value: since }],
+      })
+      .fetchAll()
+    rows = resources
+  } catch {
+    rows = []
+  }
+  rows.sort((a, b) => b.count - a.count)
+  return c.json({ since, taps: rows })
+})
+
+/** Search funnel for the last 24h. Returns total search_query, no-result,
+ * and result-tap counts so the UI can show conversion. */
+analytics.get('/api/admin/analytics/search-funnel', requireAuth, async (c) => {
+  const container = getContainer('analytics')
+  const now = Date.now()
+  const since = now - 24 * 60 * 60 * 1000
+  async function countOf(type: string): Promise<number> {
+    try {
+      const { resources } = await container.items
+        .query<number>({
+          query: 'SELECT VALUE COUNT(1) FROM c WHERE c.type = @t AND c.ts >= @s',
+          parameters: [
+            { name: '@t', value: type },
+            { name: '@s', value: since },
+          ],
+        })
+        .fetchAll()
+      return (resources[0] as number) ?? 0
+    } catch {
+      return 0
+    }
+  }
+  const [searches, noResults, resultTaps] = await Promise.all([
+    countOf('search_query'),
+    countOf('search_no_results'),
+    countOf('search_result_tap'),
+  ])
+  return c.json({ since, searches, noResults, resultTaps })
+})
+
+/** Language switches grouped by language. */
+analytics.get('/api/admin/analytics/language-split', requireAuth, async (c) => {
+  const container = getContainer('analytics')
+  const now = Date.now()
+  const since = now - 24 * 60 * 60 * 1000
+  let rows: Array<{ lang: string; count: number }> = []
+  try {
+    const { resources } = await container.items
+      .query<{ lang: string; count: number }>({
+        query: `SELECT c.payload.lang AS lang, COUNT(1) AS count
+                  FROM c
+                  WHERE c.type = 'language_switch' AND c.ts >= @t
+                    AND IS_DEFINED(c.payload.lang)
+                  GROUP BY c.payload.lang`,
+        parameters: [{ name: '@t', value: since }],
+      })
+      .fetchAll()
+    rows = resources
+  } catch {
+    rows = []
+  }
+  rows.sort((a, b) => b.count - a.count)
+  return c.json({ since, langs: rows })
+})
+
+/** Per-kiosk activity timeline — last N hours of pageview events grouped
+ * by kiosk + page. Shows what each kiosk was actively showing. */
+analytics.get('/api/admin/analytics/kiosk-timeline', requireAuth, async (c) => {
+  const container = getContainer('analytics')
+  const now = Date.now()
+  const hours = Math.min(parseInt(c.req.query('hours') || '6', 10) || 6, 24)
+  const since = now - hours * 60 * 60 * 1000
+  let rows: Array<{ kioskId: string; ts: number; path?: string }> = []
+  try {
+    const { resources } = await container.items
+      .query<{ kioskId: string; ts: number; path?: string }>({
+        query: `SELECT c.kioskId, c.ts, c.payload.path AS path
+                  FROM c
+                  WHERE c.type = 'pageview' AND c.ts >= @t
+                  ORDER BY c.ts ASC`,
+        parameters: [{ name: '@t', value: since }],
+      })
+      .fetchAll()
+    rows = resources
+  } catch {
+    rows = []
+  }
+  return c.json({ since, hours, events: rows })
 })
 
 export { analytics }
