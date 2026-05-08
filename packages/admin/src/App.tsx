@@ -16,7 +16,9 @@ import { TrashPage } from './pages/TrashPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { UsersPage } from './pages/UsersPage';
 import { ImagesPage } from './pages/ImagesPage';
+import { PreviewPage } from './pages/PreviewPage';
 import { CommandPalette } from './components/CommandPalette';
+import { EventLiveBanner } from './components/EventLiveBanner';
 import type { ReactNode } from 'react';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -33,6 +35,7 @@ const navItems = [
   { to: '/shop-items', label: 'Shop Items', icon: ShopItemsIcon },
   { to: '/floor-maps', label: 'Floor Maps', icon: FloorMapsIcon },
   { to: '/images', label: 'Images', icon: ImagesIcon },
+  { to: '/preview', label: 'Preview', icon: PreviewIcon },
   { to: '/config', label: 'Config', icon: ConfigIcon },
   { to: '/i18n', label: 'Translations', icon: TranslationsIcon },
   { to: '/analytics', label: 'Analytics', icon: AnalyticsIcon },
@@ -52,7 +55,9 @@ function AdminLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex h-screen bg-surface-alt">
+    <div className="flex h-screen flex-col bg-surface-alt">
+      <EventLiveBanner />
+      <div className="flex flex-1 min-h-0">
       {/* Sidebar */}
       <aside className="flex w-64 flex-col border-r border-border bg-white">
         <div className="flex h-16 items-center gap-3 border-b border-border px-6">
@@ -99,6 +104,7 @@ function AdminLayout({ children }: { children: ReactNode }) {
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-6xl px-8 py-8">{children}</div>
       </main>
+      </div>
       <CommandPalette />
     </div>
   );
@@ -136,6 +142,7 @@ export function App() {
                   <Route path="/users" element={<UsersPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/images" element={<ImagesPage />} />
+                  <Route path="/preview" element={<PreviewPage />} />
                 </Routes>
               </AdminLayout>
             </ProtectedRoute>
@@ -192,6 +199,14 @@ function ImagesIcon({ active }: { active: boolean }) {
   return (
     <svg className={`h-5 w-5 ${active ? 'text-primary' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+    </svg>
+  );
+}
+
+function PreviewIcon({ active }: { active: boolean }) {
+  return (
+    <svg className={`h-5 w-5 ${active ? 'text-primary' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   );
 }
