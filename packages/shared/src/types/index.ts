@@ -6,5 +6,6 @@ export type * from './booth-override.js'
 export type * from './shop.js'
 export type * from './admin.js'
 export type * from './audit.js'
+export type * from './auction.js'
 
 export { DEFAULT_BRANDING } from './event.js'
