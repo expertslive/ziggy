@@ -47,3 +47,26 @@
 .dark textarea::placeholder {
   color: #6b7388;
 }
+
+/* Status tints used across the dashboard (kiosk grid, audit pills,
+ * readiness dots) — the *-50 backgrounds are basically white in dark
+ * mode, which makes the text disappear. Re-tint them. */
+.dark .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.15); }
+.dark .text-emerald-700 { color: #6ee7b7; }
+.dark .bg-amber-50 { background-color: rgba(245, 158, 11, 0.18); }
+.dark .text-amber-700 { color: #fcd34d; }
+.dark .text-amber-900 { color: #fde68a; }
+.dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.18); }
+.dark .text-red-700 { color: #fca5a5; }
+.dark .text-red-600 { color: #fca5a5; }
+.dark .bg-gray-50 { background-color: #1a1f33; }
+.dark .bg-gray-100 { background-color: #1a1f33; }
+.dark .border-gray-200 { border-color: #2a3147; }
+.dark .border-emerald-200 { border-color: rgba(16, 185, 129, 0.35); }
+.dark .border-red-200 { border-color: rgba(239, 68, 68, 0.35); }
+.dark .text-gray-300 { color: #b6bdcf; }
+/* Active nav pill */
+.dark .bg-primary\/10 { background-color: rgba(0, 130, 200, 0.18); }
+.dark .ring-1.ring-border { --tw-ring-color: #2a3147; }
+/* Misc surface alts used inline */
+.dark .bg-surface-alt { background-color: #1a1f33; }
