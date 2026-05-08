@@ -23,7 +23,7 @@ const PAGES: { path: string; label: string }[] = [
 /** Native device viewports. The iframe renders at these exact px so
  *  the kiosk SPA's responsive logic behaves the same as in the field. */
 const DEVICES = {
-  kiosk: { w: 1080, h: 1920, label: 'Kiosk · 1080×1920 (9:16)' },
+  kiosk: { w: 1920, h: 1080, label: 'Kiosk · 1920×1080 (16:9)' },
   'ipad-portrait': { w: 768, h: 1024, label: 'iPad portrait · 768×1024 (3:4)' },
   'ipad-landscape': { w: 1024, h: 768, label: 'iPad landscape · 1024×768 (4:3)' },
   iphone: { w: 390, h: 844, label: 'iPhone · 390×844' },
