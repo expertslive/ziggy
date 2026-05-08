@@ -30,7 +30,7 @@ function fmtDate(iso: string) {
 
 export function SnapshotsPage() {
   const qc = useQueryClient()
-  const toast = useToast()
+  const { toast } = useToast()
   const q = useQuery<SnapshotMeta[]>({
     queryKey: ['snapshots'],
     queryFn: fetchSnapshots,
