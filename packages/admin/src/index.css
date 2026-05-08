@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Class-based dark mode — toggled by adding `dark` to <html>. Tailwind v4
+ * defaults to prefers-color-scheme; this opts us into manual control so
+ * the theme toggle in Profile is the source of truth. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: #0082C8;
   --color-primary-dark: #006BA3;
@@ -8,4 +13,37 @@
   --color-surface-alt: #F5F5F7;
   --color-border: #E5E5E5;
   --font-sans: "Nunito", sans-serif;
+}
+
+/* Dark theme: re-bind the same semantic names so existing classes
+ * (bg-surface-alt, bg-white, text-secondary, border-border…) flip
+ * automatically without rewriting every component. */
+:where(.dark) {
+  --color-surface: #0f1320;
+  --color-surface-alt: #1a1f33;
+  --color-border: #2a3147;
+}
+.dark {
+  color-scheme: dark;
+}
+/* Common neutral classes admin pages use for text — flip them in dark
+ * mode without touching every component. */
+.dark .text-secondary { color: #e7eaf3; }
+.dark .text-gray-700 { color: #cbd2e2; }
+.dark .text-gray-600 { color: #b6bdcf; }
+.dark .text-gray-500 { color: #99a1b8; }
+.dark .text-gray-400 { color: #7d859b; }
+.dark .bg-white { background-color: #141a2b; }
+.dark .border-border { border-color: #2a3147; }
+.dark .ring-border { --tw-ring-color: #2a3147; }
+/* Form inputs/textareas/selects sit on the surface — bump their bg + text */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #1a1f33;
+  color: #e7eaf3;
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #6b7388;
 }

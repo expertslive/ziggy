@@ -8,6 +8,7 @@ import {
 } from '../lib/api'
 import { useToast } from '../components/Toast'
 import { FormError } from '../components/FieldError'
+import { useTheme, type ThemePref } from '../lib/theme'
 
 export function ProfilePage() {
   const qc = useQueryClient()
@@ -162,6 +163,43 @@ export function ProfilePage() {
           </button>
         </div>
       </div>
+
+      <div className="mt-6 rounded-xl border border-border bg-white p-5 shadow-sm">
+        <h2 className="text-base font-bold text-secondary">Appearance</h2>
+        <ThemePicker />
+      </div>
+    </div>
+  )
+}
+
+function ThemePicker() {
+  const { pref, resolved, setPref } = useTheme()
+  const options: { value: ThemePref; label: string; hint: string }[] = [
+    { value: 'light', label: 'Light', hint: 'Always light' },
+    { value: 'dark', label: 'Dark', hint: 'Always dark' },
+    { value: 'system', label: 'System', hint: 'Match your OS setting' },
+  ]
+  return (
+    <div className="mt-3">
+      <div className="grid grid-cols-3 gap-2">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            onClick={() => setPref(o.value)}
+            className={`rounded-lg border px-3 py-3 text-left text-sm transition-colors ${
+              pref === o.value
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border hover:bg-surface-alt'
+            }`}
+          >
+            <div className="font-semibold">{o.label}</div>
+            <div className="text-xs text-gray-500">{o.hint}</div>
+          </button>
+        ))}
+      </div>
+      <p className="mt-3 text-xs text-gray-400">
+        Currently rendering in {resolved} mode. Choice is stored per-browser.
+      </p>
     </div>
   )
 }

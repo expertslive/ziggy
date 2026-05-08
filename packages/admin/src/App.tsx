@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { isAuthenticated, clearToken } from './lib/api';
+import { useQuery } from '@tanstack/react-query';
+import { isAuthenticated, clearToken, fetchMe, type AdminUser } from './lib/api';
+import { useTheme } from './lib/theme';
 import { ToastProvider } from './components/Toast';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -45,9 +47,53 @@ const navItems = [
   { to: '/profile', label: 'Profile', icon: ProfileIcon },
 ];
 
+function initials(s: string | undefined | null): string {
+  if (!s) return '?';
+  const parts = s.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return s.slice(0, 2).toUpperCase();
+}
+
+function ThemeToggle() {
+  const { pref, setPref } = useTheme();
+  const next: 'light' | 'dark' | 'system' =
+    pref === 'light' ? 'dark' : pref === 'dark' ? 'system' : 'light';
+  const label = pref === 'light' ? 'Light' : pref === 'dark' ? 'Dark' : 'System';
+  const icon =
+    pref === 'light' ? (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+      </svg>
+    ) : pref === 'dark' ? (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+      </svg>
+    ) : (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
+      </svg>
+    );
+  return (
+    <button
+      onClick={() => setPref(next)}
+      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-surface-alt hover:text-secondary"
+      title={`Theme: ${label} — click for ${next}`}
+    >
+      {icon}
+      <span>Theme: {label}</span>
+    </button>
+  );
+}
+
 function AdminLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const me = useQuery<AdminUser>({
+    queryKey: ['me'],
+    queryFn: fetchMe,
+    retry: false,
+    staleTime: 60_000,
+  });
 
   const handleLogout = () => {
     clearToken();
@@ -67,7 +113,7 @@ function AdminLayout({ children }: { children: ReactNode }) {
           <span className="text-lg font-bold text-secondary">Experts Live Admin</span>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-4">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -87,12 +133,32 @@ function AdminLayout({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
+        {/* User card + theme toggle + logout */}
         <div className="border-t border-border p-3">
+          <NavLink
+            to="/profile"
+            className="mb-2 flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-surface-alt"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+              {initials(me.data?.displayName || me.data?.email)}
+            </div>
+            <div className="min-w-0 leading-tight">
+              <div className="truncate text-sm font-semibold text-secondary">
+                {me.data?.displayName || me.data?.email || '—'}
+              </div>
+              {me.data?.displayName && (
+                <div className="truncate text-[10px] text-gray-400">
+                  {me.data.email}
+                </div>
+              )}
+            </div>
+          </NavLink>
+          <ThemeToggle />
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-surface-alt hover:text-secondary"
+            className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-surface-alt hover:text-secondary"
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3l3-3m0 0l-3-3m3 3H9" />
             </svg>
             Log out
