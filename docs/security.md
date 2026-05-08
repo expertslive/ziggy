@@ -12,7 +12,8 @@ multi-tenant SaaS.
 
 ## Secret management
 
-All long-lived secrets live in **Azure Key Vault** (`ziggy-kv-af9a93`):
+All long-lived secrets live in **Azure Key Vault** (resource name set
+via the `keyVaultName` Bicep parameter):
 
 - `jwt-secret` — HS256 signing key, ≥32 characters
 - `run-events-api-key` — upstream `ApiKey` header value

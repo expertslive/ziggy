@@ -22,9 +22,13 @@ import { fileURLToPath } from 'node:url'
 import { createInterface } from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
 
-const API_BASE =
-  process.env.API_BASE ||
-  'https://ziggy-api.mangosky-5e1b98ca.westeurope.azurecontainerapps.io'
+const API_BASE = process.env.API_BASE
+if (!API_BASE) {
+  console.error(
+    'Set API_BASE to the API origin (e.g. https://api.example.com or your Azure Container App URL).',
+  )
+  process.exit(2)
+}
 const SLUG = process.env.EVENT_SLUG || 'experts-live-netherlands-2026'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const BACKUP_DIR = join(__dirname, '..', 'backups')

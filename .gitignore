@@ -35,3 +35,8 @@ claude.txt
 ziggy_tijd_testen.txt
 SECURITY-TODO.md
 infra/main.json
+
+# Operational snapshots — local-only Cosmos dumps from scripts/backup-all.mjs.
+# Contain live records and Cosmos metadata; keep them on the operator's
+# machine, not in the public repo.
+backups/*.json

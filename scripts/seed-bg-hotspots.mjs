@@ -20,9 +20,11 @@ import { createInterface } from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
 import { randomUUID } from 'node:crypto'
 
-const API_BASE =
-  process.env.API_BASE ||
-  'https://ziggy-api.mangosky-5e1b98ca.westeurope.azurecontainerapps.io'
+const API_BASE = process.env.API_BASE
+if (!API_BASE) {
+  console.error('Set API_BASE to the API origin before running this script.')
+  process.exit(2)
+}
 const SLUG = 'experts-live-netherlands-2026'
 
 // Existing sponsor → hotspot ID map (reuse to preserve sponsor links)

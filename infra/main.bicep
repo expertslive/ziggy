@@ -3,8 +3,8 @@ targetScope = 'resourceGroup'
 @description('Base name for all resources')
 param baseName string = 'ziggy'
 
-@description('Name of the Key Vault that holds jwt-secret and run-events-api-key')
-param keyVaultName string = 'ziggy-kv-af9a93'
+@description('Name of the Key Vault that holds jwt-secret and run-events-api-key. Pass the actual KV name at deploy time; the default is a generic placeholder so the public repo doesn\'t pin a real resource.')
+param keyVaultName string = '${baseName}-kv'
 
 @description('Location for all resources')
 param location string = resourceGroup().location

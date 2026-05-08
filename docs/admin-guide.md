@@ -8,8 +8,7 @@ This guide covers how to set up and manage your event using the Ziggy admin pane
 
 The admin panel is at:
 
-- Production: `https://ziggy-admin.expertslive.dev` (or the SWA fallback
-  `https://gray-hill-067f71103.1.azurestaticapps.net`)
+- Production: `https://ziggy-admin.expertslive.dev`
 - Local dev: `http://localhost:5174` (after `pnpm dev:admin`)
 
 The default admin email is `admin@expertslive.nl`. The password is whatever

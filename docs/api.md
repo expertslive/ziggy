@@ -276,10 +276,9 @@ All responses get Hono's `secureHeaders()` middleware:
 In production:
 
 ```
-Allowed origins: https://ziggy.expertslive.dev,
-                 https://ziggy-admin.expertslive.dev,
-                 https://victorious-plant-071edeb03.6.azurestaticapps.net,
-                 https://gray-hill-067f71103.1.azurestaticapps.net
+Allowed origins: the kiosk + admin custom domains, plus the auto-generated
+                 Static Web Apps fallback hostnames (see packages/api/src/index.ts
+                 for the live list)
 Allowed methods: GET, POST, PUT, DELETE, OPTIONS
 Allowed headers: Content-Type, Authorization
 maxAge: 86400

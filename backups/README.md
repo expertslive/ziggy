@@ -5,14 +5,19 @@ the live admin API. Cheap insurance — periodic Cosmos backups still
 exist, but a JSON we can re-PUT in seconds is faster than a Microsoft
 support ticket.
 
+> **Operational artifact, not committed.** Snapshot JSONs contain live
+> records (sponsor/shop content, booth links) and Cosmos metadata fields,
+> and this repo is public. `backups/*.json` is in `.gitignore`; keep them
+> on the operator's machine or in a private store, not here.
+
 ## Take a snapshot
 
 ```sh
 ADMIN_EMAIL=…@…  ADMIN_PASSWORD=…  node scripts/backup-all.mjs
 ```
 
-Output lands at `backups/<event-slug>-YYYY-MM-DD-HHMM.json` (UTC). Keep
-the most recent few in git as restore points.
+Output lands at `backups/<event-slug>-YYYY-MM-DD-HHMM.json` (UTC). Files
+are gitignored — copy the ones you want to keep into a private location.
 
 ## Restore
 
