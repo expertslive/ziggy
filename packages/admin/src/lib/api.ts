@@ -239,6 +239,16 @@ export function deleteAdminUser(id: string) {
   return fetchJson<{ ok: boolean }>(`/api/admin/users/${id}`, { method: 'DELETE' })
 }
 
+// Rooms (read-only, derived from run.events agenda)
+export interface RoomEntry {
+  guid: string
+  name: string
+  sessionCount: number
+}
+export function fetchRooms() {
+  return fetchJson<RoomEntry[]>(`/api/admin/events/${slug}/rooms`)
+}
+
 // Trash (soft-deleted records)
 export type TrashTarget = 'sponsors' | 'sponsor-tiers' | 'floor-maps' | 'shop-items'
 export interface TrashBundle {

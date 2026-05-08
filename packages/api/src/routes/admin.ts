@@ -28,6 +28,7 @@ import {
 } from '../lib/cosmos.js'
 import { uploadImage } from '../lib/storage.js'
 import { detectImageType } from '../lib/magic-bytes.js'
+import * as runEvents from '../lib/run-events.js'
 import { writeAudit, recentAudit } from '../lib/audit.js'
 import {
   takeSnapshot,
@@ -1106,6 +1107,47 @@ admin.delete('/api/admin/events/:slug/snapshots/:name{.+}', async (c) => {
     summary: `Deleted snapshot ${name.split('/').pop()}`,
   })
   return c.json({ ok: true })
+})
+
+// ---------------------------------------------------------------------------
+// Rooms (read-only) — feeds the hotspot editor's roomGuid picker so admins
+// don't have to copy GUIDs by hand.
+// ---------------------------------------------------------------------------
+
+interface RoomEntry {
+  guid: string
+  name: string
+  /** Number of agenda sessions referencing this room. */
+  sessionCount: number
+}
+
+/** GET /api/admin/events/:slug/rooms */
+admin.get('/api/admin/events/:slug/rooms', async (c) => {
+  const slug = c.req.param('slug')
+  let rooms: RoomEntry[] = []
+  try {
+    const env = getEnv()
+    const items = await runEvents.fetchRawAgenda(slug, env.runEventsApiKey)
+    const map = new Map<string, RoomEntry>()
+    for (const it of items as Array<{ roomGuid?: string; roomName?: string }>) {
+      const guid = it.roomGuid
+      if (!guid) continue
+      const existing = map.get(guid)
+      if (existing) {
+        existing.sessionCount += 1
+      } else {
+        map.set(guid, {
+          guid,
+          name: it.roomName || guid,
+          sessionCount: 1,
+        })
+      }
+    }
+    rooms = Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name))
+  } catch (err) {
+    console.warn('[rooms] fetch failed', err)
+  }
+  return c.json(rooms)
 })
 
 // ---------------------------------------------------------------------------

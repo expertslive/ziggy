@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchFloorMap, updateFloorMap } from '../lib/api';
+import { useQuery } from '@tanstack/react-query';
+import { fetchFloorMap, updateFloorMap, fetchRooms, type RoomEntry } from '../lib/api';
 import { SUPPORTED_LANGUAGES } from '@ziggy/shared';
 import type { Hotspot } from '@ziggy/shared';
 import { DiffConfirm } from '../components/DiffConfirm';
 
 const DEFAULT_COLOR = '#E30613';
 
-type Mode = 'select' | 'draw';
+type Mode = 'select' | 'draw-poly' | 'draw-rect';
 
 interface ImageBounds {
   offsetX: number;
@@ -43,6 +44,41 @@ export function HotspotEditorPage() {
     | { hotspotId: string; mode: 'polygon'; lastNorm: [number, number]; movedSinceDown: boolean }
     | null
   >(null);
+  // Rectangle drag — start corner in normalized coords, end follows cursor
+  const [rectDrag, setRectDrag] = useState<{ start: [number, number]; end: [number, number] } | null>(null);
+
+  // Undo/redo — push the previous state on every meaningful "commit". Continuous
+  // drags push only at start, not on every tick.
+  const [past, setPast] = useState<Hotspot[][]>([]);
+  const [future, setFuture] = useState<Hotspot[][]>([]);
+  const pushHistory = useCallback(() => {
+    setPast((p) => [...p.slice(-49), hotspots]); // cap at 50 frames
+    setFuture([]);
+  }, [hotspots]);
+  const undo = useCallback(() => {
+    setPast((p) => {
+      if (p.length === 0) return p;
+      const prev = p[p.length - 1];
+      setFuture((f) => [hotspots, ...f].slice(0, 50));
+      setHotspots(prev);
+      return p.slice(0, -1);
+    });
+  }, [hotspots]);
+  const redo = useCallback(() => {
+    setFuture((f) => {
+      if (f.length === 0) return f;
+      const next = f[0];
+      setPast((p) => [...p.slice(-49), hotspots]);
+      setHotspots(next);
+      return f.slice(1);
+    });
+  }, [hotspots]);
+
+  // Run.events rooms — used by the roomGuid/roomGuids picker
+  const roomsQ = useQuery<RoomEntry[]>({
+    queryKey: ['rooms'],
+    queryFn: fetchRooms,
+  });
 
   // Image dimensions for coordinate conversion
   const containerRef = useRef<HTMLDivElement>(null);
@@ -125,7 +161,7 @@ export function HotspotEditorPage() {
 
   // Handle SVG click for drawing
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (mode !== 'draw' || !imageBounds) return;
+    if (mode !== 'draw-poly' || !imageBounds) return;
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
 
@@ -147,8 +183,17 @@ export function HotspotEditorPage() {
     setDrawingPoints((prev) => [...prev, norm]);
   };
 
+  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (mode !== 'draw-rect' || !imageBounds) return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const norm = pixelToNorm(e.clientX - rect.left, e.clientY - rect.top);
+    if (!norm) return;
+    setRectDrag({ start: norm, end: norm });
+  };
+
   const handleCanvasDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (mode !== 'draw') return;
+    if (mode !== 'draw-poly') return;
     e.preventDefault();
     if (drawingPoints.length >= 3) {
       completePolygon();
@@ -163,7 +208,13 @@ export function HotspotEditorPage() {
     const py = e.clientY - rect.top;
     const norm = pixelToNorm(px, py);
 
-    if (mode === 'draw') {
+    if (mode === 'draw-rect') {
+      if (rectDrag && norm) {
+        setRectDrag({ ...rectDrag, end: norm });
+      }
+      return;
+    }
+    if (mode === 'draw-poly') {
       setCursorPos(norm);
       return;
     }
@@ -212,15 +263,47 @@ export function HotspotEditorPage() {
     }
   };
 
-  // End any drag on global mouseup so releases outside the canvas still work
+  // End any drag on global mouseup so releases outside the canvas still work.
+  // Also commits the rectangle currently being drawn (if any).
   useEffect(() => {
-    const onUp = () => setDragState(null);
+    const onUp = () => {
+      setDragState(null);
+      if (rectDrag) {
+        const [sx, sy] = rectDrag.start;
+        const [ex, ey] = rectDrag.end;
+        const x0 = Math.min(sx, ex);
+        const x1 = Math.max(sx, ex);
+        const y0 = Math.min(sy, ey);
+        const y1 = Math.max(sy, ey);
+        // Ignore tiny drags (likely a stray click)
+        if (x1 - x0 > 0.005 && y1 - y0 > 0.005) {
+          pushHistory();
+          const newHotspot: Hotspot = {
+            id: crypto.randomUUID(),
+            roomName: '',
+            label: {},
+            points: [
+              [x0, y0],
+              [x1, y0],
+              [x1, y1],
+              [x0, y1],
+            ],
+            color: DEFAULT_COLOR,
+          };
+          setHotspots((prev) => [...prev, newHotspot]);
+          setSelectedId(newHotspot.id);
+          setMode('select');
+        }
+        setRectDrag(null);
+      }
+    };
     window.addEventListener('mouseup', onUp);
     return () => window.removeEventListener('mouseup', onUp);
-  }, []);
+  }, [rectDrag, pushHistory]);
 
   const completePolygon = () => {
     if (drawingPoints.length < 3) return;
+    pushHistory();
     const newHotspot: Hotspot = {
       id: crypto.randomUUID(),
       roomName: '',
@@ -235,12 +318,65 @@ export function HotspotEditorPage() {
     setMode('select');
   };
 
+  /** Replace the selected hotspot's polygon with a rectangle defined by
+   * normalized x/y/w/h. Used by the numeric inputs panel. */
+  const setSelectedBBox = (
+    nx: number,
+    ny: number,
+    nw: number,
+    nh: number,
+  ) => {
+    if (!selectedId) return;
+    pushHistory();
+    const x0 = Math.max(0, Math.min(1, nx));
+    const y0 = Math.max(0, Math.min(1, ny));
+    const x1 = Math.max(0, Math.min(1, nx + nw));
+    const y1 = Math.max(0, Math.min(1, ny + nh));
+    setHotspots((prev) =>
+      prev.map((h) =>
+        h.id === selectedId
+          ? {
+              ...h,
+              points: [
+                [x0, y0],
+                [x1, y0],
+                [x1, y1],
+                [x0, y1],
+              ],
+            }
+          : h,
+      ),
+    );
+  };
+
+  const duplicateSelected = () => {
+    if (!selectedId) return;
+    const src = hotspots.find((h) => h.id === selectedId);
+    if (!src) return;
+    pushHistory();
+    const xs = src.points.map((p) => p[0]);
+    const ys = src.points.map((p) => p[1]);
+    const offsetX = Math.min(...xs) > 0.95 ? -0.05 : 0.03;
+    const offsetY = Math.min(...ys) > 0.95 ? -0.05 : 0.03;
+    const dup: Hotspot = {
+      ...src,
+      id: crypto.randomUUID(),
+      points: src.points.map(([x, y]) => [
+        Math.max(0, Math.min(1, x + offsetX)),
+        Math.max(0, Math.min(1, y + offsetY)),
+      ]),
+    };
+    setHotspots((prev) => [...prev, dup]);
+    setSelectedId(dup.id);
+  };
+
   const handleSelectHotspot = (hotspotId: string) => {
     if (mode === 'draw') return;
     setSelectedId(hotspotId);
   };
 
   const handleDeleteHotspot = (hotspotId: string) => {
+    pushHistory();
     setHotspots((prev) => prev.filter((h) => h.id !== hotspotId));
     if (selectedId === hotspotId) setSelectedId(null);
   };
@@ -288,33 +424,65 @@ export function HotspotEditorPage() {
     navigate('/floor-maps');
   };
 
-  const startDrawing = () => {
-    setMode('draw');
+  const startDrawingPoly = () => {
+    setMode('draw-poly');
     setSelectedId(null);
     setDrawingPoints([]);
     setCursorPos(null);
+    setRectDrag(null);
+  };
+
+  const startDrawingRect = () => {
+    setMode('draw-rect');
+    setSelectedId(null);
+    setDrawingPoints([]);
+    setCursorPos(null);
+    setRectDrag(null);
   };
 
   const cancelDrawing = () => {
     setMode('select');
     setDrawingPoints([]);
     setCursorPos(null);
+    setRectDrag(null);
   };
 
-  // Handle Escape key to cancel drawing
+  // Keyboard shortcuts: Esc cancel, Cmd+Z undo, Cmd+Shift+Z redo, Cmd+D duplicate
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Skip when typing in inputs/textareas — otherwise typing 'd' would dupe.
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
+        return;
+      }
       if (e.key === 'Escape') {
-        if (mode === 'draw') {
+        if (mode !== 'select') {
           cancelDrawing();
         } else {
           setSelectedId(null);
         }
+        return;
+      }
+      const meta = e.metaKey || e.ctrlKey;
+      if (meta && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+        return;
+      }
+      if (meta && (e.key.toLowerCase() === 'z' && e.shiftKey || e.key.toLowerCase() === 'y')) {
+        e.preventDefault();
+        redo();
+        return;
+      }
+      if (meta && e.key.toLowerCase() === 'd' && selectedId) {
+        e.preventDefault();
+        duplicateSelected();
+        return;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mode]);
+  }, [mode, selectedId, undo, redo]);
 
   const selectedHotspot = hotspots.find((h) => h.id === selectedId);
 
@@ -374,20 +542,73 @@ export function HotspotEditorPage() {
         </div>
       </div>
 
+      {/* Toolbar — modes + undo/redo + duplicate */}
+      <div className="flex items-center gap-1 border-b border-border bg-white px-4 py-2">
+        <button
+          onClick={() => setMode('select')}
+          className={`rounded-md px-3 py-1.5 text-xs font-semibold ${
+            mode === 'select' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-surface-alt'
+          }`}
+        >
+          ↖ Select
+        </button>
+        <button
+          onClick={startDrawingRect}
+          className={`rounded-md px-3 py-1.5 text-xs font-semibold ${
+            mode === 'draw-rect'
+              ? 'bg-primary text-white'
+              : 'text-gray-600 hover:bg-surface-alt'
+          }`}
+        >
+          ▭ Rectangle
+        </button>
+        <button
+          onClick={startDrawingPoly}
+          className={`rounded-md px-3 py-1.5 text-xs font-semibold ${
+            mode === 'draw-poly'
+              ? 'bg-primary text-white'
+              : 'text-gray-600 hover:bg-surface-alt'
+          }`}
+        >
+          ⌐ Polygon
+        </button>
+        <div className="mx-2 h-5 w-px bg-border" />
+        <button
+          onClick={undo}
+          disabled={past.length === 0}
+          className="rounded-md px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-surface-alt disabled:opacity-40"
+          title="Undo (⌘Z)"
+        >
+          ↶ Undo
+        </button>
+        <button
+          onClick={redo}
+          disabled={future.length === 0}
+          className="rounded-md px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-surface-alt disabled:opacity-40"
+          title="Redo (⌘⇧Z)"
+        >
+          ↷ Redo
+        </button>
+        <div className="mx-2 h-5 w-px bg-border" />
+        <button
+          onClick={duplicateSelected}
+          disabled={!selectedId}
+          className="rounded-md px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-surface-alt disabled:opacity-40"
+          title="Duplicate (⌘D)"
+        >
+          ⧉ Duplicate
+        </button>
+        <span className="ml-auto text-xs text-gray-400">
+          {mode === 'draw-poly' && 'Click points; close on first or double-click'}
+          {mode === 'draw-rect' && 'Drag to draw a rectangle'}
+          {mode === 'select' && hotspots.length > 0 && 'Click a hotspot to edit'}
+        </span>
+      </div>
+
       {/* Main content */}
       <div className="flex min-h-0 flex-1">
         {/* Canvas area */}
         <div className="relative flex-1 overflow-hidden p-4">
-          {/* Mode indicator */}
-          {mode === 'draw' && (
-            <div className="absolute left-4 top-4 z-10 flex items-center gap-2 rounded-lg bg-secondary/90 px-3 py-2 text-sm text-white shadow-lg">
-              <div className="h-2 w-2 animate-pulse rounded-full bg-red-400" />
-              Drawing mode — click to add points, close polygon by clicking first point or double-click
-              <button onClick={cancelDrawing} className="ml-2 rounded bg-white/20 px-2 py-0.5 text-xs hover:bg-white/30">
-                Cancel (Esc)
-              </button>
-            </div>
-          )}
 
           <div
             ref={containerRef}
@@ -395,7 +616,8 @@ export function HotspotEditorPage() {
             onClick={handleCanvasClick}
             onDoubleClick={handleCanvasDoubleClick}
             onMouseMove={handleCanvasMouseMove}
-            style={{ cursor: mode === 'draw' ? 'crosshair' : 'default' }}
+            onMouseDown={handleCanvasMouseDown}
+            style={{ cursor: mode === 'select' ? 'default' : 'crosshair' }}
           >
             {/* Floor map image */}
             <img
@@ -430,7 +652,7 @@ export function HotspotEditorPage() {
                       stroke={hotspot.color || DEFAULT_COLOR}
                       strokeWidth="0.003"
                       onMouseDown={(e) => {
-                        if (mode === 'draw') return;
+                        if (mode !== 'select') return;
                         if (!isSelected) return;
                         // Selected polygon → start polygon-move drag
                         e.stopPropagation();
@@ -440,6 +662,7 @@ export function HotspotEditorPage() {
                         const py = e.clientY - rect.top;
                         const norm = pixelToNorm(px, py);
                         if (!norm) return;
+                        pushHistory();
                         setDragState({
                           hotspotId: hotspot.id,
                           mode: 'polygon',
@@ -495,6 +718,7 @@ export function HotspotEditorPage() {
                         style={{ cursor: 'grab' }}
                         onMouseDown={(e) => {
                           e.stopPropagation();
+                          pushHistory();
                           setDragState({
                             hotspotId: hotspot.id,
                             mode: 'vertex',
@@ -507,8 +731,22 @@ export function HotspotEditorPage() {
                   );
                 })}
 
+                {/* Drawing in-progress rectangle */}
+                {mode === 'draw-rect' && rectDrag && (
+                  <rect
+                    x={Math.min(rectDrag.start[0], rectDrag.end[0])}
+                    y={Math.min(rectDrag.start[1], rectDrag.end[1])}
+                    width={Math.abs(rectDrag.end[0] - rectDrag.start[0])}
+                    height={Math.abs(rectDrag.end[1] - rectDrag.start[1])}
+                    fill={`${DEFAULT_COLOR}40`}
+                    stroke={DEFAULT_COLOR}
+                    strokeWidth="0.003"
+                    strokeDasharray="0.008 0.004"
+                  />
+                )}
+
                 {/* Drawing in-progress polygon */}
-                {mode === 'draw' && drawingPoints.length > 0 && (
+                {mode === 'draw-poly' && drawingPoints.length > 0 && (
                   <g>
                     {/* Completed edges */}
                     <polyline
@@ -612,25 +850,6 @@ export function HotspotEditorPage() {
             </div>
           </div>
 
-          {/* Draw button */}
-          <div className="border-t border-border px-4 py-3">
-            {mode === 'draw' ? (
-              <button
-                onClick={cancelDrawing}
-                className="w-full rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-surface-alt"
-              >
-                Cancel Drawing
-              </button>
-            ) : (
-              <button
-                onClick={startDrawing}
-                className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark"
-              >
-                + Draw New Hotspot
-              </button>
-            )}
-          </div>
-
           {/* Selected hotspot properties */}
           {selectedHotspot && mode === 'select' && (
             <div className="border-t border-border px-4 py-4">
@@ -689,10 +908,136 @@ export function HotspotEditorPage() {
                   </div>
                 </div>
 
+                {/* Bounding-box numeric inputs (in %) — recompute polygon as rect on change.
+                 *  Useful for fine alignment after a drag. Only meaningful for rectangular
+                 *  hotspots — non-rect polygons get warned. */}
+                {(() => {
+                  const xs = selectedHotspot.points.map((p) => p[0]);
+                  const ys = selectedHotspot.points.map((p) => p[1]);
+                  const x0 = Math.min(...xs);
+                  const x1 = Math.max(...xs);
+                  const y0 = Math.min(...ys);
+                  const y1 = Math.max(...ys);
+                  const isRect =
+                    selectedHotspot.points.length === 4 &&
+                    new Set(xs.map((v) => v.toFixed(9))).size === 2 &&
+                    new Set(ys.map((v) => v.toFixed(9))).size === 2;
+                  const pct = (n: number) => (n * 100).toFixed(2);
+                  const onChange = (key: 'x' | 'y' | 'w' | 'h', val: number) => {
+                    const v = Math.max(0, Math.min(100, val)) / 100;
+                    let nx = x0, ny = y0, nw = x1 - x0, nh = y1 - y0;
+                    if (key === 'x') nx = v;
+                    if (key === 'y') ny = v;
+                    if (key === 'w') nw = v;
+                    if (key === 'h') nh = v;
+                    setSelectedBBox(nx, ny, nw, nh);
+                  };
+                  return (
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-gray-500">
+                        Position & size (% of image)
+                      </label>
+                      {!isRect && (
+                        <p className="mb-2 text-[11px] text-amber-600">
+                          ⚠ Polygon has {selectedHotspot.points.length} vertices.
+                          Editing here will replace it with a 4-corner rectangle.
+                        </p>
+                      )}
+                      <div className="grid grid-cols-4 gap-2">
+                        {(['x', 'y', 'w', 'h'] as const).map((key) => {
+                          const val =
+                            key === 'x' ? x0 : key === 'y' ? y0 : key === 'w' ? x1 - x0 : y1 - y0;
+                          return (
+                            <div key={key}>
+                              <label className="mb-0.5 block text-[10px] font-medium uppercase text-gray-400">
+                                {key}
+                              </label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                max="100"
+                                value={pct(val)}
+                                onChange={(e) => {
+                                  const n = parseFloat(e.target.value);
+                                  if (Number.isFinite(n)) onChange(key, n);
+                                }}
+                                className="w-full rounded-md border border-border px-2 py-1 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Run.events room linking — single guid + array of guids for combined rooms */}
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-500">
-                    Points ({selectedHotspot.points.length} vertices)
+                    Linked room (run.events)
                   </label>
+                  <select
+                    value={selectedHotspot.roomGuid || ''}
+                    onChange={(e) =>
+                      updateHotspot(selectedHotspot.id, {
+                        roomGuid: e.target.value || undefined,
+                      })
+                    }
+                    className="w-full rounded-lg border border-border px-2 py-1.5 text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="">— Match by room name only —</option>
+                    {(roomsQ.data || []).map((r) => (
+                      <option key={r.guid} value={r.guid}>
+                        {r.name} ({r.sessionCount}{r.sessionCount === 1 ? ' session' : ' sessions'})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-[11px] text-gray-400">
+                    Picks the run.events room for "Show on map" deep-links and the
+                    room-detail modal's session list.
+                  </p>
+                </div>
+
+                {/* Optional extra rooms — for combined hotspots like Event Hall 1 that
+                 *  also serve the keynote running in "Event Hall 1+2". Stored as
+                 *  roomGuids[] alongside roomGuid. */}
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500">
+                    Also matches these rooms (optional)
+                  </label>
+                  <div className="max-h-32 overflow-y-auto rounded-lg border border-border p-2">
+                    {(roomsQ.data || [])
+                      .filter((r) => r.guid !== selectedHotspot.roomGuid)
+                      .map((r) => {
+                        const checked = (selectedHotspot.roomGuids || []).includes(r.guid);
+                        return (
+                          <label key={r.guid} className="flex items-center gap-2 py-0.5 text-xs text-gray-700">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={(e) => {
+                                const current = selectedHotspot.roomGuids || [];
+                                const next = e.target.checked
+                                  ? [...current, r.guid]
+                                  : current.filter((g) => g !== r.guid);
+                                // Always include the primary roomGuid in roomGuids so the
+                                // matcher can use just one source of truth.
+                                const withPrimary =
+                                  selectedHotspot.roomGuid && !next.includes(selectedHotspot.roomGuid)
+                                    ? [selectedHotspot.roomGuid, ...next]
+                                    : next;
+                                updateHotspot(selectedHotspot.id, {
+                                  roomGuids: withPrimary.length > 0 ? withPrimary : undefined,
+                                });
+                              }}
+                              className="h-3.5 w-3.5 rounded border-border"
+                            />
+                            <span className="truncate">{r.name}</span>
+                          </label>
+                        );
+                      })}
+                  </div>
                 </div>
 
                 <button
