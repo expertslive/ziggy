@@ -10,6 +10,8 @@ export interface FloorMap {
   hotspots: Hotspot[]
   createdAt: string
   updatedAt: string
+  /** Soft-delete marker — set on DELETE, cleared on restore. */
+  deletedAt?: string
 }
 
 /** A tappable polygon region on a floor map */

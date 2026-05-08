@@ -16,6 +16,9 @@ export interface Sponsor {
   sortOrder: number
   createdAt: string
   updatedAt: string
+  /** Soft-delete marker — set on DELETE, cleared on restore. Public + admin
+   * list endpoints filter records that have this set. */
+  deletedAt?: string
 }
 
 export interface SponsorTier {
@@ -27,4 +30,5 @@ export interface SponsorTier {
   displaySize: 'large' | 'medium' | 'small'
   createdAt: string
   updatedAt: string
+  deletedAt?: string
 }

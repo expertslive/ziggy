@@ -183,6 +183,30 @@ export function deleteShopItem(id: string) {
   return fetchJson(`/api/admin/events/${slug}/shop-items/${id}`, { method: 'DELETE' });
 }
 
+// Trash (soft-deleted records)
+export type TrashTarget = 'sponsors' | 'sponsor-tiers' | 'floor-maps' | 'shop-items'
+export interface TrashBundle {
+  sponsors: Array<{ id: string; name: string; deletedAt?: string }>
+  'sponsor-tiers': Array<{ id: string; name: string; deletedAt?: string }>
+  'floor-maps': Array<{ id: string; name: string; deletedAt?: string; hotspots?: unknown[] }>
+  'shop-items': Array<{ id: string; name: string; deletedAt?: string }>
+}
+export function fetchTrash() {
+  return fetchJson<TrashBundle>(`/api/admin/events/${slug}/trash`)
+}
+export function restoreFromTrash(target: TrashTarget, id: string) {
+  return fetchJson<{ ok: boolean }>(
+    `/api/admin/events/${slug}/trash/${target}/${id}/restore`,
+    { method: 'POST' },
+  )
+}
+export function permanentDelete(target: TrashTarget, id: string) {
+  return fetchJson<{ ok: boolean }>(
+    `/api/admin/events/${slug}/trash/${target}/${id}`,
+    { method: 'DELETE' },
+  )
+}
+
 // Audit log
 export interface AuditEntry {
   id: string

@@ -13,4 +13,6 @@ export interface ShopItem {
   sortOrder: number
   createdAt: string
   updatedAt: string
+  /** Soft-delete marker — set on DELETE, cleared on restore. */
+  deletedAt?: string
 }

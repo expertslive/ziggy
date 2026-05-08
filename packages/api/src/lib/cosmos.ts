@@ -57,7 +57,8 @@ export async function ensureAuditContainer(): Promise<void> {
 /**
  * Find all items in a container matching a partition key value.
  * The partition key field name varies per container, so we pass the field name
- * and build a parameterised query.
+ * and build a parameterised query. Includes soft-deleted records — for the
+ * common case of "everything except trash" use findActive instead.
  */
 export async function findAll<T>(
   containerName: string,
@@ -68,6 +69,39 @@ export async function findAll<T>(
   const { resources } = await container.items
     .query({
       query: `SELECT * FROM c WHERE c.${partitionKey} = @val`,
+      parameters: [{ name: '@val', value: partitionValue }],
+    })
+    .fetchAll()
+  return resources as T[]
+}
+
+/** Find all items NOT soft-deleted. Containers without a deletedAt field
+ * still match because IS_DEFINED returns false for absent properties. */
+export async function findActive<T>(
+  containerName: string,
+  partitionKey: string,
+  partitionValue: string,
+): Promise<T[]> {
+  const container = getContainer(containerName)
+  const { resources } = await container.items
+    .query({
+      query: `SELECT * FROM c WHERE c.${partitionKey} = @val AND (NOT IS_DEFINED(c.deletedAt) OR c.deletedAt = null)`,
+      parameters: [{ name: '@val', value: partitionValue }],
+    })
+    .fetchAll()
+  return resources as T[]
+}
+
+/** Find only soft-deleted items — used by the trash page. */
+export async function findDeleted<T>(
+  containerName: string,
+  partitionKey: string,
+  partitionValue: string,
+): Promise<T[]> {
+  const container = getContainer(containerName)
+  const { resources } = await container.items
+    .query({
+      query: `SELECT * FROM c WHERE c.${partitionKey} = @val AND IS_DEFINED(c.deletedAt) AND c.deletedAt != null`,
       parameters: [{ name: '@val', value: partitionValue }],
     })
     .fetchAll()

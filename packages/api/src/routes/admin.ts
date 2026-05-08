@@ -17,7 +17,15 @@ import { DEFAULT_BRANDING } from '@ziggy/shared'
 import { requireAuth } from '../middleware/auth.js'
 import { loginRateLimiter } from '../middleware/rate-limit.js'
 import { signToken, hashPassword, comparePassword } from '../lib/auth.js'
-import { findAll, findById, upsert, deleteItem, getContainer } from '../lib/cosmos.js'
+import {
+  findAll,
+  findActive,
+  findDeleted,
+  findById,
+  upsert,
+  deleteItem,
+  getContainer,
+} from '../lib/cosmos.js'
 import { uploadImage } from '../lib/storage.js'
 import { detectImageType } from '../lib/magic-bytes.js'
 import { writeAudit, recentAudit } from '../lib/audit.js'
@@ -245,7 +253,7 @@ admin.post('/api/admin/upload', async (c) => {
 /** GET /api/admin/events/:slug/sponsors */
 admin.get('/api/admin/events/:slug/sponsors', async (c) => {
   const slug = c.req.param('slug')
-  const sponsors = await findAll<Sponsor>('sponsors', 'eventSlug', slug)
+  const sponsors = await findActive<Sponsor>('sponsors', 'eventSlug', slug)
   return c.json(sponsors)
 })
 
@@ -335,16 +343,23 @@ admin.put('/api/admin/events/:slug/sponsors/:id', async (c) => {
   return c.json(result)
 })
 
-/** DELETE /api/admin/events/:slug/sponsors/:id */
+/** DELETE /api/admin/events/:slug/sponsors/:id — soft delete by default.
+ * Pass ?hard=true to permanently remove (used by the trash page). */
 admin.delete('/api/admin/events/:slug/sponsors/:id', async (c) => {
   const slug = c.req.param('slug')
   const id = c.req.param('id')
+  const hard = c.req.query('hard') === 'true'
   const existing = await findById<Sponsor>('sponsors', id, slug)
+  if (!existing) return c.json({ error: 'Sponsor not found' }, 404)
 
-  try {
-    await deleteItem('sponsors', id, slug)
-  } catch {
-    return c.json({ error: 'Sponsor not found' }, 404)
+  if (hard) {
+    try {
+      await deleteItem('sponsors', id, slug)
+    } catch {
+      return c.json({ error: 'Sponsor not found' }, 404)
+    }
+  } else {
+    await upsert('sponsors', { ...existing, deletedAt: new Date().toISOString() })
   }
   void writeAudit({
     eventSlug: slug,
@@ -352,7 +367,7 @@ admin.delete('/api/admin/events/:slug/sponsors/:id', async (c) => {
     action: 'delete',
     target: 'sponsor',
     recordId: id,
-    summary: `Deleted sponsor "${existing?.name ?? id}"`,
+    summary: `${hard ? 'Permanently deleted' : 'Soft-deleted'} sponsor "${existing.name}"`,
   })
   return c.json({ ok: true })
 })
@@ -364,7 +379,7 @@ admin.delete('/api/admin/events/:slug/sponsors/:id', async (c) => {
 /** GET /api/admin/events/:slug/sponsor-tiers */
 admin.get('/api/admin/events/:slug/sponsor-tiers', async (c) => {
   const slug = c.req.param('slug')
-  const tiers = await findAll<SponsorTier>('sponsor-tiers', 'eventSlug', slug)
+  const tiers = await findActive<SponsorTier>('sponsor-tiers', 'eventSlug', slug)
   return c.json(tiers)
 })
 
@@ -440,16 +455,22 @@ admin.put('/api/admin/events/:slug/sponsor-tiers/:id', async (c) => {
   return c.json(result)
 })
 
-/** DELETE /api/admin/events/:slug/sponsor-tiers/:id */
+/** DELETE /api/admin/events/:slug/sponsor-tiers/:id — soft by default. */
 admin.delete('/api/admin/events/:slug/sponsor-tiers/:id', async (c) => {
   const slug = c.req.param('slug')
   const id = c.req.param('id')
+  const hard = c.req.query('hard') === 'true'
   const existing = await findById<SponsorTier>('sponsor-tiers', id, slug)
+  if (!existing) return c.json({ error: 'Sponsor tier not found' }, 404)
 
-  try {
-    await deleteItem('sponsor-tiers', id, slug)
-  } catch {
-    return c.json({ error: 'Sponsor tier not found' }, 404)
+  if (hard) {
+    try {
+      await deleteItem('sponsor-tiers', id, slug)
+    } catch {
+      return c.json({ error: 'Sponsor tier not found' }, 404)
+    }
+  } else {
+    await upsert('sponsor-tiers', { ...existing, deletedAt: new Date().toISOString() })
   }
   void writeAudit({
     eventSlug: slug,
@@ -457,7 +478,7 @@ admin.delete('/api/admin/events/:slug/sponsor-tiers/:id', async (c) => {
     action: 'delete',
     target: 'sponsor-tier',
     recordId: id,
-    summary: `Deleted sponsor tier "${existing?.name ?? id}"`,
+    summary: `${hard ? 'Permanently deleted' : 'Soft-deleted'} sponsor tier "${existing.name}"`,
   })
   return c.json({ ok: true })
 })
@@ -466,10 +487,10 @@ admin.delete('/api/admin/events/:slug/sponsor-tiers/:id', async (c) => {
 // Floor Maps CRUD
 // ---------------------------------------------------------------------------
 
-/** GET /api/admin/events/:slug/floor-maps */
+/** GET /api/admin/events/:slug/floor-maps — active only */
 admin.get('/api/admin/events/:slug/floor-maps', async (c) => {
   const slug = c.req.param('slug')
-  const maps = await findAll<FloorMap>('floor-maps', 'eventSlug', slug)
+  const maps = await findActive<FloorMap>('floor-maps', 'eventSlug', slug)
   return c.json(maps)
 })
 
@@ -587,16 +608,22 @@ admin.put('/api/admin/events/:slug/floor-maps/:id', async (c) => {
   return c.json(result)
 })
 
-/** DELETE /api/admin/events/:slug/floor-maps/:id */
+/** DELETE /api/admin/events/:slug/floor-maps/:id — soft by default. */
 admin.delete('/api/admin/events/:slug/floor-maps/:id', async (c) => {
   const slug = c.req.param('slug')
   const id = c.req.param('id')
+  const hard = c.req.query('hard') === 'true'
   const existing = await findById<FloorMap>('floor-maps', id, slug)
+  if (!existing) return c.json({ error: 'Floor map not found' }, 404)
 
-  try {
-    await deleteItem('floor-maps', id, slug)
-  } catch {
-    return c.json({ error: 'Floor map not found' }, 404)
+  if (hard) {
+    try {
+      await deleteItem('floor-maps', id, slug)
+    } catch {
+      return c.json({ error: 'Floor map not found' }, 404)
+    }
+  } else {
+    await upsert('floor-maps', { ...existing, deletedAt: new Date().toISOString() })
   }
   void writeAudit({
     eventSlug: slug,
@@ -604,7 +631,7 @@ admin.delete('/api/admin/events/:slug/floor-maps/:id', async (c) => {
     action: 'delete',
     target: 'floor-map',
     recordId: id,
-    summary: `Deleted floor map "${existing?.name ?? id}"`,
+    summary: `${hard ? 'Permanently deleted' : 'Soft-deleted'} floor map "${existing.name}"`,
   })
   return c.json({ ok: true })
 })
@@ -760,7 +787,7 @@ admin.put('/api/admin/events/:slug/booth-overrides/:boothId', async (c) => {
 /** GET /api/admin/events/:slug/shop-items */
 admin.get('/api/admin/events/:slug/shop-items', async (c) => {
   const slug = c.req.param('slug')
-  const items = await findAll<ShopItem>('shop-items', 'eventSlug', slug)
+  const items = await findActive<ShopItem>('shop-items', 'eventSlug', slug)
   return c.json(items)
 })
 
@@ -840,15 +867,22 @@ admin.put('/api/admin/events/:slug/shop-items/:id', async (c) => {
   return c.json(result)
 })
 
-/** DELETE /api/admin/events/:slug/shop-items/:id */
+/** DELETE /api/admin/events/:slug/shop-items/:id — soft by default. */
 admin.delete('/api/admin/events/:slug/shop-items/:id', async (c) => {
   const slug = c.req.param('slug')
   const id = c.req.param('id')
+  const hard = c.req.query('hard') === 'true'
   const existing = await findById<ShopItem>('shop-items', id, slug)
-  try {
-    await deleteItem('shop-items', id, slug)
-  } catch {
-    return c.json({ error: 'Shop item not found' }, 404)
+  if (!existing) return c.json({ error: 'Shop item not found' }, 404)
+
+  if (hard) {
+    try {
+      await deleteItem('shop-items', id, slug)
+    } catch {
+      return c.json({ error: 'Shop item not found' }, 404)
+    }
+  } else {
+    await upsert('shop-items', { ...existing, deletedAt: new Date().toISOString() })
   }
   void writeAudit({
     eventSlug: slug,
@@ -856,7 +890,89 @@ admin.delete('/api/admin/events/:slug/shop-items/:id', async (c) => {
     action: 'delete',
     target: 'shop-item',
     recordId: id,
-    summary: `Deleted shop item "${existing?.name || id}"`,
+    summary: `${hard ? 'Permanently deleted' : 'Soft-deleted'} shop item "${existing.name}"`,
+  })
+  return c.json({ ok: true })
+})
+
+// ---------------------------------------------------------------------------
+// Trash (soft-deleted records)
+// ---------------------------------------------------------------------------
+
+const TRASH_TARGETS = {
+  sponsors: { container: 'sponsors', auditTarget: 'sponsor' as const },
+  'sponsor-tiers': { container: 'sponsor-tiers', auditTarget: 'sponsor-tier' as const },
+  'floor-maps': { container: 'floor-maps', auditTarget: 'floor-map' as const },
+  'shop-items': { container: 'shop-items', auditTarget: 'shop-item' as const },
+} as const
+
+type TrashKey = keyof typeof TRASH_TARGETS
+
+/** GET /api/admin/events/:slug/trash — every soft-deleted record per type. */
+admin.get('/api/admin/events/:slug/trash', async (c) => {
+  const slug = c.req.param('slug')
+  const [sponsors, tiers, floorMaps, shopItems] = await Promise.all([
+    findDeleted<Sponsor>('sponsors', 'eventSlug', slug),
+    findDeleted<SponsorTier>('sponsor-tiers', 'eventSlug', slug),
+    findDeleted<FloorMap>('floor-maps', 'eventSlug', slug),
+    findDeleted<ShopItem>('shop-items', 'eventSlug', slug),
+  ])
+  return c.json({
+    sponsors,
+    'sponsor-tiers': tiers,
+    'floor-maps': floorMaps,
+    'shop-items': shopItems,
+  })
+})
+
+/** POST /api/admin/events/:slug/trash/:target/:id/restore — clears deletedAt. */
+admin.post('/api/admin/events/:slug/trash/:target/:id/restore', async (c) => {
+  const slug = c.req.param('slug')
+  const target = c.req.param('target') as TrashKey
+  const id = c.req.param('id')
+  const cfg = TRASH_TARGETS[target]
+  if (!cfg) return c.json({ error: 'Unknown trash target' }, 400)
+
+  const existing = await findById<{ id: string; deletedAt?: string; name?: string }>(
+    cfg.container,
+    id,
+    slug,
+  )
+  if (!existing) return c.json({ error: 'Not found' }, 404)
+  // Cosmos has no "delete property" — write back without it.
+  const { deletedAt: _ignored, ...rest } = existing
+  await upsert(cfg.container, rest)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'restore',
+    target: cfg.auditTarget,
+    recordId: id,
+    summary: `Restored ${cfg.auditTarget} "${existing.name ?? id}"`,
+  })
+  return c.json({ ok: true })
+})
+
+/** DELETE /api/admin/events/:slug/trash/:target/:id — hard remove. */
+admin.delete('/api/admin/events/:slug/trash/:target/:id', async (c) => {
+  const slug = c.req.param('slug')
+  const target = c.req.param('target') as TrashKey
+  const id = c.req.param('id')
+  const cfg = TRASH_TARGETS[target]
+  if (!cfg) return c.json({ error: 'Unknown trash target' }, 400)
+  const existing = await findById<{ id: string; name?: string }>(cfg.container, id, slug)
+  try {
+    await deleteItem(cfg.container, id, slug)
+  } catch {
+    return c.json({ error: 'Not found' }, 404)
+  }
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'delete',
+    target: cfg.auditTarget,
+    recordId: id,
+    summary: `Permanently deleted ${cfg.auditTarget} "${existing?.name ?? id}" from trash`,
   })
   return c.json({ ok: true })
 })

@@ -15,7 +15,7 @@ import {
 import { getEnv } from '../env.js'
 import * as runEvents from '../lib/run-events.js'
 import * as cache from '../lib/cache.js'
-import { findAll, findById } from '../lib/cosmos.js'
+import { findAll, findActive, findById } from '../lib/cosmos.js'
 
 const events = new Hono()
 
@@ -242,7 +242,7 @@ events.get('/api/events/:slug/sponsor-tiers', async (c) => {
   const slug = c.req.param('slug')
 
   try {
-    const tiers = await findAll<SponsorTier>('sponsor-tiers', 'eventSlug', slug)
+    const tiers = await findActive<SponsorTier>('sponsor-tiers', 'eventSlug', slug)
     return c.json(tiers)
   } catch {
     return c.json([] as SponsorTier[])
@@ -254,7 +254,7 @@ events.get('/api/events/:slug/sponsors', async (c) => {
   const slug = c.req.param('slug')
 
   try {
-    const sponsors = await findAll<Sponsor>('sponsors', 'eventSlug', slug)
+    const sponsors = await findActive<Sponsor>('sponsors', 'eventSlug', slug)
     return c.json(sponsors)
   } catch {
     // Cosmos DB not available — return empty array
@@ -267,7 +267,7 @@ events.get('/api/events/:slug/floor-maps', async (c) => {
   const slug = c.req.param('slug')
 
   try {
-    const floorMaps = await findAll<FloorMap>('floor-maps', 'eventSlug', slug)
+    const floorMaps = await findActive<FloorMap>('floor-maps', 'eventSlug', slug)
     return c.json(floorMaps)
   } catch {
     // Cosmos DB not available — return empty array
@@ -279,7 +279,7 @@ events.get('/api/events/:slug/floor-maps', async (c) => {
 events.get('/api/events/:slug/shop-items', async (c) => {
   const slug = c.req.param('slug')
   try {
-    const items = await findAll<ShopItem>('shop-items', 'eventSlug', slug)
+    const items = await findActive<ShopItem>('shop-items', 'eventSlug', slug)
     return c.json(items)
   } catch {
     return c.json([] as ShopItem[])
