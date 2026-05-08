@@ -371,7 +371,7 @@ export function HotspotEditorPage() {
   };
 
   const handleSelectHotspot = (hotspotId: string) => {
-    if (mode === 'draw') return;
+    if (mode !== 'select') return;
     setSelectedId(hotspotId);
   };
 
