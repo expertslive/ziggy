@@ -127,6 +127,78 @@ Required GitHub secrets:
 | `SWA_DEPLOYMENT_TOKEN` | Deployment token for the kiosk SWA. |
 | `ADMIN_SWA_DEPLOYMENT_TOKEN` | Deployment token for the admin SWA. |
 
+## First-time deployment (fresh Azure subscription / fork)
+
+The repo is self-sufficient for a clean deploy, but Bicep treats the Key
+Vault as `existing` and the GitHub Actions workflow assumes the
+`ziggy-rg` resource group + `ziggy-api` container app. For a brand-new
+environment:
+
+1. **Create the resource group**
+   ```bash
+   az group create --name <RG> --location westeurope
+   ```
+
+2. **Create the Key Vault and seed the two secrets** (`jwt-secret` and
+   `run-events-api-key`). KV must exist before `main.bicep` runs because
+   the Container App pulls these via `keyVaultUrl` references.
+   ```bash
+   az keyvault create --name <KV> --resource-group <RG> --location westeurope
+   az keyvault secret set --vault-name <KV> --name jwt-secret \
+     --value "$(openssl rand -hex 32)"
+   az keyvault secret set --vault-name <KV> --name run-events-api-key \
+     --value "<run.events ApiKey>"
+   ```
+
+3. **Deploy the rest of the infra**
+   ```bash
+   az deployment group create \
+     --resource-group <RG> \
+     --template-file infra/main.bicep \
+     --parameters keyVaultName=<KV>
+   ```
+   This provisions the Container App, both Static Web Apps, Cosmos,
+   Storage, ACR, Container Apps Env, and Log Analytics, and grants the
+   Container App's MSI "Key Vault Secrets User" on the KV.
+
+4. **Set GitHub repo secrets** for CI (Settings → Secrets and variables
+   → Actions). Values come from the deployed resources:
+   - `AZURE_CREDENTIALS` — `az ad sp create-for-rbac --sdk-auth` output,
+     scoped Contributor on the resource group
+   - `API_URL` — the Container App's ingress FQDN, e.g.
+     `https://<container-app>.azurecontainerapps.io`
+   - `ACR_NAME` — `az acr list -g <RG> --query '[0].name' -o tsv`
+   - `SWA_DEPLOYMENT_TOKEN` — kiosk SWA deployment token
+   - `ADMIN_SWA_DEPLOYMENT_TOKEN` — admin SWA deployment token
+
+5. **Update workflow if the resource names differ from defaults**.
+   `.github/workflows/deploy.yml` hardcodes `--name ziggy-api` and
+   `--resource-group ziggy-rg`. If you used different names in step 1
+   you must edit those literals (or convert them to secrets/env vars).
+
+6. **Bootstrap the first admin account.** Set `SETUP_TOKEN` on the
+   Container App, then `POST /api/auth/setup` with the matching
+   `X-Setup-Token` header — see `docs/admin-guide.md`.
+
+7. **Push to `main`** to trigger the first SPA + image deploy.
+
+### Redeploying our production infra
+
+CI auto-deploys on `main`. For an infra change (rare, requires a Bicep
+redeploy):
+
+```bash
+RG=ziggy-rg
+KV=$(az keyvault list -g "$RG" --query '[0].name' -o tsv)
+az deployment group create \
+  --resource-group "$RG" \
+  --template-file infra/main.bicep \
+  --parameters keyVaultName="$KV"
+```
+
+The KV name is auto-generated and lives in the Azure portal — look it up
+each time rather than committing it.
+
 ## Manual deploy procedures
 
 ### API

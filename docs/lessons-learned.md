@@ -360,6 +360,46 @@ real kiosk pairs, with the right partition key and TTL, regardless of
 whether infra was redeployed. Bicep is still the source of truth, but
 the runtime check guards against drift.
 
+## Two CSPs: kiosk frame-ancestors AND admin frame-src
+
+Embedding the kiosk in the admin's `/preview` iframe needs both ends to
+agree:
+
+- The **kiosk's** CSP `frame-ancestors` must allow the admin origin —
+  otherwise Chrome refuses to render the frame ("who's allowed to embed
+  me?").
+- The **admin's** CSP `frame-src` must allow the kiosk origin —
+  otherwise Chrome refuses to load the iframe at all ("what am I
+  allowed to embed?").
+
+I fixed only the kiosk side first and stared at a broken-page icon for
+twenty minutes. Both sides are policed independently; both must
+explicitly whitelist.
+
+## Public-repo cleanup is a separate pass — don't trust grep alone
+
+A repo can be free of obvious secrets (tokens, connection strings,
+password hashes) and still leak operational recon: live blob URLs,
+Cosmos `_rid`/`_self`/`_etag` metadata in committed snapshot JSONs,
+auto-generated Azure resource names hardcoded in scripts as silent
+defaults, SWA fallback hostnames in docs. None of those are credentials,
+but together they're a free reconnaissance kit for an attacker. Treat
+"secrets clean" and "exposure clean" as two distinct passes, and
+codify it: `backups/*.json` in `.gitignore`, scripts that *require*
+`API_BASE` instead of defaulting silently, Bicep parameters that ship
+generic placeholders rather than the live resource names.
+
+## `existing` Key Vault means you must seed it before Bicep runs
+
+`infra/main.bicep` declares the Key Vault as `existing` and wires the
+Container App's secret references via `keyVaultUrl`. The MSI gets
+"Key Vault Secrets User" granted on the KV inside the same Bicep run.
+A clean-slate deploy therefore breaks if the KV (and its
+`jwt-secret` + `run-events-api-key` entries) doesn't exist *before* the
+Bicep runs — `az keyvault create` + `secret set` first, then the
+`az deployment group create`. Documenting this saves the next deployer
+half an hour of "why is the Container App in CrashLoopBackoff?" debugging.
+
 ## Vite doesn't copy `staticwebapp.config.json` from the package root
 
 `staticwebapp.config.json` (CSP, headers, SPA fallback) needs to land in
