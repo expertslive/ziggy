@@ -106,10 +106,61 @@
     "handmade": "Alle Artikel sind exklusiv von MVP Koos Goossens entworfen — limitierte Auflage, mit Leidenschaft und Handwerkskunst für die Experts Live Community gefertigt.",
     "featured": "Besonders",
     "empty": "Shop öffnet am 2. Juni",
+    "bidNow": "Mitbieten →",
+    "liveAuction": "Live-Auktion",
     "studiebeurs": {
       "heading": "Experts Live Stipendium — nominiere Talent",
       "body1": "Bei jedem Kauf nominierst du jemanden für das Experts Live Stipendium von €5.000: ein Microsoft-Zertifizierungspaket (Prüfungen, Studienmaterial, Schulung) einlösbar innerhalb von 12 Monaten.",
       "body2": "Mehr Käufe = mehr Nominierungen. Selbstnominierung ist erlaubt. Die Gewinnerin oder der Gewinner wird innerhalb von 30 Tagen nach dem Event auf LinkedIn bekanntgegeben."
+    }
+  },
+  "auction": {
+    "currentBid": "Aktuelles Gebot",
+    "winner": "Gewinner",
+    "closedThanks": "Auktion geschlossen — danke für deinen Beitrag",
+    "noBids": "Noch kein Gebot — Start bei {{amount}}",
+    "noBidsHistory": "Noch keine Gebote.",
+    "closesAt": "Endet {{time}} — in {{countdown}}",
+    "bidCta": "Mitbieten · ab {{amount}}",
+    "alreadyBid": "Du hast in dieser Sitzung bereits geboten",
+    "history": "Gebots-Historie",
+    "footnote": "1 Gebot pro Kiosk · verbindlich",
+    "form": {
+      "title": "Auf den Octocat bieten",
+      "minHint": "Mindestens {{amount}} (= aktuelles Gebot + €{{increment}}). Du darfst auch mehr bieten.",
+      "amountLabel": "Betrag (€)",
+      "minError": "Minimum ist €{{amount}}",
+      "name": "Vollständiger Name",
+      "namePlaceholder": "Vorname Nachname",
+      "email": "E-Mail",
+      "phone": "Mobil (06)",
+      "phonePlaceholder": "06 12 34 56 78",
+      "privacy": "E-Mail und Telefon werden nur dem Veranstalter angezeigt, niemals öffentlich.",
+      "cancel": "Abbrechen",
+      "next": "Weiter"
+    },
+    "confirm": {
+      "title": "Verbindliches Gebot",
+      "body": "Dein Gebot von {{amount}} für den Octocat ist VERBINDLICH.",
+      "consequence": "Wenn du gewinnst, kaufst du den Octocat zu diesem Betrag.",
+      "fieldName": "Name:",
+      "fieldEmail": "E-Mail:",
+      "fieldPhone": "Telefon:",
+      "cancel": "Abbrechen",
+      "submit": "Ja, Gebot abgeben",
+      "submitting": "Gebot wird abgegeben…"
+    },
+    "errors": {
+      "generic": "Gebot fehlgeschlagen"
+    },
+    "time": {
+      "secAgo": "vor {{n}}s",
+      "minAgo": "vor {{n}}m",
+      "hrAgo": "vor {{n}}h",
+      "closed": "geschlossen",
+      "countDays": "{{d}}T {{h}}h",
+      "countHours": "{{h}}h {{m}}m",
+      "countMins": "{{m}}m"
     }
   },
   "session": {

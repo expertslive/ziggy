@@ -106,10 +106,61 @@
     "handmade": "Tous les articles sont conçus exclusivement par le MVP Koos Goossens — édition limitée, fabriquée avec passion et savoir-faire pour la communauté Experts Live.",
     "featured": "À la une",
     "empty": "La boutique ouvre le 2 juin",
+    "bidNow": "Enchérir →",
+    "liveAuction": "Enchère en direct",
     "studiebeurs": {
       "heading": "Bourse Experts Live — nommez un talent",
       "body1": "À chaque achat, vous nommez quelqu'un pour la bourse Experts Live de 5 000 € : un pack de certification Microsoft (examens, supports, formation) à utiliser dans les 12 mois.",
       "body2": "Plus d'achats = plus de nominations. L'autonomination est autorisée. Le gagnant est annoncé via LinkedIn dans les 30 jours suivant l'événement."
+    }
+  },
+  "auction": {
+    "currentBid": "Offre actuelle",
+    "winner": "Gagnant",
+    "closedThanks": "Enchère terminée — merci pour votre participation",
+    "noBids": "Aucune offre — départ à {{amount}}",
+    "noBidsHistory": "Aucune offre pour le moment.",
+    "closesAt": "Clôture {{time}} — dans {{countdown}}",
+    "bidCta": "Enchérir · à partir de {{amount}}",
+    "alreadyBid": "Vous avez déjà enchéri durant cette session",
+    "history": "Historique des offres",
+    "footnote": "1 offre par kiosque · offre engageante",
+    "form": {
+      "title": "Enchérir sur l'Octocat",
+      "minHint": "Minimum {{amount}} (= offre actuelle + {{increment}} €). Vous pouvez saisir un montant plus élevé.",
+      "amountLabel": "Montant (€)",
+      "minError": "Minimum {{amount}} €",
+      "name": "Nom complet",
+      "namePlaceholder": "Prénom Nom",
+      "email": "E-mail",
+      "phone": "Mobile (06)",
+      "phonePlaceholder": "06 12 34 56 78",
+      "privacy": "Votre e-mail et téléphone ne sont visibles que par l'organisateur, jamais publiquement.",
+      "cancel": "Annuler",
+      "next": "Suivant"
+    },
+    "confirm": {
+      "title": "Offre engageante",
+      "body": "Votre offre de {{amount}} pour l'Octocat est ENGAGEANTE.",
+      "consequence": "Si vous gagnez, vous achetez l'Octocat pour ce montant.",
+      "fieldName": "Nom :",
+      "fieldEmail": "E-mail :",
+      "fieldPhone": "Téléphone :",
+      "cancel": "Annuler",
+      "submit": "Oui, soumettre l'offre",
+      "submitting": "Soumission…"
+    },
+    "errors": {
+      "generic": "Échec de l'offre"
+    },
+    "time": {
+      "secAgo": "il y a {{n}}s",
+      "minAgo": "il y a {{n}}m",
+      "hrAgo": "il y a {{n}}h",
+      "closed": "fermée",
+      "countDays": "{{d}}j {{h}}h",
+      "countHours": "{{h}}h {{m}}m",
+      "countMins": "{{m}}m"
     }
   },
   "session": {

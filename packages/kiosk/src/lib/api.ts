@@ -191,10 +191,60 @@ export interface ShopItem {
   priceLabel: string;
   isHighlighted?: boolean;
   sortOrder: number;
+  auction?: {
+    minStartBid: number;
+    minIncrement: number;
+    endsAt: string;
+    closedAt?: string;
+  };
 }
 
 export function fetchShopItems(slug: string): Promise<ShopItem[]> {
   return fetchJson<ShopItem[]>(`/api/events/${slug}/shop-items`);
+}
+
+// Auction
+export interface AuctionPublicState {
+  shopItemId: string;
+  config: { minStartBid: number; minIncrement: number; endsAt: string; closedAt?: string };
+  isOpen: boolean;
+  highest: { amount: number; displayName: string; ts: number } | null;
+  bids: { amount: number; displayName: string; ts: number }[];
+}
+
+export function fetchAuction(slug: string, shopItemId: string): Promise<AuctionPublicState> {
+  return fetchJson<AuctionPublicState>(
+    `/api/events/${slug}/shop-items/${shopItemId}/auction`,
+  );
+}
+
+export interface PlaceBidArgs {
+  amount: number; // cents
+  name: string;
+  email: string;
+  phone: string;
+  kioskId?: string;
+  sessionId?: string;
+  binding: true;
+}
+
+export async function placeBid(
+  slug: string,
+  shopItemId: string,
+  body: PlaceBidArgs,
+): Promise<{ amount: number; displayName: string; ts: number }> {
+  const res = await fetch(`/api/events/${slug}/shop-items/${shopItemId}/auction`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(
+      typeof data.error === 'string' ? data.error : `API error ${res.status}`,
+    );
+  }
+  return data;
 }
 
 export interface I18nOverrides {

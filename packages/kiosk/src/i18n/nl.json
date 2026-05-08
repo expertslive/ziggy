@@ -106,10 +106,61 @@
     "handmade": "Alle items zijn exclusief ontworpen door MVP Koos Goossens — gelimiteerde oplage, met passie en vakmanschap gemaakt voor de Experts Live community.",
     "featured": "Uitgelicht",
     "empty": "Shop opent 2 juni",
+    "bidNow": "Bied mee →",
+    "liveAuction": "Live veiling",
     "studiebeurs": {
       "heading": "Experts Live Studiebeurs — nomineer talent",
       "body1": "Bij elke aankoop nomineer je iemand voor de Experts Live Studiebeurs van €5.000: een Microsoft-certificeringspakket (examens, studiemateriaal, training) te besteden binnen 12 maanden.",
       "body2": "Meer aankopen = meer nominaties. Zelfnominatie is toegestaan. De winnaar wordt binnen 30 dagen na het event bekendgemaakt via LinkedIn."
+    }
+  },
+  "auction": {
+    "currentBid": "Huidig bod",
+    "winner": "Winnaar",
+    "closedThanks": "Veiling gesloten — bedankt voor je bijdrage",
+    "noBids": "Nog geen bod — start vanaf {{amount}}",
+    "noBidsHistory": "Nog geen biedingen.",
+    "closesAt": "Sluit {{time}} — over {{countdown}}",
+    "bidCta": "Bied mee · vanaf {{amount}}",
+    "alreadyBid": "Je hebt al geboden in deze sessie",
+    "history": "Bod-historie",
+    "footnote": "1 bod per kiosk · bod is bindend",
+    "form": {
+      "title": "Bied mee op de Octocat",
+      "minHint": "Minimaal {{amount}} (= huidig bod + €{{increment}}). Je mag een hoger bedrag invullen.",
+      "amountLabel": "Bedrag (€)",
+      "minError": "Minimum is €{{amount}}",
+      "name": "Volledige naam",
+      "namePlaceholder": "Voornaam Achternaam",
+      "email": "Email",
+      "phone": "Mobiel (06)",
+      "phonePlaceholder": "06 12 34 56 78",
+      "privacy": "Email en telefoon worden alleen aan de organisator getoond, niet publiek.",
+      "cancel": "Annuleer",
+      "next": "Volgende"
+    },
+    "confirm": {
+      "title": "Bindend bod",
+      "body": "Je bod van {{amount}} voor de Octocat is BINDEND.",
+      "consequence": "Als jij wint, koop jij de Octocat voor dit bedrag.",
+      "fieldName": "Naam:",
+      "fieldEmail": "Email:",
+      "fieldPhone": "Telefoon:",
+      "cancel": "Annuleer",
+      "submit": "Ja, plaats bod",
+      "submitting": "Bod plaatsen…"
+    },
+    "errors": {
+      "generic": "Bod plaatsen mislukt"
+    },
+    "time": {
+      "secAgo": "{{n}}s geleden",
+      "minAgo": "{{n}}m geleden",
+      "hrAgo": "{{n}}u geleden",
+      "closed": "gesloten",
+      "countDays": "{{d}}d {{h}}u",
+      "countHours": "{{h}}u {{m}}m",
+      "countMins": "{{m}}m"
     }
   },
   "session": {

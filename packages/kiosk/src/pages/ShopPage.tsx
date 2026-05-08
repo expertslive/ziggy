@@ -6,16 +6,25 @@ import { PageContainer } from '../components/PageContainer';
 import { useShopItems } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
 import type { ShopItem } from '../lib/api';
+import { AuctionPanel } from '../components/AuctionPanel';
 
 function ShopCard({ item, onTap }: { item: ShopItem; onTap: () => void }) {
+  const { t } = useTranslation();
+  const hasAuction = !!item.auction;
   return (
     <motion.button
       whileTap={{ scale: 0.96 }}
       onClick={onTap}
-      className={`bg-white rounded-2xl p-4 flex flex-col gap-3 active:bg-el-light transition-colors text-left ${
+      className={`bg-white rounded-2xl p-4 flex flex-col gap-3 active:bg-el-light transition-colors text-left relative ${
         item.isHighlighted ? 'ring-4 ring-el-blue' : ''
       }`}
     >
+      {hasAuction && (
+        <span className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/90 text-white text-[10px] font-bold uppercase tracking-wider">
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+          {t('shop.liveAuction')}
+        </span>
+      )}
       <div className="aspect-[4/3] w-full bg-el-light rounded-xl overflow-hidden flex items-center justify-center">
         {item.imageUrl ? (
           <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
@@ -25,7 +34,9 @@ function ShopCard({ item, onTap }: { item: ShopItem; onTap: () => void }) {
       </div>
       <div>
         <h3 className="text-base font-bold text-el-dark line-clamp-2">{item.name}</h3>
-        <p className="text-el-blue font-extrabold mt-1">{item.priceLabel}</p>
+        <p className="text-el-blue font-extrabold mt-1">
+          {hasAuction ? t('shop.bidNow') : item.priceLabel}
+        </p>
       </div>
     </motion.button>
   );
@@ -52,6 +63,8 @@ function ShopDetailModal({ item, onClose }: { item: ShopItem; onClose: () => voi
     if (idx !== activeIdx) setActiveIdx(idx);
   }
 
+  const hasAuction = !!item.auction;
+
   return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
@@ -65,7 +78,9 @@ function ShopDetailModal({ item, onClose }: { item: ShopItem; onClose: () => voi
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="relative bg-el-dark rounded-t-3xl w-full max-w-2xl max-h-[90dvh] overflow-auto"
+        className={`relative bg-el-dark rounded-t-3xl w-full max-h-[92dvh] overflow-auto ${
+          hasAuction ? 'max-w-5xl' : 'max-w-2xl'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -76,47 +91,67 @@ function ShopDetailModal({ item, onClose }: { item: ShopItem; onClose: () => voi
           &#x2715;
         </button>
         <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mt-3 mb-4" />
-        {images.length > 0 && (
-          <div className="relative">
-            <div
-              ref={scrollerRef}
-              onScroll={onScroll}
-              className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar"
-            >
-              {images.map((src, i) => (
-                <img
-                  key={src + i}
-                  src={src}
-                  alt={`${item.name} ${i + 1}`}
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  draggable={false}
-                  className="shrink-0 w-full h-60 sm:h-80 object-contain snap-start select-none bg-el-darker"
-                />
-              ))}
-            </div>
-            {images.length > 1 && (
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 px-2 py-1 rounded-full bg-black/40 backdrop-blur">
-                {images.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => scrollToIdx(i)}
-                    aria-label={`Show image ${i + 1}`}
-                    className={`w-1.5 h-1.5 rounded-full transition-all ${
-                      i === activeIdx ? 'bg-white w-4' : 'bg-white/50'
-                    }`}
-                  />
-                ))}
+
+        {/* Layout: split-pane on md+ when auction is present (gallery+info on
+         *  the left, auction panel on the right). Otherwise single column. */}
+        <div className={hasAuction ? 'md:grid md:grid-cols-2 md:gap-0' : ''}>
+          {/* Left / top: gallery + name + description */}
+          <div>
+            {images.length > 0 && (
+              <div className="relative">
+                <div
+                  ref={scrollerRef}
+                  onScroll={onScroll}
+                  className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar"
+                >
+                  {images.map((src, i) => (
+                    <img
+                      key={src + i}
+                      src={src}
+                      alt={`${item.name} ${i + 1}`}
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      draggable={false}
+                      className="shrink-0 w-full h-60 sm:h-80 object-contain snap-start select-none bg-el-darker"
+                    />
+                  ))}
+                </div>
+                {images.length > 1 && (
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 px-2 py-1 rounded-full bg-black/40 backdrop-blur">
+                    {images.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => scrollToIdx(i)}
+                        aria-label={`Show image ${i + 1}`}
+                        className={`w-1.5 h-1.5 rounded-full transition-all ${
+                          i === activeIdx ? 'bg-white w-4' : 'bg-white/50'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
+            <div className="p-5 sm:p-6 space-y-3 sm:space-y-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-el-light">{item.name}</h2>
+              {!hasAuction && (
+                <p className="text-el-blue font-extrabold text-xl sm:text-2xl">{item.priceLabel}</p>
+              )}
+              {description && (
+                <p className="text-el-light/70 leading-relaxed whitespace-pre-line text-sm sm:text-base">{description}</p>
+              )}
+            </div>
           </div>
-        )}
-        <div className="p-5 sm:p-6 space-y-3 sm:space-y-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-el-light">{item.name}</h2>
-          <p className="text-el-blue font-extrabold text-xl sm:text-2xl">{item.priceLabel}</p>
-          {description && (
-            <p className="text-el-light/70 leading-relaxed whitespace-pre-line text-sm sm:text-base">{description}</p>
+
+          {/* Right / bottom: auction panel (only when configured) */}
+          {hasAuction && (
+            <div className="p-5 sm:p-6 md:border-l md:border-white/10">
+              <AuctionPanel item={item} />
+            </div>
           )}
+        </div>
+
+        <div className="p-5 sm:p-6 pt-0">
           <button
             onClick={onClose}
             className="w-full py-3 rounded-xl bg-white/10 text-el-light font-semibold active:bg-white/20 transition-colors"

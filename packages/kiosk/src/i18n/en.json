@@ -106,10 +106,61 @@
     "handmade": "All items are exclusively designed by MVP Koos Goossens — limited edition, made with passion and craftsmanship for the Experts Live community.",
     "featured": "Featured",
     "empty": "Shop opens June 2",
+    "bidNow": "Place a bid →",
+    "liveAuction": "Live auction",
     "studiebeurs": {
       "heading": "Experts Live Scholarship — nominate talent",
       "body1": "With every purchase you nominate someone for the €5,000 Experts Live Scholarship: a Microsoft certification package (exams, study material, training) to be used within 12 months.",
       "body2": "More purchases = more nominations. Self-nomination is allowed. The winner is announced via LinkedIn within 30 days after the event."
+    }
+  },
+  "auction": {
+    "currentBid": "Current bid",
+    "winner": "Winner",
+    "closedThanks": "Auction closed — thanks for joining in",
+    "noBids": "No bids yet — starting at {{amount}}",
+    "noBidsHistory": "No bids yet.",
+    "closesAt": "Closes {{time}} — in {{countdown}}",
+    "bidCta": "Place a bid · from {{amount}}",
+    "alreadyBid": "You've already bid in this session",
+    "history": "Bid history",
+    "footnote": "1 bid per kiosk · binding bid",
+    "form": {
+      "title": "Bid on the Octocat",
+      "minHint": "Minimum {{amount}} (= current bid + €{{increment}}). You may enter a higher amount.",
+      "amountLabel": "Amount (€)",
+      "minError": "Minimum is €{{amount}}",
+      "name": "Full name",
+      "namePlaceholder": "First Last",
+      "email": "Email",
+      "phone": "Mobile (06)",
+      "phonePlaceholder": "06 12 34 56 78",
+      "privacy": "Your email and phone are only shown to the organiser, never publicly.",
+      "cancel": "Cancel",
+      "next": "Next"
+    },
+    "confirm": {
+      "title": "Binding bid",
+      "body": "Your bid of {{amount}} for the Octocat is BINDING.",
+      "consequence": "If you win, you buy the Octocat for this amount.",
+      "fieldName": "Name:",
+      "fieldEmail": "Email:",
+      "fieldPhone": "Phone:",
+      "cancel": "Cancel",
+      "submit": "Yes, place bid",
+      "submitting": "Placing bid…"
+    },
+    "errors": {
+      "generic": "Bid failed"
+    },
+    "time": {
+      "secAgo": "{{n}}s ago",
+      "minAgo": "{{n}}m ago",
+      "hrAgo": "{{n}}h ago",
+      "closed": "closed",
+      "countDays": "{{d}}d {{h}}h",
+      "countHours": "{{h}}h {{m}}m",
+      "countMins": "{{m}}m"
     }
   },
   "session": {
