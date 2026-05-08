@@ -21,6 +21,13 @@ import { findAll, findById, upsert, deleteItem, getContainer } from '../lib/cosm
 import { uploadImage } from '../lib/storage.js'
 import { detectImageType } from '../lib/magic-bytes.js'
 import { writeAudit, recentAudit } from '../lib/audit.js'
+import {
+  takeSnapshot,
+  listSnapshots,
+  readSnapshot,
+  restoreSnapshot,
+  deleteSnapshot,
+} from '../lib/snapshots.js'
 import { getEnv } from '../env.js'
 import type { TokenPayload } from '../lib/auth.js'
 import {
@@ -522,6 +529,21 @@ admin.put('/api/admin/events/:slug/floor-maps/:id', async (c) => {
   }
   const patch = parsed.data
 
+  // Auto-snapshot before any floor-map PUT that touches hotspots — the
+  // shape that hurt us last time. Cheap insurance: ~100 KB, ~1 second.
+  if (patch.hotspots !== undefined) {
+    try {
+      await takeSnapshot({
+        eventSlug: slug,
+        capturedBy: actorEmail(c),
+        reason: `auto-pre-floor-map-put-${id.slice(0, 8)}`,
+      })
+    } catch (err) {
+      // Snapshot failure should never block the actual mutation — log and continue.
+      console.warn('[snapshots] auto pre-PUT snapshot failed', err)
+    }
+  }
+
   const updated: FloorMap = {
     ...existing,
     ...(patch.name !== undefined && { name: patch.name }),
@@ -850,6 +872,99 @@ admin.get('/api/admin/events/:slug/audit-log', async (c) => {
   const limit = Math.min(Math.max(parseInt(raw || '50', 10) || 50, 1), 500)
   const entries = await recentAudit(slug, limit)
   return c.json(entries)
+})
+
+// ---------------------------------------------------------------------------
+// Snapshots (Cosmos JSON dumps in Blob Storage)
+// ---------------------------------------------------------------------------
+
+/** GET /api/admin/events/:slug/snapshots — list all snapshots, newest first. */
+admin.get('/api/admin/events/:slug/snapshots', async (c) => {
+  const slug = c.req.param('slug')
+  const items = await listSnapshots(slug)
+  return c.json(items)
+})
+
+/** POST /api/admin/events/:slug/snapshots — take a new snapshot now.
+ * Body: { reason?: string }. */
+admin.post('/api/admin/events/:slug/snapshots', async (c) => {
+  const slug = c.req.param('slug')
+  let reason: string | undefined
+  try {
+    const body = (await c.req.json()) as { reason?: string }
+    reason = body?.reason
+  } catch {
+    // empty body is fine
+  }
+  const meta = await takeSnapshot({
+    eventSlug: slug,
+    capturedBy: actorEmail(c),
+    reason,
+  })
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'snapshot',
+    target: 'snapshot',
+    recordId: meta.name,
+    summary: `Took snapshot${reason ? ` (${reason})` : ''}`,
+    meta: { sizeBytes: meta.sizeBytes },
+  })
+  return c.json(meta, 201)
+})
+
+/** GET /api/admin/events/:slug/snapshots/:name — download a single snapshot.
+ * `:name` is URL-encoded (contains slashes). */
+admin.get('/api/admin/events/:slug/snapshots/:name{.+}', async (c) => {
+  const name = decodeURIComponent(c.req.param('name'))
+  const payload = await readSnapshot(name)
+  return c.json(payload)
+})
+
+/** POST /api/admin/events/:slug/snapshots/:name/restore — replay snapshot
+ * upserts back into Cosmos. Auto-snapshots first as a safety net. */
+admin.post('/api/admin/events/:slug/snapshots/:name{.+}/restore', async (c) => {
+  const slug = c.req.param('slug')
+  const name = decodeURIComponent(c.req.param('name'))
+  // Take a pre-restore snapshot so the user can roll back if the chosen
+  // snapshot turns out to be wrong.
+  let preMeta
+  try {
+    preMeta = await takeSnapshot({
+      eventSlug: slug,
+      capturedBy: actorEmail(c),
+      reason: `auto-pre-restore`,
+    })
+  } catch (err) {
+    return c.json({ error: 'Could not take pre-restore snapshot', detail: String(err) }, 500)
+  }
+  const result = await restoreSnapshot(name)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'restore-snapshot',
+    target: 'snapshot',
+    recordId: name,
+    summary: `Restored from snapshot ${name.split('/').pop()}`,
+    meta: { restored: result.restored, preRestoreSnapshot: preMeta.name },
+  })
+  return c.json({ ...result, preRestoreSnapshot: preMeta.name })
+})
+
+/** DELETE /api/admin/events/:slug/snapshots/:name — remove a snapshot blob. */
+admin.delete('/api/admin/events/:slug/snapshots/:name{.+}', async (c) => {
+  const slug = c.req.param('slug')
+  const name = decodeURIComponent(c.req.param('name'))
+  await deleteSnapshot(name)
+  void writeAudit({
+    eventSlug: slug,
+    actor: actorEmail(c),
+    action: 'delete',
+    target: 'snapshot',
+    recordId: name,
+    summary: `Deleted snapshot ${name.split('/').pop()}`,
+  })
+  return c.json({ ok: true })
 })
 
 export default admin

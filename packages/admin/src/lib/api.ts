@@ -183,6 +183,52 @@ export function deleteShopItem(id: string) {
   return fetchJson(`/api/admin/events/${slug}/shop-items/${id}`, { method: 'DELETE' });
 }
 
+// Audit log
+export interface AuditEntry {
+  id: string
+  eventSlug: string
+  ts: number
+  actor: string
+  action: string
+  target: string
+  recordId?: string
+  summary: string
+  meta?: Record<string, unknown>
+}
+export function fetchAuditLog(limit = 50) {
+  return fetchJson<AuditEntry[]>(`/api/admin/events/${slug}/audit-log?limit=${limit}`)
+}
+
+// Snapshots (Cosmos backup blobs)
+export interface SnapshotMeta {
+  name: string
+  capturedAt: string
+  capturedBy: string
+  reason?: string
+  sizeBytes: number
+}
+export function fetchSnapshots() {
+  return fetchJson<SnapshotMeta[]>(`/api/admin/events/${slug}/snapshots`)
+}
+export function takeSnapshot(reason?: string) {
+  return fetchJson<SnapshotMeta>(`/api/admin/events/${slug}/snapshots`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  })
+}
+export function restoreSnapshot(name: string) {
+  return fetchJson<{ restored: Record<string, number>; preRestoreSnapshot: string }>(
+    `/api/admin/events/${slug}/snapshots/${encodeURIComponent(name)}/restore`,
+    { method: 'POST' },
+  )
+}
+export function deleteSnapshot(name: string) {
+  return fetchJson<{ ok: boolean }>(
+    `/api/admin/events/${slug}/snapshots/${encodeURIComponent(name)}`,
+    { method: 'DELETE' },
+  )
+}
+
 // Analytics
 export interface AnalyticsSummary {
   now: number

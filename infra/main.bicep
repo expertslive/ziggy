@@ -164,6 +164,15 @@ resource imagesContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   }
 }
 
+// Cosmos snapshots — admin-only JSON dumps. Private (no anonymous access).
+resource snapshotsContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  parent: blobService
+  name: 'snapshots'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
 // ─── Log Analytics ────────────────────────────────────────────────────
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: logAnalyticsName
