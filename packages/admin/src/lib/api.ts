@@ -183,6 +183,62 @@ export function deleteShopItem(id: string) {
   return fetchJson(`/api/admin/events/${slug}/shop-items/${id}`, { method: 'DELETE' });
 }
 
+// Admin user management
+export interface AdminUser {
+  id: string
+  email: string
+  displayName?: string
+  lastLoginAt?: string
+  disabled?: boolean
+  createdAt: string
+}
+export function fetchMe() {
+  return fetchJson<AdminUser>('/api/admin/me')
+}
+export function updateMe(displayName: string) {
+  return fetchJson<AdminUser>('/api/admin/me', {
+    method: 'PUT',
+    body: JSON.stringify({ displayName }),
+  })
+}
+export function changeOwnPassword(currentPassword: string, newPassword: string) {
+  return fetchJson<{ ok: boolean }>('/api/admin/me/password', {
+    method: 'POST',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  })
+}
+export function fetchAdmins() {
+  return fetchJson<AdminUser[]>('/api/admin/users')
+}
+export function createAdminUser(data: {
+  email: string
+  displayName?: string
+  password: string
+}) {
+  return fetchJson<AdminUser>('/api/admin/users', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+export function updateAdminUser(
+  id: string,
+  data: { displayName?: string; disabled?: boolean },
+) {
+  return fetchJson<AdminUser>(`/api/admin/users/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+export function resetUserPassword(id: string, newPassword: string) {
+  return fetchJson<{ ok: boolean }>(`/api/admin/users/${id}/reset-password`, {
+    method: 'POST',
+    body: JSON.stringify({ newPassword }),
+  })
+}
+export function deleteAdminUser(id: string) {
+  return fetchJson<{ ok: boolean }>(`/api/admin/users/${id}`, { method: 'DELETE' })
+}
+
 // Trash (soft-deleted records)
 export type TrashTarget = 'sponsors' | 'sponsor-tiers' | 'floor-maps' | 'shop-items'
 export interface TrashBundle {

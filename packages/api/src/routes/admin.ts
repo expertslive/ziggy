@@ -56,12 +56,20 @@ function clientIp(c: Context): string {
   )
 }
 
+/** Pull the authenticated admin's full token payload from the request.
+ * Hono's stricter typing on route handlers rejects `c.get('admin')` with
+ * an arbitrary key, so we centralize the cast here. Returns undefined for
+ * routes that don't run under requireAuth. */
+function currentAdmin(c: Context): TokenPayload | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (c.get as any)('admin') as TokenPayload | undefined
+}
+
 /** Pull the authenticated admin's email from the request. Routes mounted
  * under requireAuth always have this; for routes that don't (login/setup
  * fall back to the supplied email or '<system>'). */
 function actorEmail(c: Context, fallback = '<system>'): string {
-  const payload = c.get('admin') as TokenPayload | undefined
-  return payload?.email || fallback
+  return currentAdmin(c)?.email || fallback
 }
 
 /**
@@ -120,6 +128,19 @@ admin.post('/api/auth/login', async (c) => {
     return c.json({ error: 'Invalid email or password' }, 401)
   }
 
+  if (adminUser.disabled) {
+    loginRateLimiter.recordFailure(ip, emailRaw)
+    void writeAudit({
+      eventSlug: getEnv().eventSlug,
+      actor: emailRaw,
+      action: 'login-failed',
+      target: 'admin',
+      recordId: adminUser.id,
+      summary: `Login refused (account disabled) from ${ip}`,
+    })
+    return c.json({ error: 'Account disabled — contact an admin.' }, 403)
+  }
+
   const valid = await comparePassword(body.password, adminUser.passwordHash)
   if (!valid) {
     loginRateLimiter.recordFailure(ip, emailRaw)
@@ -134,6 +155,10 @@ admin.post('/api/auth/login', async (c) => {
   }
 
   loginRateLimiter.recordSuccess(ip, emailRaw)
+  // Stamp last-login (don't await — non-critical to the response).
+  adminUser.lastLoginAt = new Date().toISOString()
+  void upsert('admins', adminUser).catch(() => {})
+
   const token = signToken(adminUser)
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
   void writeAudit({
@@ -1079,6 +1104,270 @@ admin.delete('/api/admin/events/:slug/snapshots/:name{.+}', async (c) => {
     target: 'snapshot',
     recordId: name,
     summary: `Deleted snapshot ${name.split('/').pop()}`,
+  })
+  return c.json({ ok: true })
+})
+
+// ---------------------------------------------------------------------------
+// Admin user management
+// ---------------------------------------------------------------------------
+
+interface PublicAdmin {
+  id: string
+  email: string
+  displayName?: string
+  lastLoginAt?: string
+  disabled?: boolean
+  createdAt: string
+}
+
+function toPublicAdmin(a: Admin): PublicAdmin {
+  return {
+    id: a.id,
+    email: a.email,
+    displayName: a.displayName,
+    lastLoginAt: a.lastLoginAt,
+    disabled: a.disabled,
+    createdAt: a.createdAt,
+  }
+}
+
+async function findAdminByEmail(email: string): Promise<Admin | undefined> {
+  const container = getContainer('admins')
+  const { resources } = await container.items
+    .query<Admin>({
+      query: 'SELECT * FROM c WHERE c.email = @e',
+      parameters: [{ name: '@e', value: email }],
+    })
+    .fetchAll()
+  return resources[0]
+}
+
+async function findAdminById(id: string): Promise<Admin | undefined> {
+  const container = getContainer('admins')
+  const { resources } = await container.items
+    .query<Admin>({
+      query: 'SELECT * FROM c WHERE c.id = @id',
+      parameters: [{ name: '@id', value: id }],
+    })
+    .fetchAll()
+  return resources[0]
+}
+
+async function listAllAdmins(): Promise<Admin[]> {
+  const container = getContainer('admins')
+  const { resources } = await container.items
+    .query<Admin>({ query: 'SELECT * FROM c' })
+    .fetchAll()
+  return resources
+}
+
+async function countEnabledAdmins(): Promise<number> {
+  const all = await listAllAdmins()
+  return all.filter((a) => !a.disabled).length
+}
+
+/** GET /api/admin/me — current admin's own profile. */
+admin.get('/api/admin/me', async (c) => {
+  const payload = currentAdmin(c)!
+  const me = await findAdminByEmail(payload.email)
+  if (!me) return c.json({ error: 'Account no longer exists' }, 404)
+  return c.json(toPublicAdmin(me))
+})
+
+/** PUT /api/admin/me — update own displayName. */
+admin.put('/api/admin/me', async (c) => {
+  const payload = currentAdmin(c)!
+  const me = await findAdminByEmail(payload.email)
+  if (!me) return c.json({ error: 'Account no longer exists' }, 404)
+  const body = (await c.req.json()) as { displayName?: string }
+  if (body.displayName !== undefined && body.displayName.length > 100) {
+    return c.json({ error: 'displayName too long' }, 400)
+  }
+  const updated: Admin = {
+    ...me,
+    displayName: body.displayName,
+    updatedAt: new Date().toISOString(),
+  }
+  await upsert('admins', updated)
+  void writeAudit({
+    eventSlug: getEnv().eventSlug,
+    actor: payload.email,
+    action: 'update',
+    target: 'admin',
+    recordId: me.id,
+    summary: `Updated own profile`,
+  })
+  return c.json(toPublicAdmin(updated))
+})
+
+/** POST /api/admin/me/password — change own password. Requires current pw. */
+admin.post('/api/admin/me/password', async (c) => {
+  const payload = currentAdmin(c)!
+  const me = await findAdminByEmail(payload.email)
+  if (!me) return c.json({ error: 'Account no longer exists' }, 404)
+  const body = (await c.req.json()) as {
+    currentPassword?: string
+    newPassword?: string
+  }
+  if (!body.currentPassword || !body.newPassword) {
+    return c.json({ error: 'currentPassword and newPassword required' }, 400)
+  }
+  if (body.newPassword.length < 8) {
+    return c.json({ error: 'New password must be at least 8 characters' }, 400)
+  }
+  const ok = await comparePassword(body.currentPassword, me.passwordHash)
+  if (!ok) return c.json({ error: 'Current password is incorrect' }, 401)
+
+  const updated: Admin = {
+    ...me,
+    passwordHash: await hashPassword(body.newPassword),
+    updatedAt: new Date().toISOString(),
+  }
+  await upsert('admins', updated)
+  void writeAudit({
+    eventSlug: getEnv().eventSlug,
+    actor: payload.email,
+    action: 'password-change',
+    target: 'admin',
+    recordId: me.id,
+    summary: `Changed own password`,
+  })
+  return c.json({ ok: true })
+})
+
+/** GET /api/admin/users — list all admin accounts. */
+admin.get('/api/admin/users', async (c) => {
+  const all = await listAllAdmins()
+  return c.json(all.map(toPublicAdmin))
+})
+
+/** POST /api/admin/users — create another admin. */
+admin.post('/api/admin/users', async (c) => {
+  const body = (await c.req.json()) as {
+    email?: string
+    displayName?: string
+    password?: string
+  }
+  if (!body.email || !body.password) {
+    return c.json({ error: 'email and password required' }, 400)
+  }
+  if (body.password.length < 8) {
+    return c.json({ error: 'Password must be at least 8 characters' }, 400)
+  }
+  const existing = await findAdminByEmail(body.email.toLowerCase())
+  if (existing) return c.json({ error: 'An admin with this email already exists' }, 409)
+
+  const newAdmin: Admin = {
+    id: crypto.randomUUID(),
+    email: body.email.toLowerCase(),
+    displayName: body.displayName,
+    passwordHash: await hashPassword(body.password),
+    createdAt: new Date().toISOString(),
+  }
+  await upsert('admins', newAdmin)
+  void writeAudit({
+    eventSlug: getEnv().eventSlug,
+    actor: actorEmail(c),
+    action: 'create',
+    target: 'admin',
+    recordId: newAdmin.id,
+    summary: `Created admin account ${newAdmin.email}`,
+  })
+  return c.json(toPublicAdmin(newAdmin), 201)
+})
+
+/** PUT /api/admin/users/:id — update displayName/disabled on another admin. */
+admin.put('/api/admin/users/:id', async (c) => {
+  const id = c.req.param('id')
+  const target = await findAdminById(id)
+  if (!target) return c.json({ error: 'Admin not found' }, 404)
+  const body = (await c.req.json()) as { displayName?: string; disabled?: boolean }
+
+  // Block self-disable + last-enabled-admin lockout.
+  const me = currentAdmin(c)!
+  if (body.disabled === true) {
+    if (target.email === me.email) {
+      return c.json({ error: "You can't disable your own account" }, 400)
+    }
+    const enabledCount = await countEnabledAdmins()
+    if (enabledCount <= 1 && !target.disabled) {
+      return c.json({ error: "Can't disable the last enabled admin" }, 400)
+    }
+  }
+
+  const updated: Admin = {
+    ...target,
+    displayName:
+      body.displayName !== undefined ? body.displayName : target.displayName,
+    disabled: body.disabled !== undefined ? body.disabled : target.disabled,
+    updatedAt: new Date().toISOString(),
+  }
+  await upsert('admins', updated)
+  void writeAudit({
+    eventSlug: getEnv().eventSlug,
+    actor: actorEmail(c),
+    action: 'update',
+    target: 'admin',
+    recordId: id,
+    summary: `Updated admin ${target.email}`,
+    meta: { fields: Object.keys(body) },
+  })
+  return c.json(toPublicAdmin(updated))
+})
+
+/** POST /api/admin/users/:id/reset-password — set a new password for another admin. */
+admin.post('/api/admin/users/:id/reset-password', async (c) => {
+  const id = c.req.param('id')
+  const target = await findAdminById(id)
+  if (!target) return c.json({ error: 'Admin not found' }, 404)
+  const body = (await c.req.json()) as { newPassword?: string }
+  if (!body.newPassword || body.newPassword.length < 8) {
+    return c.json({ error: 'newPassword must be at least 8 characters' }, 400)
+  }
+  const updated: Admin = {
+    ...target,
+    passwordHash: await hashPassword(body.newPassword),
+    updatedAt: new Date().toISOString(),
+  }
+  await upsert('admins', updated)
+  void writeAudit({
+    eventSlug: getEnv().eventSlug,
+    actor: actorEmail(c),
+    action: 'password-change',
+    target: 'admin',
+    recordId: id,
+    summary: `Reset password for ${target.email}`,
+  })
+  return c.json({ ok: true })
+})
+
+/** DELETE /api/admin/users/:id — hard-delete another admin. */
+admin.delete('/api/admin/users/:id', async (c) => {
+  const id = c.req.param('id')
+  const target = await findAdminById(id)
+  if (!target) return c.json({ error: 'Admin not found' }, 404)
+  const me = currentAdmin(c)!
+  if (target.email === me.email) {
+    return c.json({ error: "You can't delete your own account" }, 400)
+  }
+  const enabledCount = await countEnabledAdmins()
+  if (enabledCount <= 1 && !target.disabled) {
+    return c.json({ error: "Can't delete the last enabled admin" }, 400)
+  }
+
+  try {
+    await deleteItem('admins', id, target.email)
+  } catch {
+    return c.json({ error: 'Admin not found' }, 404)
+  }
+  void writeAudit({
+    eventSlug: getEnv().eventSlug,
+    actor: actorEmail(c),
+    action: 'delete',
+    target: 'admin',
+    recordId: id,
+    summary: `Deleted admin account ${target.email}`,
   })
   return c.json({ ok: true })
 })
