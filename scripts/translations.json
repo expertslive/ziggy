@@ -1,0 +1,183 @@
+{
+  "sponsors": {
+    "18ee1a78-84f0-4c93-9200-6062066ea16c": {
+      "name": "KPN Partner Network",
+      "de": "Das KPN Partner Network besteht aus unabhängigen Geschäftspartnern in den ganzen Niederlanden, die White-Label-Konnektivität, Kommunikation, Cloud- und Sicherheitsdienste anbieten. Sie fungieren als indirekter Vertriebskanal von KPN und liefern unabhängige IT-Beratung und maßgeschneiderte Lösungen.",
+      "fr": "Le KPN Partner Network réunit des partenaires commerciaux indépendants à travers les Pays-Bas qui proposent des services en marque blanche de connectivité, communication, cloud et sécurité. Ils constituent le canal de vente indirect de KPN et offrent des conseils IT impartiaux et des solutions sur mesure."
+    },
+    "9c952a53-bd56-4031-beb2-8d047e399ebb": {
+      "name": "SoftwareCentral",
+      "de": "SoftwareCentral ist ein führender Anbieter von Microsoft-Endpoint-Management-Tools und unterstützt Unternehmen sowie MSPs bei der Endpoint-Verwaltung durch Intune- und ConfigMgr-Automatisierung, Drittanbieter-Patching und Multi-Tenant-Management.",
+      "fr": "SoftwareCentral est un fournisseur de premier plan d'outils Microsoft Endpoint Management qui aide les entreprises et les MSP à administrer leurs endpoints grâce à l'automatisation d'Intune et ConfigMgr, au patching tiers et à la gestion multi-tenant."
+    },
+    "ebbc133d-d37b-4680-834d-3f601e414d08": {
+      "name": "Supervision",
+      "de": "SuperVision ist ein in den Niederlanden entwickeltes intelligentes Workplace-Tool für MSPs, das die Verwaltung von Microsoft-365-Umgebungen automatisiert und vereinfacht. Es bietet Golden-Master-Compliance, Multi-Tenant-Management, Benutzerverwaltung und kontinuierliches Monitoring.",
+      "fr": "SuperVision est un outil de gestion d'espace de travail intelligent conçu aux Pays-Bas pour les MSP. Il automatise et rationalise la gestion des environnements Microsoft 365 avec la conformité Golden Master, la gestion multi-tenant, la gestion des utilisateurs et un monitoring continu."
+    },
+    "2bef4cba-5369-4201-a03d-b5e0a0894803": {
+      "name": "inSpark",
+      "de": "InSpark ist der führende Microsoft-Spezialist in den Niederlanden und Beschleuniger der digitalen Transformation. Seit 2017 Teil von KPN, wurde InSpark 2025 zum Microsoft Country Partner of the Year für die Niederlande ernannt — mit Expertise in Data & AI sowie Identity.",
+      "fr": "InSpark est le spécialiste Microsoft de premier plan aux Pays-Bas et accélérateur de la transformation numérique. Filiale de KPN depuis 2017, InSpark a été nommé Microsoft Country Partner of the Year 2025 pour les Pays-Bas, avec une expertise en Data & AI et Identity."
+    },
+    "497d84df-e463-4b68-9f69-673329bc3388": {
+      "name": "Microsoft",
+      "de": "Microsoft ist ein globales Technologieunternehmen, das Software, Dienste, Geräte und Lösungen entwickelt und unterstützt. Die Cloud-Plattform Azure, Microsoft 365 und KI-Lösungen treiben die digitale Transformation von Organisationen weltweit an.",
+      "fr": "Microsoft est une entreprise technologique mondiale qui développe et soutient des logiciels, services, appareils et solutions. Sa plateforme cloud Azure, Microsoft 365 et ses solutions d'IA accompagnent la transformation numérique des organisations dans le monde entier."
+    },
+    "6b9199bc-c0a8-49b1-bba4-ea08c607cf2c": {
+      "name": "Dell",
+      "de": "Dell Technologies ist ein weltweit führendes Unternehmen im Bereich digitale Transformation und bietet ein breites Spektrum an Technologielösungen — Server, Storage, Networking und Cloud-Infrastruktur — die Organisationen helfen, ihre IT-Umgebungen zu modernisieren.",
+      "fr": "Dell Technologies est un leader mondial de la transformation numérique. L'entreprise propose une large gamme de solutions technologiques — serveurs, stockage, réseaux et infrastructure cloud — qui aident les organisations à moderniser leurs environnements IT."
+    },
+    "807089e5-a0b0-4c5f-8c66-ac166cbc228d": {
+      "name": "Nerdio",
+      "de": "Nerdio ermöglicht es MSPs und Enterprise-IT-Profis, virtuelle Desktops in Microsoft Azure bereitzustellen, zu verwalten und zu optimieren. Die Plattform vereinfacht die Verwaltung von Azure Virtual Desktop und Windows 365 und senkt Compute-Kosten um bis zu 80 %.",
+      "fr": "Nerdio permet aux MSP et aux professionnels IT d'entreprise de déployer, gérer et optimiser des bureaux virtuels dans Microsoft Azure. Leur plateforme simplifie la gestion d'Azure Virtual Desktop et Windows 365 tout en réduisant les coûts de calcul jusqu'à 80 %."
+    },
+    "d897a3fa-6f06-4dd5-9114-dc8075b274a9": {
+      "name": "Inforcer",
+      "de": "Inforcer ist eine Microsoft-365-Sicherheitsplattform, die speziell für MSPs und MSSPs entwickelt wurde, um Sicherheitsrichtlinien über mehrere Tenants hinweg zu verwalten und zu überwachen. Unterstützt Intune, Exchange Online, Entra ID, Defender XDR, Teams und Purview.",
+      "fr": "Inforcer est une plateforme de sécurité Microsoft 365 conçue spécifiquement pour les MSP et MSSP afin de gérer et superviser les politiques de sécurité sur plusieurs tenants. Elle prend en charge Intune, Exchange Online, Entra ID, Defender XDR, Teams et Purview."
+    },
+    "5b273bf1-e4f7-4168-a671-07c2e1a260f4": {
+      "name": "Innvolve",
+      "de": "Innvolve ist ein niederländisches IT-Dienstleistungsunternehmen, spezialisiert auf Microsoft-Cloud-Lösungen. Es unterstützt Organisationen auf ihrem Weg der digitalen Transformation durch fachkundige Beratung und Managed Services.",
+      "fr": "Innvolve est une société néerlandaise de services IT spécialisée dans les solutions cloud Microsoft. Elle accompagne les organisations dans leur transformation numérique grâce à un conseil expert et à des services managés."
+    },
+    "905461e5-9b2d-4a41-80c3-8f8f1f53f4a6": {
+      "name": "Rubicon",
+      "de": "Rubicon ist ein führender Microsoft Solution Partner mit über 25 Jahren Erfahrung in Cloud Security, Integration, Data & AI sowie Applications. Mit mehr als 300 Mitarbeitenden liefert das Unternehmen Beratung und sichere Cloud-native Services für Großkunden.",
+      "fr": "Rubicon est un Microsoft Solution Partner de premier plan avec plus de 25 ans d'expérience en Cloud Security, intégration, Data & AI et applications. Forte de plus de 300 collaborateurs, l'entreprise fournit conseil et services cloud-natifs sécurisés à de grands clients."
+    },
+    "de954b02-80bb-4150-960d-ad45d4ed9e96": {
+      "name": "Silverside",
+      "de": "Silverside ist ein niederländischer Spezialist für Microsoft 365, HCL und Zoho, der Organisationen hilft, in einer sicheren, modernen digitalen Umgebung intelligenter zusammenzuarbeiten. Mit Erfahrung aus über 200 Kunden steht Arbeitsfreude und effektive Zusammenarbeit im Mittelpunkt.",
+      "fr": "Silverside est un spécialiste néerlandais de Microsoft 365, HCL et Zoho qui aide les organisations à collaborer plus intelligemment dans un environnement numérique moderne et sécurisé. Fort de plus de 200 clients, il met l'accent sur le bien-être au travail et la collaboration efficace."
+    },
+    "0c89cdf4-ed16-4d56-b510-62ae4b7ddca5": {
+      "name": "Liquidware",
+      "de": "Liquidware ist Marktführer im Digital Workspace Management für alle Windows-Bereitstellungstypen. Die Lösungen unterstützen Microsoft AVD, Windows 365, Citrix, VMware Horizon und Amazon WorkSpaces mit Profilverwaltung, App-Bereitstellung und Endpoint-Sichtbarkeit.",
+      "fr": "Liquidware est le leader du Digital Workspace Management pour tous les modes de livraison Windows. Ses solutions prennent en charge Microsoft AVD, Windows 365, Citrix, VMware Horizon et Amazon WorkSpaces avec gestion des profils, livraison d'applications et visibilité des endpoints."
+    },
+    "45849092-3d81-4758-b802-e13e7402058a": {
+      "name": "VirtualMetric",
+      "de": "VirtualMetric ist ein Cybersecurity-Telemetrieunternehmen, das Unternehmen hilft, SIEM-Ingestion-Kosten zu senken, Log-Daten anzureichern und Sicherheit zu stärken. Gegründet 2011, bietet es agentenloses Monitoring von 350+ Metriken mit Echtzeit-Sichtbarkeit.",
+      "fr": "VirtualMetric est une entreprise de télémétrie cybersécurité qui aide les organisations à réduire les coûts d'ingestion SIEM, à enrichir les données de logs et à renforcer la sécurité. Fondée en 2011, elle propose un monitoring sans agent de plus de 350 métriques avec visibilité en temps réel."
+    },
+    "9c4d4b36-39f5-4dc6-be27-03f48f2822b9": {
+      "name": "Pink Elephant",
+      "de": "Pink Elephant ist weltweit führend im IT Service Management (ITSM) und wurde vor über 40 Jahren in den Niederlanden gegründet. Das Unternehmen bietet ITSM-Beratung, Trainings, Technologie und Support — und genießt das Vertrauen von mehr als 250.000 IT-Profis weltweit.",
+      "fr": "Pink Elephant est un leader mondial de l'IT Service Management (ITSM), fondé aux Pays-Bas il y a plus de 40 ans. L'entreprise propose conseil ITSM, formations, technologie et services support, et est reconnue par plus de 250 000 professionnels IT dans le monde."
+    },
+    "b7081ed2-997a-4794-889e-3bdfdfecfab8": {
+      "name": "Wortell",
+      "de": "Wortell ist der #1 Microsoft-Partner mit Spezialisierung auf KI-, Cloud- und Security-Lösungen. Als 16-facher Microsoft Gold Partner und mehrfacher Gewinner des Microsoft Partner of the Year Awards hilft Wortell Organisationen, durch intelligente Technologieadoption vorne zu bleiben.",
+      "fr": "Wortell est le partenaire Microsoft #1 spécialisé dans les solutions IA, cloud et sécurité. 16 fois Microsoft Gold Partner et lauréat à plusieurs reprises du Microsoft Partner of the Year Award, Wortell aide les organisations à garder une longueur d'avance grâce à une adoption technologique intelligente."
+    },
+    "619c72d7-beea-436f-a9ad-a506af66f15f": {
+      "name": "ScriptRunner",
+      "de": "ScriptRunner ist die #1 Agentic Automation and Orchestration Platform für Microsoft-Ökosysteme. Sie liefert sichere, richtliniengesteuerte PowerShell-Automatisierung, beseitigt Silos und beschleunigt IT-Operationen für Unternehmen und MSPs.",
+      "fr": "ScriptRunner est la plateforme d'automatisation et d'orchestration agentique #1 pour les écosystèmes Microsoft. Elle fournit une automatisation PowerShell sécurisée et pilotée par politiques, élimine les silos et accélère les opérations IT pour les entreprises et les MSP."
+    },
+    "111c3033-5879-4577-a625-c6fda3574f7a": {
+      "name": "Recast Software",
+      "de": "Recast Software ist weltweit führend im Endpoint- und Application-Management und erweitert Microsoft ConfigMgr und Intune. Die Tools werden von Zehntausenden Organisationen genutzt und vereinfachen Workflows, Patching und Compliance auf über 60 Millionen Geräten.",
+      "fr": "Recast Software est un leader mondial de la gestion des endpoints et des applications, qui étend Microsoft ConfigMgr et Intune. Utilisés par des dizaines de milliers d'organisations, ses outils simplifient les workflows, le patching et la conformité sur plus de 60 millions d'appareils."
+    },
+    "0301abd7-963b-4614-b375-c365dfb29c06": {
+      "name": "Interstellar",
+      "de": "Interstellar ist ein großer niederländischer IT-Dienstleister, gebildet aus sechs autonomen IT-Unternehmen, mit landesweiter Abdeckung und über 650 Mitarbeitenden. Spezialisiert auf Cloud, Security und Managed IT Services — inklusive der souveränen Cloud-Plattform Fundaments.",
+      "fr": "Interstellar est un important prestataire de services IT néerlandais, issu de six entreprises IT autonomes, avec une couverture nationale et plus de 650 collaborateurs. Spécialisé dans le cloud, la sécurité et les services IT managés, incluant la plateforme cloud souveraine Fundaments."
+    },
+    "6c108265-9b2c-4cad-8b89-cf77ec85a709": {
+      "name": "ControlUp",
+      "de": "ControlUp ist Marktführer für Digital-Employee-Experience-(DEX)-Plattformen und vereint Echtzeit-Monitoring mit automatisierter Remediation für physische und virtuelle Desktops, Anwendungen und Endpoints. Die Plattform liefert DEX-Scoring und proaktive Problemlösung.",
+      "fr": "ControlUp est le leader des plateformes Digital Employee Experience (DEX), unifiant le monitoring en temps réel et la remédiation automatisée pour les bureaux physiques et virtuels, les applications et les endpoints. Sa plateforme fournit un scoring DEX et une résolution proactive des incidents."
+    },
+    "1439cc84-04ae-4c58-80f0-7261cfb9847f": {
+      "name": "Login VSI",
+      "de": "Login VSI hilft IT-Teams, kostenoptimierte digitale Arbeitsplätze mit weniger Störungen zu planen und zu betreiben. Die Login Enterprise-Plattform ist Industriestandard für automatisierte Performance-Tests virtueller Desktops; Hydra vereinfacht das AVD- und Windows-365-Management.",
+      "fr": "Login VSI aide les équipes IT à planifier et maintenir des espaces de travail numériques optimisés en coûts, avec moins de perturbations. Sa plateforme Login Enterprise est la norme du secteur pour les tests automatisés de performance des bureaux virtuels, et Hydra simplifie la gestion d'AVD et Windows 365."
+    },
+    "47f0100c-35ae-41be-bdde-9d3a9b004aba": {
+      "name": "Previder",
+      "de": "Previder betreibt eigene 100 % niederländische TIER-3+-Rechenzentren mit 400 IT-Spezialisten und bietet Managed Services, Cloud-Hosting und Colocation. Zertifiziert nach ISO 9001, 14001, 27001 und NEN7510 für maximale Zuverlässigkeit und Sicherheit.",
+      "fr": "Previder exploite ses propres centres de données TIER 3+ 100 % néerlandais avec 400 spécialistes IT, et propose des services managés, de l'hébergement cloud et de la colocation. Certifié ISO 9001, 14001, 27001 et NEN7510 pour une fiabilité et une sécurité maximales."
+    },
+    "a5cbfad8-cc85-4dfc-b9ab-8fc56c239327": {
+      "name": "Delta-N",
+      "de": "Delta-N ist ein Microsoft-Partner, der seit 1999 flexible und durchdachte IT-Lösungen auf Basis von Microsoft-Cloud-Technologie liefert. Mit Sitz in Den Haag begleitet Delta-N Organisationen verantwortungsvoll bei ihrem Schritt in die Cloud.",
+      "fr": "Delta-N est un partenaire Microsoft qui propose depuis 1999 des solutions IT flexibles et réfléchies basées sur la technologie cloud Microsoft. Basée à La Haye, l'entreprise accompagne les organisations dans une transition responsable vers le cloud."
+    },
+    "a04286fc-3723-4669-a0e1-a057a29c6ba3": {
+      "name": "eG Innovations",
+      "de": "eG Innovations bietet IT-Performance-Monitoring und Digital-Intelligence-Lösungen, die Erkennung, Diagnose und Behebung von IT-Problemen automatisieren. Die Plattform eG Enterprise liefert End-to-End-Sichtbarkeit über Cloud-, virtuelle und On-Premises-Umgebungen hinweg.",
+      "fr": "eG Innovations fournit des solutions de monitoring de la performance IT et d'intelligence digitale qui automatisent la détection, le diagnostic et la résolution des problèmes IT. Sa plateforme eG Enterprise offre une visibilité de bout en bout sur les environnements cloud, virtuels et on-premises."
+    },
+    "2137716f-7271-4b1e-8861-02157fac581a": {
+      "name": "ESPC",
+      "de": "ESPC (European SharePoint, Office 365 & Azure Conference) ist Europas größtes Treffen von Microsoft-365- und Azure-Profis. Organisiert von QualTech Ltd. aus Irland, bringt ESPC die Community mit erstklassigen Sessions und Networking-Möglichkeiten zusammen.",
+      "fr": "ESPC (European SharePoint, Office 365 & Azure Conference) est le plus grand rassemblement européen de professionnels Microsoft 365 et Azure. Organisé par QualTech Ltd. en Irlande, ESPC réunit la communauté autour de sessions de classe mondiale et d'opportunités de networking."
+    },
+    "4a35d28c-8a4b-4974-a6bf-6d87d29ca2d8": {
+      "name": "Bright Sourcing",
+      "de": "BrightSourcing ist eine niederländische IT-Detaching- und Recruiting-Agentur mit einem frischen, transparenten Ansatz, um IT-Profis und Organisationen zusammenzubringen. Mit 20 Jahren Erfahrung spezialisiert auf Detachierung, befristete und Projekteinsätze im IT-Sektor.",
+      "fr": "BrightSourcing est une agence néerlandaise de recrutement et d'externalisation IT avec une approche fraîche et transparente pour mettre en relation professionnels IT et organisations. Forte de 20 ans d'expérience, elle est spécialisée dans la mise à disposition, les missions à durée déterminée et les missions projet dans le secteur IT."
+    },
+    "0f31666c-ddbd-483c-8464-5edf95743021": {
+      "name": "Experts Inside",
+      "de": "Experts Inside ist eine Schweizer Microsoft-Beratung, gegründet 2011, mit nahezu 30 Experten in der DACH-Region. Spezialisiert auf Microsoft-365- und Azure-Migrationen, Integration und Entwicklung — und Prioritized Tier Microsoft Copilot Partner.",
+      "fr": "Experts Inside est un cabinet de conseil Microsoft suisse fondé en 2011, comptant près de 30 experts actifs dans la région DACH. Spécialisé dans les migrations Microsoft 365 et Azure, l'intégration et le développement, et Prioritized Tier Microsoft Copilot Partner."
+    },
+    "386907ed-42de-4549-8e88-656c83bae04d": {
+      "name": "Capgemini",
+      "nl": "Capgemini is een wereldwijde leider in zakelijke en technologische transformatie, die organisaties helpt versnellen op weg naar een digitale en duurzame toekomst. Met sterke Microsoft-cloud-, AI- en data-engineering-praktijken biedt Capgemini end-to-end advies en delivery voor grote ondernemingen wereldwijd.",
+      "en": "Capgemini is a global leader in business and technology transformation, helping organisations accelerate their dual transition to a digital and sustainable future. With strong Microsoft cloud, AI, and data engineering practices, Capgemini delivers end-to-end consulting and delivery for large enterprises worldwide.",
+      "de": "Capgemini ist ein weltweit führendes Unternehmen für Business- und Technologietransformation und hilft Organisationen, ihren Weg in eine digitale und nachhaltige Zukunft zu beschleunigen. Mit starken Microsoft-Cloud-, KI- und Data-Engineering-Praktiken liefert Capgemini End-to-End-Beratung und -Umsetzung für Großunternehmen weltweit.",
+      "fr": "Capgemini est un leader mondial de la transformation business et technologique, qui aide les organisations à accélérer leur double transition vers un avenir numérique et durable. Forte de pratiques solides en cloud Microsoft, IA et data engineering, Capgemini propose un conseil et une mise en œuvre end-to-end pour les grandes entreprises dans le monde entier."
+    },
+    "a8e2da6d-9aea-49fb-9762-1e1e6c8b8035": {
+      "name": "Senteon",
+      "de": "Senteon ist eine automatisierte Plattform für Endpoint-Hardening und CIS-Compliance. Sie erzwingt kontinuierlich Zero-Trust-Konfigurationen auf jeder Workstation, jedem Server und jedem Browser, um Fehlkonfigurationen und Security Drift auszuschließen — so bleibt die Organisation Audit-fähig gegenüber Frameworks wie CMMC und SOC II.",
+      "fr": "Senteon est une plateforme automatisée de durcissement des endpoints et de conformité CIS. Elle applique en continu des configurations Zero Trust sur chaque station de travail, serveur et navigateur afin d'éliminer les erreurs de configuration et la dérive de sécurité — ce qui maintient l'organisation prête pour l'audit selon des cadres tels que CMMC et SOC II."
+    }
+  },
+  "shop": {
+    "9a24c982-f438-4378-8666-77b7f4f841e1": {
+      "name": "Ridge wallet",
+      "de": "Verkaufspreis 79 €. Davon gehen 24 € an das Experts Live Stipendium.",
+      "fr": "Prix de vente 79 €. Sur cette somme, 24 € sont reversés à la Bourse Experts Live."
+    },
+    "8ce8d87e-d4fd-4f22-9a3f-2515762136b9": {
+      "name": "Stanley beker",
+      "de": "Verkaufspreis 89 €. Davon gehen 29 € an das Experts Live Stipendium.",
+      "fr": "Prix de vente 89 €. Sur cette somme, 29 € sont reversés à la Bourse Experts Live."
+    },
+    "3b92fa70-4ad9-4941-92f8-1736d1d7f8b0": {
+      "name": "Draadloze lader",
+      "de": "Verkaufspreis 99 €. Davon gehen 29 € an das Experts Live Stipendium.",
+      "fr": "Prix de vente 99 €. Sur cette somme, 29 € sont reversés à la Bourse Experts Live."
+    },
+    "58d20584-e1b5-4b6b-8e67-a8367aeeb4d1": {
+      "name": "Leren travel bag",
+      "de": "Verkaufspreis 69 €. Davon gehen 23 € an das Experts Live Stipendium.",
+      "fr": "Prix de vente 69 €. Sur cette somme, 23 € sont reversés à la Bourse Experts Live."
+    },
+    "6a3bd3b1-26d5-4b87-9e47-03683453279f": {
+      "name": "Houten borrelplank",
+      "de": "Verkaufspreis 89 €. Davon gehen 30 € an das Experts Live Stipendium.",
+      "fr": "Prix de vente 89 €. Sur cette somme, 30 € sont reversés à la Bourse Experts Live."
+    },
+    "b77afe6c-9f3f-4b81-902f-c5828570e6e5": {
+      "name": "Ninjacat Lamp",
+      "de": "Verkaufspreis 79 €. Davon gehen 44 € an das Experts Live Stipendium.",
+      "fr": "Prix de vente 79 €. Sur cette somme, 44 € sont reversés à la Bourse Experts Live."
+    },
+    "d6c39f42-ed3e-4c0f-92c1-e81c07c38a38": {
+      "name": "Octocat — originele tekening (gesigneerd)",
+      "de": "Ein originaler, signierter Octocat-Druck von Simon Oxley — dem britischen Illustrator, der diese ikonische GitHub-Figur 2006 entwarf. Signiert mit „SMOX\" und der Inschrift „Born in 2006\".\n\nGespendet von Martin Woodward (GitHub). Simon Oxley ist im April 2026 verstorben; das macht diese Versteigerung umso bedeutsamer.\n\nGebote werden den ganzen Tag im Experts Shop in der Partnerarea entgegengenommen. Die Versteigerung findet um 18:15 Uhr statt. Der Erlös geht an das Experts Live Stipendium.",
+      "fr": "Une impression originale signée d'Octocat par Simon Oxley — l'illustrateur britannique qui a conçu ce personnage iconique de GitHub en 2006. Signée « SMOX » avec l'inscription « Born in 2006 ».\n\nFaite don par Martin Woodward (GitHub). Simon Oxley est malheureusement décédé en avril 2026, ce qui rend cette vente aux enchères d'autant plus émouvante.\n\nMisez tout au long de la journée à l'Experts Shop dans la zone partenaires. La vente aux enchères a lieu à 18:15. Les recettes sont reversées à la Bourse Experts Live."
+    }
+  }
+}
