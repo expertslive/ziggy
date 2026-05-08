@@ -273,6 +273,34 @@ export function permanentDelete(target: TrashTarget, id: string) {
   )
 }
 
+// Auction (admin)
+export interface AuctionBid {
+  id: string
+  ts: number
+  amount: number
+  name: string
+  email: string
+  phone: string
+  displayName: string
+  kioskId?: string
+}
+export interface AuctionAdminState {
+  config: { minStartBid: number; minIncrement: number; endsAt: string; closedAt?: string }
+  isOpen: boolean
+  bids: AuctionBid[]
+}
+export function fetchAuctionAdmin(shopItemId: string) {
+  return fetchJson<AuctionAdminState>(
+    `/api/admin/events/${slug}/shop-items/${shopItemId}/auction`,
+  )
+}
+export function closeAuction(shopItemId: string) {
+  return fetchJson<{ ok: boolean; closedAt?: string }>(
+    `/api/admin/events/${slug}/shop-items/${shopItemId}/auction/close`,
+    { method: 'POST' },
+  )
+}
+
 // Image library
 export interface ImageBlob {
   name: string

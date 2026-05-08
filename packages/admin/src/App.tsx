@@ -19,6 +19,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { UsersPage } from './pages/UsersPage';
 import { ImagesPage } from './pages/ImagesPage';
 import { PreviewPage } from './pages/PreviewPage';
+import { AuctionAdminPage } from './pages/AuctionAdminPage';
 import { CommandPalette } from './components/CommandPalette';
 import { EventLiveBanner } from './components/EventLiveBanner';
 import type { ReactNode } from 'react';
@@ -204,6 +205,7 @@ export function App() {
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/images" element={<ImagesPage />} />
                   <Route path="/preview" element={<PreviewPage />} />
+                  <Route path="/shop-items/:id/auction" element={<AuctionAdminPage />} />
                 </Routes>
               </AdminLayout>
             </ProtectedRoute>

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   useShopItems,
   useCreateShopItem,
@@ -11,6 +12,17 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useToast } from '../components/Toast';
 import { SUPPORTED_LANGUAGES } from '@ziggy/shared';
 
+interface AuctionFormState {
+  enabled: boolean;
+  /** EUR (whole number for the form). */
+  minStartBid: number;
+  /** EUR (whole number for the form). */
+  minIncrement: number;
+  /** datetime-local string, e.g. "2026-06-02T18:15". Empty = unset. */
+  endsAtLocal: string;
+  closedAt?: string;
+}
+
 interface ShopItemForm {
   name: string;
   description: Record<string, string>;
@@ -18,7 +30,15 @@ interface ShopItemForm {
   priceLabel: string;
   isHighlighted: boolean;
   sortOrder: number;
+  auction: AuctionFormState;
 }
+
+const emptyAuction: AuctionFormState = {
+  enabled: false,
+  minStartBid: 90,
+  minIncrement: 10,
+  endsAtLocal: '',
+};
 
 const emptyForm: ShopItemForm = {
   name: '',
@@ -27,7 +47,20 @@ const emptyForm: ShopItemForm = {
   priceLabel: '',
   isHighlighted: false,
   sortOrder: 0,
+  auction: emptyAuction,
 };
+
+/** Convert an ISO timestamp to the local datetime-local input value
+ *  ("YYYY-MM-DDTHH:MM" in the user's tz). */
+function isoToLocalInput(iso: string): string {
+  const d = new Date(iso);
+  const tz = d.getTime() - d.getTimezoneOffset() * 60_000;
+  return new Date(tz).toISOString().slice(0, 16);
+}
+function localInputToIso(local: string): string {
+  // datetime-local has no timezone — interpret as the user's local tz.
+  return new Date(local).toISOString();
+}
 
 export function ShopItemsPage() {
   const { toast } = useToast();
@@ -60,6 +93,17 @@ export function ShopItemsPage() {
       priceLabel: item.priceLabel || '',
       isHighlighted: !!item.isHighlighted,
       sortOrder: item.sortOrder ?? 0,
+      auction: item.auction
+        ? {
+            enabled: true,
+            minStartBid: Math.round(item.auction.minStartBid / 100),
+            minIncrement: Math.round(item.auction.minIncrement / 100),
+            endsAtLocal: item.auction.endsAt
+              ? isoToLocalInput(item.auction.endsAt)
+              : '',
+            closedAt: item.auction.closedAt,
+          }
+        : emptyAuction,
     });
     setImageMode(item.imageUrl ? 'url' : 'upload');
     setPanelOpen(true);
@@ -67,7 +111,27 @@ export function ShopItemsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...form };
+    // Strip the form-only auction wrapper down to the wire shape.
+    const { auction, ...rest } = form;
+    const payload: Record<string, unknown> = { ...rest };
+    if (auction.enabled) {
+      if (!auction.endsAtLocal) {
+        toast('error', 'Sluittijd verplicht voor veiling');
+        return;
+      }
+      payload.auction = {
+        minStartBid: Math.round(auction.minStartBid * 100),
+        minIncrement: Math.round(auction.minIncrement * 100),
+        endsAt: localInputToIso(auction.endsAtLocal),
+        ...(auction.closedAt ? { closedAt: auction.closedAt } : {}),
+      };
+    } else {
+      // Explicit null tells the API to drop the auction config — but our
+      // current PUT only patches when the field is defined. Simpler: keep
+      // the current behavior (no auction field = leave unchanged), and
+      // disable the toggle on the form when an auction has bids.
+      payload.auction = undefined;
+    }
     try {
       if (editingId) {
         await updateMut.mutateAsync({ id: editingId, data: payload });
@@ -187,6 +251,14 @@ export function ShopItemsPage() {
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-600">{item.sortOrder}</td>
                 <td className="px-6 py-4 text-right">
+                  {item.auction && (
+                    <Link
+                      to={`/shop-items/${item.id}/auction`}
+                      className="mr-3 text-sm font-medium text-amber-700 hover:underline"
+                    >
+                      Veiling
+                    </Link>
+                  )}
                   <button
                     onClick={() => openEdit(item)}
                     className="mr-2 text-sm font-medium text-primary hover:text-primary-dark"
@@ -328,6 +400,108 @@ export function ShopItemsPage() {
               onChange={(e) => setField('sortOrder', parseInt(e.target.value) || 0)}
               className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
+          </div>
+
+          {/* Auction config */}
+          <div className="rounded-lg border border-border bg-surface-alt p-4">
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <input
+                type="checkbox"
+                checked={form.auction.enabled}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    auction: { ...prev.auction, enabled: e.target.checked },
+                  }))
+                }
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
+              />
+              Veiling actief op dit item
+            </label>
+            <p className="mt-1 mb-3 text-xs text-gray-400">
+              Wanneer aan, toont de kiosk een live bod-paneel naast de foto + beschrijving.
+              Configuratie kan vóór de eerste bod nog gewijzigd worden; daarna alleen sluittijd.
+            </p>
+            {form.auction.enabled && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium uppercase text-gray-500">
+                    Min. start (€)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={form.auction.minStartBid}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        auction: {
+                          ...prev.auction,
+                          minStartBid: parseInt(e.target.value, 10) || 0,
+                        },
+                      }))
+                    }
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium uppercase text-gray-500">
+                    Min. increment (€)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={form.auction.minIncrement}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        auction: {
+                          ...prev.auction,
+                          minIncrement: parseInt(e.target.value, 10) || 0,
+                        },
+                      }))
+                    }
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="mb-1 block text-xs font-medium uppercase text-gray-500">
+                    Sluittijd
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={form.auction.endsAtLocal}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        auction: { ...prev.auction, endsAtLocal: e.target.value },
+                      }))
+                    }
+                    className="w-full rounded-md border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                  <p className="mt-1 text-xs text-gray-400">
+                    Lokale tijd. Tip: 2026-06-02 18:15.
+                  </p>
+                </div>
+                {form.auction.closedAt && (
+                  <div className="col-span-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                    Veiling al gesloten op {new Date(form.auction.closedAt).toLocaleString('nl-NL')}.
+                  </div>
+                )}
+                {editingId && (
+                  <div className="col-span-2">
+                    <Link
+                      to={`/shop-items/${editingId}/auction`}
+                      className="text-xs font-semibold text-primary hover:underline"
+                    >
+                      → Bekijk biedingen + sluit veiling
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Description per language */}
