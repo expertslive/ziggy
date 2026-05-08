@@ -95,14 +95,16 @@ export function AuctionPanel({ item }: { item: ShopItem }) {
   const alreadyBid = hasBidThisSession(item.id)
 
   const state = q.data
+  // Prefer the live polled config over the parent's cached shop-item — admin
+  // updates to minStartBid / increment / endsAt land here within 8s instead
+  // of waiting up to 60s for the shop-items react-query cache to expire.
+  const liveConfig = state?.config ?? item.auction!
   const currentHigh = state?.highest?.amount ?? 0
   const minNext =
-    currentHigh > 0
-      ? currentHigh + (item.auction?.minIncrement ?? 1000)
-      : item.auction?.minStartBid ?? 9000
+    currentHigh > 0 ? currentHigh + liveConfig.minIncrement : liveConfig.minStartBid
 
   const isOpen = state ? state.isOpen : true
-  const endsAt = item.auction ? new Date(item.auction.endsAt).getTime() : 0
+  const endsAt = new Date(liveConfig.endsAt).getTime()
   const ms = endsAt - now
 
   const winner = !isOpen && state?.highest
@@ -137,10 +139,7 @@ export function AuctionPanel({ item }: { item: ShopItem }) {
             <div className="text-4xl font-extrabold">
               {state?.highest
                 ? fmtEur(state.highest.amount)
-                : fmtEur(
-                    item.auction!.minStartBid -
-                      (item.auction!.minIncrement ?? 0),
-                  )}
+                : fmtEur(liveConfig.minStartBid)}
             </div>
             {state?.highest ? (
               <div className="text-el-light/70 mt-1 text-sm">
@@ -148,14 +147,14 @@ export function AuctionPanel({ item }: { item: ShopItem }) {
               </div>
             ) : (
               <div className="text-el-light/50 mt-1 text-sm">
-                {t('auction.noBids', { amount: fmtEur(item.auction!.minStartBid) })}
+                {t('auction.noBids', { amount: fmtEur(liveConfig.minStartBid) })}
               </div>
             )}
             <div className="mt-3 text-xs text-el-light/60 flex items-center gap-1.5">
               <span>⏱</span>
               <span>
                 {t('auction.closesAt', {
-                  time: new Date(item.auction!.endsAt).toLocaleTimeString(
+                  time: new Date(liveConfig.endsAt).toLocaleTimeString(
                     timeLocale,
                     { hour: '2-digit', minute: '2-digit' },
                   ),
@@ -227,7 +226,7 @@ export function AuctionPanel({ item }: { item: ShopItem }) {
         <BidForm
           item={item}
           minNext={minNext}
-          increment={item.auction!.minIncrement}
+          increment={liveConfig.minIncrement}
           onClose={() => setFormOpen(false)}
           onPlaced={() => {
             markBidThisSession(item.id)
