@@ -265,8 +265,8 @@ export function ShopPage() {
 
       {/* Full-width info strip — subtitle + Merch button (added in Task 6) +
           handmade line. */}
-      <div className="mt-4 mb-8 bg-el-blue/10 border border-el-blue/40 rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
-        <div className="space-y-1">
+      <div className="mt-4 mb-8 bg-el-blue/10 border border-el-blue/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        <div className="flex-1 space-y-1">
           <p className="text-el-light/90 text-xs sm:text-sm leading-relaxed">
             {t('shop.subtitle')}
           </p>
@@ -281,7 +281,7 @@ export function ShopPage() {
               touch();
               navigate('/map');
             }}
-            className="self-start inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-el-blue text-white text-sm font-bold active:bg-el-blue/80"
+            className="self-start sm:self-center shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-el-blue text-white text-sm font-bold active:bg-el-blue/80"
           >
             <span aria-hidden="true">📍</span>
             {t('shop.merchOnMap')}
