@@ -11,6 +11,18 @@ import {
 } from '@ziggy/shared'
 import * as cache from './cache.js'
 
+// ---------------------------------------------------------------------------
+// Freshness tracking — module-level epoch ms of the most recent 2xx response
+// from upstream. Used by the admin dashboard health probe to decide whether
+// run.events is "ok" without making a fresh outbound request on every poll.
+// ---------------------------------------------------------------------------
+
+let lastSuccessAt: number | null = null
+
+export function getLastSuccessAt(): number | null {
+  return lastSuccessAt
+}
+
 /**
  * Make an authenticated request to the run.events API.
  */
@@ -39,6 +51,7 @@ async function request<T>(
     throw new Error(`run.events API error ${response.status} for ${method} ${path}`)
   }
 
+  lastSuccessAt = Date.now()
   return response.json() as Promise<T>
 }
 

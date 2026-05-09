@@ -83,3 +83,21 @@ export function status(): CacheStatusEntry[] {
     }))
     .sort((a, b) => a.key.localeCompare(b.key))
 }
+
+/** Age in whole seconds of the OLDEST non-expired entry — i.e. the one
+ * that was refreshed longest ago. Each entry stores `expiresAt`, so its
+ * insertion time is `expiresAt - CACHE_TTL_MS`. Returns null when the
+ * live cache is empty. */
+export function oldestEntryAgeSec(): number | null {
+  const now = Date.now()
+  let oldestInsertedAt: number | null = null
+  for (const entry of live.values()) {
+    if (entry.expiresAt <= now) continue
+    const insertedAt = entry.expiresAt - CACHE_TTL_MS
+    if (oldestInsertedAt === null || insertedAt < oldestInsertedAt) {
+      oldestInsertedAt = insertedAt
+    }
+  }
+  if (oldestInsertedAt === null) return null
+  return Math.max(0, Math.floor((now - oldestInsertedAt) / 1000))
+}
