@@ -40,3 +40,7 @@ infra/main.json
 # Contain live records and Cosmos metadata; keep them on the operator's
 # machine, not in the public repo.
 backups/*.json
+
+# Local brainstorm/design notes — kept out of the public repo per project policy.
+BRAINSTORM-*.md
+.scratch/
