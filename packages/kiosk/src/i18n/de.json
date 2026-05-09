@@ -102,16 +102,23 @@
   },
   "shop": {
     "title": "Shop",
-    "subtitle": "Nur am 2. Juni — in der Partner Area. Kartenzahlung, kein Bargeld. Der Erlös geht an das Experts Live Stipendium.",
+    "subtitle": "Nur am 2. Juni — in der Partner Area. Zahlung nur per QR-Code (Tikkie Business, iDEAL/WERO). Der Erlös geht an das Experts Live Stipendium.",
     "handmade": "Alle Artikel sind exklusiv von MVP Koos Goossens entworfen — limitierte Auflage, mit Leidenschaft und Handwerkskunst für die Experts Live Community gefertigt.",
     "featured": "Besonders",
     "empty": "Shop öffnet am 2. Juni",
     "bidNow": "Mitbieten →",
     "liveAuction": "Live-Auktion",
+    "merchOnMap": "Merch-Stand auf dem Plan zeigen",
+    "moreBelow": "↓ {{count}} weitere Artikel",
     "studiebeurs": {
-      "heading": "Experts Live Stipendium — nominiere Talent",
-      "body1": "Bei jedem Kauf nominierst du jemanden für das Experts Live Stipendium von €5.000: ein Microsoft-Zertifizierungspaket (Prüfungen, Studienmaterial, Schulung) einlösbar innerhalb von 12 Monaten.",
-      "body2": "Mehr Käufe = mehr Nominierungen. Selbstnominierung ist erlaubt. Die Gewinnerin oder der Gewinner wird innerhalb von 30 Tagen nach dem Event auf LinkedIn bekanntgegeben."
+      "hero": {
+        "headline": "Gib Talent ein Sprungbrett",
+        "pitch": "Mit deinem Kauf nominierst du jemanden für das Experts Live Stipendium von <strong>€5.000</strong> — ein Microsoft-Zertifizierungspaket (Prüfungen, Studienmaterial, Schulung), einlösbar innerhalb von 12 Monaten.",
+        "step1": "Kauf Merch oder biete auf den Octocat",
+        "step2": "Reiche deine Nominierung digital am Merch-Stand ein",
+        "step3": "Gewinner wird 30 Tage nach dem Event auf LinkedIn bekanntgegeben",
+        "footnote": "Mehr Käufe = mehr Nominierungen. Selbstnominierung ist erlaubt."
+      }
     }
   },
   "auction": {

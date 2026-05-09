@@ -102,16 +102,23 @@
   },
   "shop": {
     "title": "Shop",
-    "subtitle": "Available June 2 only — in the partner area. Card payment only, no cash. Proceeds go to the Experts Live Scholarship.",
+    "subtitle": "June 2 only — in the partner area. Payment only by QR code (Tikkie Business, iDEAL/WERO). Proceeds go to the Experts Live Scholarship.",
     "handmade": "All items are exclusively designed by MVP Koos Goossens — limited edition, made with passion and craftsmanship for the Experts Live community.",
     "featured": "Featured",
     "empty": "Shop opens June 2",
     "bidNow": "Place a bid →",
     "liveAuction": "Live auction",
+    "merchOnMap": "Find the Merch booth on the floor plan",
+    "moreBelow": "↓ {{count}} more items",
     "studiebeurs": {
-      "heading": "Experts Live Scholarship — nominate talent",
-      "body1": "With every purchase you nominate someone for the €5,000 Experts Live Scholarship: a Microsoft certification package (exams, study material, training) to be used within 12 months.",
-      "body2": "More purchases = more nominations. Self-nomination is allowed. The winner is announced via LinkedIn within 30 days after the event."
+      "hero": {
+        "headline": "Give talent a springboard",
+        "pitch": "With your purchase you nominate someone for the <strong>€5,000</strong> Experts Live Scholarship — a Microsoft certification package (exams, study material, training) to be used within 12 months.",
+        "step1": "Buy merch or bid on the Octocat",
+        "step2": "Fill in your nomination digitally at the Merch booth",
+        "step3": "Winner announced 30 days after the event on LinkedIn",
+        "footnote": "More purchases = more nominations. Self-nomination is allowed."
+      }
     }
   },
   "auction": {

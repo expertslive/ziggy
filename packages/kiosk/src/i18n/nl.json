@@ -102,16 +102,23 @@
   },
   "shop": {
     "title": "Shop",
-    "subtitle": "Alleen op 2 juni — in de partner area. Pin only (geen contant geld). De opbrengst gaat naar de Experts Live Studiebeurs.",
+    "subtitle": "Alleen op 2 juni — in de partner area. Alleen betaling via QR-code (Tikkie zakelijk, iDEAL/WERO). De opbrengst gaat naar de Experts Live Studiebeurs.",
     "handmade": "Alle items zijn exclusief ontworpen door MVP Koos Goossens — gelimiteerde oplage, met passie en vakmanschap gemaakt voor de Experts Live community.",
     "featured": "Uitgelicht",
     "empty": "Shop opent 2 juni",
     "bidNow": "Bied mee →",
     "liveAuction": "Live veiling",
+    "merchOnMap": "Vind de Merch stand op de plattegrond",
+    "moreBelow": "↓ Nog {{count}} items",
     "studiebeurs": {
-      "heading": "Experts Live Studiebeurs — nomineer talent",
-      "body1": "Bij elke aankoop nomineer je iemand voor de Experts Live Studiebeurs van €5.000: een Microsoft-certificeringspakket (examens, studiemateriaal, training) te besteden binnen 12 maanden.",
-      "body2": "Meer aankopen = meer nominaties. Zelfnominatie is toegestaan. De winnaar wordt binnen 30 dagen na het event bekendgemaakt via LinkedIn."
+      "hero": {
+        "headline": "Geef talent een springplank",
+        "pitch": "Met jouw aankoop nomineer je iemand voor de Experts Live Studiebeurs van <strong>€5.000</strong> — een Microsoft-certificeringspakket (examens, studiemateriaal, training) te besteden binnen 12 maanden.",
+        "step1": "Koop merch of bied op de Octocat",
+        "step2": "Vul je nominatie digitaal in bij de Merch stand",
+        "step3": "Winnaar bekendgemaakt 30 dagen na het event op LinkedIn",
+        "footnote": "Meer aankopen = meer nominaties. Zelfnominatie is toegestaan."
+      }
     }
   },
   "auction": {
