@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -193,6 +193,24 @@ export function ShopPage() {
   const highlighted = items.filter((i) => i.isHighlighted);
   const regular = items.filter((i) => !i.isHighlighted);
 
+  const regularGridRef = useRef<HTMLDivElement | null>(null);
+  const [regularInView, setRegularInView] = useState(true);
+
+  useEffect(() => {
+    const el = regularGridRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) setRegularInView(e.isIntersecting);
+      },
+      // any sliver of the grid showing counts as "in view" so the cue
+      // disappears as soon as it begins to peek.
+      { threshold: 0.01 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [regular.length]);
+
   return (
     <PageContainer>
       <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">{t('shop.title')}</h1>
@@ -252,7 +270,7 @@ export function ShopPage() {
 
       {regular.length > 0 && (
         <section>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div ref={regularGridRef} className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {regular.map((item) => (
               <ShopCard
                 key={item.id}
@@ -270,6 +288,19 @@ export function ShopPage() {
       <AnimatePresence>
         {selected && <ShopDetailModal item={selected} onClose={() => setSelected(null)} />}
       </AnimatePresence>
+
+      {regular.length > 0 && !regularInView && (
+        <button
+          onClick={() => {
+            regularGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            touch();
+          }}
+          className="fixed bottom-24 right-4 z-40 inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-el-blue text-white text-sm font-semibold shadow-lg active:bg-el-blue/80 animate-bounce-soft"
+          aria-label={t('shop.moreBelow', { count: regular.length })}
+        >
+          {t('shop.moreBelow', { count: regular.length })}
+        </button>
+      )}
     </PageContainer>
   );
 }

@@ -81,6 +81,17 @@ body {
   }
 }
 
+@keyframes bounce-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@layer utilities {
+  .animate-bounce-soft {
+    animation: bounce-soft 1.6s ease-in-out infinite;
+  }
+}
+
 /* High-contrast theme — variable overrides apply to all bg-el-* / text-el-* utilities */
 [data-theme='high-contrast'] {
   --color-el-blue: #ffcc00;
