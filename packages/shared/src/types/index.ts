@@ -7,5 +7,6 @@ export type * from './shop.js'
 export type * from './admin.js'
 export type * from './audit.js'
 export type * from './auction.js'
+export type * from './nomination.js'
 
 export { DEFAULT_BRANDING } from './event.js'
