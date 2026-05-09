@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageContainer } from '../components/PageContainer';
-import { useShopItems } from '../lib/hooks';
+import { useShopItems, useFloorMaps } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
 import type { ShopItem } from '../lib/api';
 import { AuctionPanel } from '../components/AuctionPanel';
@@ -170,6 +171,22 @@ export function ShopPage() {
   const { t } = useTranslation();
   const touch = useKioskStore((s) => s.touch);
   const { data, isLoading } = useShopItems();
+  const navigate = useNavigate();
+  const setSelectedMap = useKioskStore((s) => s.setSelectedMap);
+  const { data: floorMapsData } = useFloorMaps();
+
+  // Find the Merch hotspot across all floor maps. Hidden when not yet
+  // loaded or when the hotspot is missing — never shows a broken state.
+  const merchTarget = (() => {
+    for (const map of floorMapsData ?? []) {
+      for (const h of map.hotspots ?? []) {
+        if (h.roomName?.trim().toLowerCase() === 'merchandise') {
+          return { mapId: map.id, hotspotId: h.id };
+        }
+      }
+    }
+    return null;
+  })();
   const [selected, setSelected] = useState<ShopItem | null>(null);
 
   const items = (data ?? []).slice().sort((a, b) => a.sortOrder - b.sortOrder);
@@ -209,7 +226,19 @@ export function ShopPage() {
         <p className="text-el-light/90 text-base sm:text-lg leading-relaxed">
           {t('shop.subtitle')}
         </p>
-        {/* MerchMapButton slot — wired in Task 6 */}
+        {merchTarget && (
+          <button
+            onClick={() => {
+              setSelectedMap(merchTarget.mapId, merchTarget.hotspotId);
+              touch();
+              navigate('/map');
+            }}
+            className="self-start inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-el-blue text-white text-sm font-bold active:bg-el-blue/80"
+          >
+            <span aria-hidden="true">📍</span>
+            {t('shop.merchOnMap')}
+          </button>
+        )}
         <p className="text-el-light/65 italic leading-relaxed text-sm sm:text-base">
           {t('shop.handmade')}
         </p>
