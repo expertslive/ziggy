@@ -38,8 +38,6 @@ export function KiosksBlock() {
   const rows = query.data ?? []
   const online = rows.filter((r) => r.status === 'online').length
   const total = rows.length
-  const top = rows.slice(0, 6)
-  const more = Math.max(0, total - top.length)
 
   return (
     <div className="rounded-xl border border-border bg-white p-4 shadow-sm">
@@ -54,8 +52,8 @@ export function KiosksBlock() {
         <p className="text-sm text-gray-400">No kiosks yet.</p>
       ) : (
         <>
-          <ul className="space-y-1.5">
-            {top.map((k) => (
+          <ul className="space-y-1">
+            {rows.map((k) => (
               <li
                 key={k.kioskId}
                 className="flex items-center justify-between gap-3 text-sm"
@@ -73,9 +71,6 @@ export function KiosksBlock() {
               </li>
             ))}
           </ul>
-          {more > 0 && (
-            <p className="mt-2 text-xs text-gray-400">{more} more</p>
-          )}
           <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs">
             <span className="text-gray-500">{online}/{total} online</span>
             <Link
