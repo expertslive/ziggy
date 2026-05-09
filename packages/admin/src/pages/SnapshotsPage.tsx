@@ -5,10 +5,26 @@ import {
   takeSnapshot,
   restoreSnapshot,
   deleteSnapshot,
+  backupPii,
+  fetchHealth,
   type SnapshotMeta,
 } from '../lib/api'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useToast } from '../components/Toast'
+
+function relativeTime(iso: string | null | undefined): string {
+  if (!iso) return 'never'
+  const ageMs = Date.now() - new Date(iso).getTime()
+  if (ageMs < 0) return 'just now'
+  const sec = Math.floor(ageMs / 1000)
+  if (sec < 60) return `${sec}s ago`
+  const min = Math.floor(sec / 60)
+  if (min < 60) return `${min}m ago`
+  const hr = Math.floor(min / 60)
+  if (hr < 24) return `${hr}h ago`
+  const day = Math.floor(hr / 24)
+  return `${day}d ago`
+}
 
 function fmtSize(n: number) {
   if (n < 1024) return `${n} B`
@@ -76,6 +92,20 @@ export function SnapshotsPage() {
     onError: () => toast('error', 'Delete failed'),
   })
 
+  // PII backup is a separate spoor — bids and nominations are append-only PII
+  // we never want to "restore" (rolling back live entries is destructive).
+  // The dashboard's lastBackupAt powers the "Last run" line; reusing that
+  // query keeps a single source of truth.
+  const health = useQuery({ queryKey: ['dashboard-health'], queryFn: fetchHealth })
+  const piiMut = useMutation({
+    mutationFn: () => backupPii(),
+    onSuccess: (data) => {
+      toast('success', `Backed up ${data.bids} bids + ${data.nominations} nominations`)
+      qc.invalidateQueries({ queryKey: ['dashboard-health'] })
+    },
+    onError: () => toast('error', 'PII backup failed'),
+  })
+
   return (
     <div>
       <div className="mb-6 flex items-baseline justify-between">
@@ -84,6 +114,28 @@ export function SnapshotsPage() {
           <p className="mt-1 text-sm text-gray-500">
             Self-service Cosmos backups — restore everything in one click.
           </p>
+        </div>
+      </div>
+
+      {/* PII backup (bids + nominations) — separate from snapshots; never restored. */}
+      <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-base font-bold text-secondary">
+              PII backup (bids + nominations)
+            </h2>
+            <p className="mt-1 text-xs text-gray-600">
+              Daily JSON dump to Blob Storage. Append-only PII — never restored,
+              just preserved. Last run: {relativeTime(health.data?.lastBackupAt)}.
+            </p>
+          </div>
+          <button
+            onClick={() => piiMut.mutate()}
+            disabled={piiMut.isPending}
+            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
+          >
+            {piiMut.isPending ? 'Backing up…' : 'Back up now'}
+          </button>
         </div>
       </div>
 

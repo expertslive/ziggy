@@ -459,6 +459,18 @@ export function deleteSnapshot(name: string) {
   )
 }
 
+export interface PiiBackupResult {
+  bids: number
+  nominations: number
+  blobUrls: { bids: string; nominations: string }
+}
+
+export function backupPii() {
+  return fetchJson<PiiBackupResult>(`/api/admin/events/${slug}/backup-pii`, {
+    method: 'POST',
+  })
+}
+
 // Analytics — extra reports
 export interface HourlySeriesPoint {
   bucket: string // e.g. "2026-06-02T14"
