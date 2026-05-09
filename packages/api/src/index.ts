@@ -11,6 +11,7 @@ import admin from './routes/admin.js'
 import warmup from './routes/warmup.js'
 import { analytics } from './routes/analytics.js'
 import nominations from './routes/nominations.js'
+import adminNominations from './routes/admin-nominations.js'
 
 const app = new Hono()
 
@@ -82,6 +83,7 @@ app.route('/', admin)
 app.route('/', warmup)
 app.route('/', analytics)
 app.route('/', nominations)
+app.route('/', adminNominations)
 
 // ---------------------------------------------------------------------------
 // Start server

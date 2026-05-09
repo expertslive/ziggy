@@ -48,9 +48,13 @@ export const NominationSubmitSchema = z.object({
 
 export type NominationSubmitInput = z.infer<typeof NominationSubmitSchema>
 
-export const AdminNominationPatchSchema = z.object({
-  status: z.enum(['pending', 'verified', 'rejected']).optional(),
-  adminNotes: z.string().max(2000).optional(),
-})
+export const AdminNominationPatchSchema = z
+  .object({
+    status: z.enum(['pending', 'verified', 'rejected']).optional(),
+    adminNotes: z.string().max(2000).optional(),
+  })
+  .refine((v) => v.status !== undefined || v.adminNotes !== undefined, {
+    message: 'At least one of status or adminNotes is required',
+  })
 
 export type AdminNominationPatchInput = z.infer<typeof AdminNominationPatchSchema>
