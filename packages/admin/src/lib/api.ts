@@ -285,6 +285,7 @@ export interface AuctionBid {
   phone: string
   displayName: string
   kioskId?: string
+  sessionId?: string
 }
 export interface AuctionAdminState {
   config: { minStartBid: number; minIncrement: number; endsAt: string; closedAt?: string }
@@ -301,6 +302,69 @@ export function closeAuction(shopItemId: string) {
     `/api/admin/events/${slug}/shop-items/${shopItemId}/auction/close`,
     { method: 'POST' },
   )
+}
+
+// Event-wide bids (admin) — joined with shop-item name + auction status.
+export type AuctionItemStatus = 'open' | 'closed'
+export interface AuctionBidWithItem extends AuctionBid {
+  itemId: string
+  itemName: string
+  itemAuctionStatus: AuctionItemStatus
+  shopItemId: string
+  eventSlug: string
+}
+
+export function fetchBids(params: {
+  status?: AuctionItemStatus | 'all'
+  q?: string
+  itemId?: string
+}) {
+  const search = new URLSearchParams()
+  if (params.status && params.status !== 'all') search.set('status', params.status)
+  if (params.q && params.q.trim()) search.set('q', params.q.trim())
+  if (params.itemId) search.set('itemId', params.itemId)
+  const qs = search.toString()
+  return fetchJson<AuctionBidWithItem[]>(
+    `/api/admin/events/${slug}/bids${qs ? `?${qs}` : ''}`,
+  )
+}
+
+export async function downloadBidsCsv(params: {
+  status?: AuctionItemStatus | 'all'
+  q?: string
+  itemId?: string
+} = {}): Promise<void> {
+  const token = getToken()
+  const headers: Record<string, string> = {}
+  if (token) headers['Authorization'] = `Bearer ${token}`
+  const search = new URLSearchParams()
+  if (params.status && params.status !== 'all') search.set('status', params.status)
+  if (params.q && params.q.trim()) search.set('q', params.q.trim())
+  if (params.itemId) search.set('itemId', params.itemId)
+  const qs = search.toString()
+  const res = await fetch(
+    `${BASE_URL}/api/admin/events/${slug}/bids.csv${qs ? `?${qs}` : ''}`,
+    { headers },
+  )
+  if (res.status === 401) {
+    clearToken()
+    window.location.href = '/login'
+    throw new ApiError(401, 'Unauthorized')
+  }
+  if (!res.ok) throw new ApiError(res.status, `CSV export failed (${res.status})`)
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const cd = res.headers.get('content-disposition') || ''
+  const match = /filename="([^"]+)"/.exec(cd)
+  const today = new Date().toISOString().slice(0, 10)
+  const filename = match?.[1] || `bids-${slug}-${today}.csv`
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 
 // Image library
