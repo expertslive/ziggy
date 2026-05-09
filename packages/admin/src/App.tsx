@@ -20,6 +20,7 @@ import { UsersPage } from './pages/UsersPage';
 import { ImagesPage } from './pages/ImagesPage';
 import { PreviewPage } from './pages/PreviewPage';
 import { AuctionAdminPage } from './pages/AuctionAdminPage';
+import { NominationsPage } from './pages/NominationsPage';
 import { CommandPalette } from './components/CommandPalette';
 import { EventLiveBanner } from './components/EventLiveBanner';
 import type { ReactNode } from 'react';
@@ -36,6 +37,7 @@ const navItems = [
   { to: '/sponsors', label: 'Sponsors', icon: SponsorsIcon },
   { to: '/tiers', label: 'Tiers', icon: TiersIcon },
   { to: '/shop-items', label: 'Shop Items', icon: ShopItemsIcon },
+  { to: '/nominations', label: 'Nominations', icon: NominationsIcon },
   { to: '/floor-maps', label: 'Floor Maps', icon: FloorMapsIcon },
   { to: '/images', label: 'Images', icon: ImagesIcon },
   { to: '/preview', label: 'Preview', icon: PreviewIcon },
@@ -206,6 +208,7 @@ export function App() {
                   <Route path="/images" element={<ImagesPage />} />
                   <Route path="/preview" element={<PreviewPage />} />
                   <Route path="/shop-items/:id/auction" element={<AuctionAdminPage />} />
+                  <Route path="/nominations" element={<NominationsPage />} />
                 </Routes>
               </AdminLayout>
             </ProtectedRoute>
@@ -246,6 +249,14 @@ function ShopItemsIcon({ active }: { active: boolean }) {
   return (
     <svg className={`h-5 w-5 ${active ? 'text-primary' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z" />
+    </svg>
+  );
+}
+
+function NominationsIcon({ active }: { active: boolean }) {
+  return (
+    <svg className={`h-5 w-5 ${active ? 'text-primary' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9a9 9 0 1118 0v.75a.75.75 0 01-.75.75h-7.5a.75.75 0 01-.75-.75v-.75zM12 12.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
     </svg>
   );
 }

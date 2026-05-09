@@ -1,3 +1,5 @@
+import type { Nomination, NominationStatus } from '@ziggy/shared';
+
 const BASE_URL = import.meta.env.VITE_API_URL || '';
 
 function getToken(): string | null {
@@ -461,6 +463,83 @@ export interface AnalyticsSummary {
 }
 export function fetchAnalyticsSummary() {
   return fetchJson<AnalyticsSummary>('/api/admin/analytics/summary')
+}
+
+// Nominations (studiebeurs)
+export function fetchNominations(params: {
+  status?: NominationStatus | 'all';
+  q?: string;
+}) {
+  const search = new URLSearchParams();
+  if (params.status && params.status !== 'all') search.set('status', params.status);
+  if (params.q && params.q.trim()) search.set('q', params.q.trim());
+  const qs = search.toString();
+  return fetchJson<Nomination[]>(
+    `/api/admin/events/${slug}/nominations${qs ? `?${qs}` : ''}`,
+  );
+}
+
+export function patchNomination(
+  id: string,
+  data: { status?: NominationStatus; adminNotes?: string },
+) {
+  return fetchJson<Nomination>(`/api/admin/events/${slug}/nominations/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteNomination(id: string): Promise<void> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${BASE_URL}/api/admin/events/${slug}/nominations/${id}`, {
+    method: 'DELETE',
+    headers,
+  });
+  if (res.status === 401) {
+    clearToken();
+    window.location.href = '/login';
+    throw new ApiError(401, 'Unauthorized');
+  }
+  if (!res.ok && res.status !== 204) {
+    let body: { error?: string } = {};
+    try {
+      body = await res.json();
+    } catch {
+      // ignore
+    }
+    throw new ApiError(res.status, body.error || `API error ${res.status}`);
+  }
+}
+
+export async function downloadNominationsCsv(): Promise<void> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(
+    `${BASE_URL}/api/admin/events/${slug}/nominations.csv`,
+    { headers },
+  );
+  if (res.status === 401) {
+    clearToken();
+    window.location.href = '/login';
+    throw new ApiError(401, 'Unauthorized');
+  }
+  if (!res.ok) throw new ApiError(res.status, `CSV export failed (${res.status})`);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  // Server sets a Content-Disposition; we still propose a sensible default.
+  const cd = res.headers.get('content-disposition') || '';
+  const match = /filename="([^"]+)"/.exec(cd);
+  const filename = match?.[1] || `nominations-${slug}.csv`;
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // I18n Overrides
