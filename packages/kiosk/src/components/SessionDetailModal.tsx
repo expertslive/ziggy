@@ -49,12 +49,36 @@ export function SessionDetailModal({ session, onClose }: SessionDetailModalProps
   const { data: sponsors } = useSponsors();
   const visibleLabels = session.labels.filter((l) => l.showInElement);
 
-  const matchingMap = (floorMaps ?? []).find((m) =>
-    m.hotspots?.some((h) => h.roomGuid === session.roomGuid),
-  );
-  const matchingHotspot = matchingMap?.hotspots.find(
-    (h) => h.roomGuid === session.roomGuid,
-  );
+  // GUID-based match (preferred). roomGuids[] handles combined rooms — e.g.
+  // a single "Event Hall 1" hotspot listing both the Event Hall 1 GUID and
+  // the combined "Event Hall 1+2" GUID used during keynote / closing-note.
+  const guidMatch = (h: { roomGuid?: string; roomGuids?: string[] }) =>
+    (h.roomGuids && h.roomGuids.includes(session.roomGuid)) ||
+    h.roomGuid === session.roomGuid;
+  let matchingMap = (floorMaps ?? []).find((m) => m.hotspots?.some(guidMatch));
+  let matchingHotspot = matchingMap?.hotspots.find(guidMatch);
+
+  // Fallback: roomName substring match for combined-room sessions where the
+  // admin hasn't wired roomGuids yet. "Event Hall 1 & 2" → matches the
+  // hotspot named "Event Hall 1" so the kiosk can still point users
+  // somewhere sensible. The shorter (single-hall) hotspot name being a
+  // prefix of the longer (combined) session name is the load-bearing
+  // property.
+  if (!matchingHotspot) {
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const sn = norm(session.roomName);
+    for (const m of floorMaps ?? []) {
+      const hit = m.hotspots?.find((h) => {
+        const hn = norm(h.roomName);
+        return hn.length >= 4 && sn !== hn && sn.includes(hn);
+      });
+      if (hit) {
+        matchingMap = m;
+        matchingHotspot = hit;
+        break;
+      }
+    }
+  }
 
   // For sponsor sessions: find the sponsor + their booth on the floor map.
   const sessionSponsor = findSessionSponsor(session, sponsors);
