@@ -30,6 +30,7 @@ export type AuditTarget =
   | 'auction'
   | 'nomination'
   | 'kiosk'
+  | 'pii-backup'
 
 export interface AuditEntry {
   /** ts-actor-target-recordId-random — synthetic for ordering. */

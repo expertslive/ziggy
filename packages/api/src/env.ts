@@ -7,6 +7,7 @@ export interface EnvConfig {
   jwtSecret: string
   storageConnectionString: string
   setupToken: string
+  backupToken?: string
 }
 
 function requireInProd(name: string, value: string, nodeEnv: string): void {
@@ -40,5 +41,6 @@ export function getEnv(): EnvConfig {
     jwtSecret,
     storageConnectionString: process.env.STORAGE_CONNECTION_STRING || '',
     setupToken: process.env.SETUP_TOKEN || '',
+    backupToken: process.env.BACKUP_TOKEN || undefined,
   }
 }

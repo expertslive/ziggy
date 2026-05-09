@@ -14,6 +14,7 @@ import nominations from './routes/nominations.js'
 import adminNominations from './routes/admin-nominations.js'
 import adminKiosks from './routes/admin-kiosks.js'
 import adminBids from './routes/admin-bids.js'
+import adminBackup from './routes/admin-backup.js'
 
 const app = new Hono()
 
@@ -88,6 +89,7 @@ app.route('/', nominations)
 app.route('/', adminNominations)
 app.route('/', adminKiosks)
 app.route('/', adminBids)
+app.route('/', adminBackup)
 
 // ---------------------------------------------------------------------------
 // Start server
