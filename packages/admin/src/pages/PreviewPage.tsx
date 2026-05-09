@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /** Live kiosk preview — embeds the public kiosk in an iframe. The iframe
  *  is rendered at the device's actual viewport size (so the kiosk SPA
@@ -31,12 +31,10 @@ const DEVICES = {
 
 type DeviceKey = keyof typeof DEVICES
 
-/** Cap visual size so the preview fits inside the admin layout's
- *  max-w-6xl content column without spilling past the right edge. The
- *  width cap was the missing constraint — kiosk 16:9 at 720px tall is
- *  1280px wide, far wider than the column. */
+/** Visual height cap — width is measured at runtime from the surrounding
+ *  card so the preview always fits the admin layout regardless of how
+ *  wide the user's window is. */
 const MAX_DISPLAY_HEIGHT = 720
-const MAX_DISPLAY_WIDTH = 1040
 
 const DEVICE_BUTTON_LABELS: Record<DeviceKey, string> = {
   kiosk: 'Kiosk',
@@ -50,8 +48,27 @@ export function PreviewPage() {
   const [iframeKey, setIframeKey] = useState(0)
   const [device, setDevice] = useState<DeviceKey>('kiosk')
 
+  // Measure the available width inside the surrounding card so the kiosk
+  // preview never spills past the right edge regardless of the user's
+  // window size. Falls back to the device's native width on first paint.
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [containerW, setContainerW] = useState<number>(0)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerW(entry.contentRect.width)
+      }
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   const dims = DEVICES[device]
-  const scale = Math.min(MAX_DISPLAY_HEIGHT / dims.h, MAX_DISPLAY_WIDTH / dims.w, 1)
+  const widthCap = containerW > 0 ? containerW : dims.w
+  const scale = Math.min(MAX_DISPLAY_HEIGHT / dims.h, widthCap / dims.w, 1)
   const displayW = Math.round(dims.w * scale)
   const displayH = Math.round(dims.h * scale)
 
@@ -104,7 +121,10 @@ export function PreviewPage() {
         </div>
       </div>
 
-      <div className="flex justify-center rounded-xl border border-border bg-gray-100 p-6 shadow-inner">
+      <div
+        ref={containerRef}
+        className="flex justify-center rounded-xl border border-border bg-gray-100 p-6 shadow-inner"
+      >
         {/* Outer wrapper takes the *display* size — so layout reserves only
          *  the space the scaled iframe actually occupies. */}
         <div
