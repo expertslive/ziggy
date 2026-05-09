@@ -83,6 +83,11 @@ app.use('/api/admin/*', async (c, next) => {
 
 app.route('/', health)
 app.route('/', events)
+// adminBackup must mount BEFORE admin — its endpoint accepts a Bearer
+// BACKUP_TOKEN as alternative to a JWT, but admin's catch-all
+// `requireAuth` middleware would intercept first and reject the token as
+// invalid JWT. Sub-router order in Hono determines which handler answers.
+app.route('/', adminBackup)
 app.route('/', admin)
 app.route('/', warmup)
 app.route('/', analytics)
@@ -90,7 +95,6 @@ app.route('/', nominations)
 app.route('/', adminNominations)
 app.route('/', adminKiosks)
 app.route('/', adminBids)
-app.route('/', adminBackup)
 app.route('/', adminDashboard)
 
 // ---------------------------------------------------------------------------
