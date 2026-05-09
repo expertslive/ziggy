@@ -30,6 +30,29 @@ body {
   overscroll-behavior: none;
 }
 
+/* /nominate runs on someone's phone, not on a kiosk — undo the kiosk-only
+ * resets that lock scrolling, text selection, and tap-callouts so the
+ * public form behaves like a normal mobile page. Activated by
+ * BareLayout adding html.nominate-mode on mount. */
+html.nominate-mode {
+  overflow: auto;
+  touch-action: auto;
+}
+html.nominate-mode body {
+  overscroll-behavior: auto;
+}
+html.nominate-mode * {
+  -webkit-touch-callout: default;
+}
+html.nominate-mode,
+html.nominate-mode * {
+  user-select: auto;
+}
+html.nominate-mode input,
+html.nominate-mode textarea {
+  user-select: text;
+}
+
 /* Scrollable areas opt-in */
 .scrollable {
   overflow-y: auto;

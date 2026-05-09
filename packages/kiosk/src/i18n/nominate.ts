@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 
 /** Self-contained NL/EN strings for /nominate. Kept outside react-i18next
  *  so the public form's language never bleeds into the kiosk's own i18n
@@ -125,30 +125,54 @@ function detectLang(): NominateLang {
   return langs.some((l) => l?.toLowerCase().startsWith('nl')) ? 'nl' : 'en'
 }
 
-/** Read/write nominate language to its own localStorage key. Independent
- *  of the kiosk's main i18n store. */
+// Module-level singleton so every useNominateLang() consumer shares state.
+// useState-per-call would give Hero and NominatePage independent copies and
+// the switcher would only update its own subtree.
+const subscribers = new Set<() => void>()
+
+let currentLang: NominateLang = (() => {
+  if (typeof window === 'undefined') return 'nl'
+  const stored = window.localStorage.getItem(STORAGE_KEY)
+  if (stored === 'nl' || stored === 'en') return stored
+  return detectLang()
+})()
+
+function setLangShared(next: NominateLang) {
+  if (next === currentLang) return
+  currentLang = next
+  try {
+    window.localStorage.setItem(STORAGE_KEY, next)
+  } catch {
+    /* ignore quota / private mode */
+  }
+  subscribers.forEach((fn) => fn())
+}
+
+function subscribe(fn: () => void) {
+  subscribers.add(fn)
+  return () => {
+    subscribers.delete(fn)
+  }
+}
+
+function getSnapshot() {
+  return currentLang
+}
+
+function getServerSnapshot(): NominateLang {
+  return 'nl'
+}
+
+/** Read/write nominate language. Singleton state — all consumers re-render
+ *  on switch, so Hero and NominatePage stay in sync. */
 export function useNominateLang() {
-  const [lang, setLangState] = useState<NominateLang>(() => {
-    if (typeof window === 'undefined') return 'nl'
-    const stored = window.localStorage.getItem(STORAGE_KEY)
-    if (stored === 'nl' || stored === 'en') return stored
-    return detectLang()
-  })
+  const lang = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
 
-  const setLang = (next: NominateLang) => {
-    setLangState(next)
-    try {
-      window.localStorage.setItem(STORAGE_KEY, next)
-    } catch {
-      /* ignore quota / private mode */
-    }
-  }
-
   const t = (key: NominateStringKey) => nominateStrings[lang][key]
 
-  return { lang, setLang, t }
+  return { lang, setLang: setLangShared, t }
 }
