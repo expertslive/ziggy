@@ -65,6 +65,22 @@ export async function ensureAuctionContainer(): Promise<void> {
   auctionEnsured = true
 }
 
+/** Ensure the nominations container exists. Partitioned by eventSlug.
+ * 180-day TTL — nominations are PII tied to a specific scholarship cycle
+ * (winner announced ~30 days post-event), so half a year covers
+ * follow-up + dispute window with a buffer. */
+let nominationsEnsured = false
+export async function ensureNominationsContainer(): Promise<void> {
+  if (nominationsEnsured) return
+  const db = getClient().database(DATABASE_NAME)
+  await db.containers.createIfNotExists({
+    id: 'nominations',
+    partitionKey: { paths: ['/eventSlug'], kind: PartitionKeyKind.Hash },
+    defaultTtl: 15_552_000, // 180 days
+  })
+  nominationsEnsured = true
+}
+
 // ---------------------------------------------------------------------------
 // CRUD helpers
 // ---------------------------------------------------------------------------
