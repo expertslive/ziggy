@@ -40,24 +40,26 @@ function ShopCard({ item, onTap }: { item: ShopItem; onTap: () => void }) {
           {hasAuction ? t('shop.bidNow') : item.priceLabel}
         </p>
         {hasAuction && (
-          <div className="mt-3 space-y-2">
-            <p className="text-sm text-el-dark/80 leading-relaxed">
+          <div className="mt-3 space-y-3">
+            <p className="text-el-dark/80 leading-relaxed text-sm sm:text-base">
               {t('shop.octocat.pitch')}
             </p>
-            <ul className="space-y-1.5 text-xs text-el-dark/70">
-              <li className="flex items-start gap-2">
-                <span className="text-el-blue font-bold mt-0.5">•</span>
-                {t('shop.octocat.bullet1')}
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-el-blue font-bold mt-0.5">•</span>
-                {t('shop.octocat.bullet2')}
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-el-blue font-bold mt-0.5">•</span>
-                {t('shop.octocat.bullet3')}
-              </li>
-            </ul>
+            <ol className="space-y-2.5">
+              {(['bullet1', 'bullet2', 'bullet3'] as const).map((key, idx) => (
+                <li
+                  key={key}
+                  className="flex items-start gap-3 text-sm sm:text-base text-el-dark/85"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="shrink-0 w-6 h-6 rounded-full bg-el-blue text-white text-xs font-bold flex items-center justify-center mt-0.5"
+                  >
+                    {idx + 1}
+                  </span>
+                  <span>{t(`shop.octocat.${key}`)}</span>
+                </li>
+              ))}
+            </ol>
           </div>
         )}
       </div>
@@ -263,10 +265,15 @@ export function ShopPage() {
 
       {/* Full-width info strip — subtitle + Merch button (added in Task 6) +
           handmade line. */}
-      <div className="mt-4 mb-8 bg-el-blue/10 border border-el-blue/40 rounded-2xl p-4 sm:p-5 flex flex-col gap-2">
-        <p className="text-el-light/90 text-sm sm:text-base leading-relaxed">
-          {t('shop.subtitle')}
-        </p>
+      <div className="mt-4 mb-8 bg-el-blue/10 border border-el-blue/40 rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
+        <div className="space-y-1">
+          <p className="text-el-light/90 text-xs sm:text-sm leading-relaxed">
+            {t('shop.subtitle')}
+          </p>
+          <p className="text-el-light/60 italic leading-relaxed text-xs sm:text-sm">
+            {t('shop.handmade')}
+          </p>
+        </div>
         {merchTarget && (
           <button
             onClick={() => {
@@ -280,9 +287,6 @@ export function ShopPage() {
             {t('shop.merchOnMap')}
           </button>
         )}
-        <p className="text-el-light/60 italic leading-relaxed text-xs sm:text-sm">
-          {t('shop.handmade')}
-        </p>
       </div>
 
       {isLoading && <p className="text-el-light/60">{t('common.loading')}</p>}
