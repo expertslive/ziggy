@@ -7,6 +7,7 @@ import { useShopItems } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
 import type { ShopItem } from '../lib/api';
 import { AuctionPanel } from '../components/AuctionPanel';
+import { StudiebeursHeroCard } from '../components/StudiebeursHeroCard';
 
 function ShopCard({ item, onTap }: { item: ShopItem; onTap: () => void }) {
   const { t } = useTranslation();
@@ -179,11 +180,10 @@ export function ShopPage() {
     <PageContainer>
       <h1 className="text-2xl sm:text-3xl font-extrabold text-el-light mb-4">{t('shop.title')}</h1>
 
-      {/* Hero row: featured item on the left, combined info+studiebeurs on the right (md+).
-          On mobile they stack with featured first. Both sides stretch to equal height —
-          dropped the "Uitgelicht" header so both columns top-align cleanly; the ring +
-          large image already mark the featured card without a label. */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 items-stretch">
+      {/* Hero row: Octocat (left) and Studiebeurs (right) get equal visual
+          weight on md+. On mobile they stack. Below the hero row a full-width
+          info strip carries the subtitle + Merch deeplink + handmade line. */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
         {highlighted.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
             {highlighted.map((item) => (
@@ -198,23 +198,21 @@ export function ShopPage() {
             ))}
           </div>
         ) : (
-          <div /> /* placeholder so the info block keeps its right-side position */
+          <div /> /* placeholder so the studiebeurs card keeps its right slot */
         )}
+        <StudiebeursHeroCard />
+      </div>
 
-        {/* Combined info block — subtitle, handmade, studiebeurs in one card.
-            justify-center vertically balances content when the featured card on
-            the left makes this column taller than the natural text height. */}
-        <div className="bg-el-blue/10 border border-el-blue/40 rounded-2xl p-6 sm:p-7 flex flex-col gap-4 justify-center">
-          <p className="text-el-light/90 text-base sm:text-lg leading-relaxed">{t('shop.subtitle')}</p>
-          <p className="text-el-light/65 italic leading-relaxed text-sm sm:text-base">{t('shop.handmade')}</p>
-          <hr className="border-el-blue/30" />
-          <div>
-            <h2 className="text-lg font-bold text-el-blue mb-2">{t('shop.studiebeurs.heading')}</h2>
-            <p className="text-el-light/80 leading-relaxed">
-              {t('shop.studiebeurs.body1')} {t('shop.studiebeurs.body2')}
-            </p>
-          </div>
-        </div>
+      {/* Full-width info strip — subtitle + Merch button (added in Task 6) +
+          handmade line. */}
+      <div className="mt-4 mb-8 bg-el-blue/10 border border-el-blue/40 rounded-2xl p-5 sm:p-6 flex flex-col gap-3">
+        <p className="text-el-light/90 text-base sm:text-lg leading-relaxed">
+          {t('shop.subtitle')}
+        </p>
+        {/* MerchMapButton slot — wired in Task 6 */}
+        <p className="text-el-light/65 italic leading-relaxed text-sm sm:text-base">
+          {t('shop.handmade')}
+        </p>
       </div>
 
       {isLoading && <p className="text-el-light/60">{t('common.loading')}</p>}
