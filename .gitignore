@@ -44,3 +44,8 @@ backups/*.json
 # Local brainstorm/design notes — kept out of the public repo per project policy.
 BRAINSTORM-*.md
 .scratch/
+
+# One-off ops/cleanup scripts (orphan blob audit, ad-hoc data-fix scripts).
+# Live-data scripts that should never be in the public repo.
+orphan-check.mjs
+ops-*.mjs
