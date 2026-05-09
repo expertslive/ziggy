@@ -668,6 +668,59 @@ export async function deleteKiosk(id: string): Promise<void> {
   }
 }
 
+// Dashboard aggregates
+export interface DashboardHealthCheck {
+  ok: boolean
+  label: string
+}
+export interface DashboardHealth {
+  runEvents: DashboardHealthCheck
+  cosmos: DashboardHealthCheck
+  storage: DashboardHealthCheck
+  cacheAgeSec: number | null
+  lastBackupAt: string | null
+  errors24h: number
+}
+export function fetchHealth() {
+  return fetchJson<DashboardHealth>('/api/admin/dashboard/health')
+}
+
+export interface DashboardToday {
+  bids: { count: number; totalEur: number }
+  nominations: { count: number }
+  pageviews: number
+  activeKiosks: { online: number; total: number }
+  topPage: { path: string; views: number } | null
+}
+export function fetchToday(eventSlug: string = slug) {
+  return fetchJson<DashboardToday>(
+    `/api/admin/events/${eventSlug}/dashboard/today`,
+  )
+}
+
+export interface DashboardActionItem {
+  count: number
+  link: string
+}
+export interface DashboardActionItems {
+  pendingNominations: DashboardActionItem
+  sponsorsNoLogo: DashboardActionItem
+  shopItemsNoImage: DashboardActionItem
+  sessionsNoRoom: DashboardActionItem
+  hotspotsEmpty: DashboardActionItem
+}
+export function fetchActionItems(eventSlug: string = slug) {
+  return fetchJson<DashboardActionItems>(
+    `/api/admin/events/${eventSlug}/dashboard/action-items`,
+  )
+}
+
+export function fetchRecentActivity(eventSlug: string = slug, limit: number = 20) {
+  return fetchJson<AuditEntry[]>(
+    `/api/admin/events/${eventSlug}/dashboard/recent-activity?limit=${limit}`,
+  )
+}
+
 // I18n Overrides
 export function fetchI18nOverrides() {
   return fetchJson<any[]>(`/api/admin/events/${slug}/i18n-overrides`);
