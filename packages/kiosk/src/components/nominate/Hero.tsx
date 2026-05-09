@@ -20,17 +20,20 @@ export function Hero() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-el-darker/50 via-el-darker/40 to-el-darker/70" />
 
-      <div className="absolute top-3 right-3 z-10">
-        <LangPill lang={lang} setLang={setLang} labelNL={t('langNL')} labelEN={t('langEN')} />
-      </div>
-
-      <div className="relative z-10 flex min-h-[30vh] flex-col justify-end px-5 py-5 sm:px-6 sm:py-6">
+      <div className="relative z-10 flex min-h-[30vh] flex-col justify-end px-5 py-5 sm:px-6 sm:py-6 pointer-events-none">
         <span className="self-start mb-3 px-3 py-1 rounded-full bg-el-darker/70 backdrop-blur-sm text-white text-xs sm:text-sm font-bold uppercase tracking-wider">
           {t('pill')}
         </span>
         <h1 className="text-white font-extrabold leading-tight text-3xl sm:text-4xl">
           {t('headline')} <span aria-hidden="true">{t('headlineEmoji')}</span>
         </h1>
+      </div>
+
+      {/* LangPill renders AFTER the headline so it wins on equal z-index, and
+       *  pointer-events-auto re-enables clicks (parent headline div is
+       *  pointer-events-none so it doesn't eat taps in the corner). */}
+      <div className="absolute top-3 right-3 z-20 pointer-events-auto">
+        <LangPill lang={lang} setLang={setLang} labelNL={t('langNL')} labelEN={t('langEN')} />
       </div>
     </header>
   )
