@@ -250,27 +250,29 @@ export function ShopItemsPage() {
                   {item.isHighlighted ? 'Yes' : '—'}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-600">{item.sortOrder}</td>
-                <td className="px-6 py-4 text-right">
-                  {item.auction && (
-                    <Link
-                      to={`/shop-items/${item.id}/auction`}
-                      className="mr-3 text-sm font-medium text-amber-700 hover:underline"
+                <td className="whitespace-nowrap px-6 py-4 text-right">
+                  <div className="inline-flex items-center justify-end gap-3">
+                    {item.auction && (
+                      <Link
+                        to={`/shop-items/${item.id}/auction`}
+                        className="text-sm font-medium text-amber-700 hover:underline"
+                      >
+                        Veiling
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => openEdit(item)}
+                      className="text-sm font-medium text-primary hover:text-primary-dark"
                     >
-                      Veiling
-                    </Link>
-                  )}
-                  <button
-                    onClick={() => openEdit(item)}
-                    className="mr-2 text-sm font-medium text-primary hover:text-primary-dark"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => setDeleteTarget({ id: item.id, name: item.name })}
-                    className="text-sm font-medium text-red-500 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget({ id: item.id, name: item.name })}
+                      className="text-sm font-medium text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

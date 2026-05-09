@@ -31,9 +31,19 @@ const DEVICES = {
 
 type DeviceKey = keyof typeof DEVICES
 
-/** Cap visual height so the preview never blows past the viewport. The
- *  scale comes out of: max display height / native height. */
+/** Cap visual size so the preview fits inside the admin layout's
+ *  max-w-6xl content column without spilling past the right edge. The
+ *  width cap was the missing constraint — kiosk 16:9 at 720px tall is
+ *  1280px wide, far wider than the column. */
 const MAX_DISPLAY_HEIGHT = 720
+const MAX_DISPLAY_WIDTH = 1040
+
+const DEVICE_BUTTON_LABELS: Record<DeviceKey, string> = {
+  kiosk: 'Kiosk',
+  'ipad-portrait': 'iPad portrait',
+  'ipad-landscape': 'iPad landscape',
+  iphone: 'iPhone',
+}
 
 export function PreviewPage() {
   const [active, setActive] = useState('/now')
@@ -41,7 +51,7 @@ export function PreviewPage() {
   const [device, setDevice] = useState<DeviceKey>('kiosk')
 
   const dims = DEVICES[device]
-  const scale = Math.min(MAX_DISPLAY_HEIGHT / dims.h, 1)
+  const scale = Math.min(MAX_DISPLAY_HEIGHT / dims.h, MAX_DISPLAY_WIDTH / dims.w, 1)
   const displayW = Math.round(dims.w * scale)
   const displayH = Math.round(dims.h * scale)
 
@@ -88,7 +98,7 @@ export function PreviewPage() {
                   : 'bg-white text-gray-600 ring-1 ring-border'
               }`}
             >
-              {d.replace('ipad-', 'iPad ').replace(/^./, (m) => m.toUpperCase())}
+              {DEVICE_BUTTON_LABELS[d]}
             </button>
           ))}
         </div>
