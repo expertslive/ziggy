@@ -44,6 +44,22 @@ export async function listBidsForItem(
   return resources
 }
 
+/** Pull every bid for an event slug, newest first. JOIN-style filtering
+ * against shop-items happens in the route. */
+export async function listAllBids(eventSlug: string): Promise<AuctionBid[]> {
+  await ensureAuctionContainer()
+  const container = getContainer('auction-bids')
+  const { resources } = await container.items
+    .query<AuctionBid>({
+      query: `SELECT * FROM c
+                WHERE c.eventSlug = @s
+                ORDER BY c.ts DESC`,
+      parameters: [{ name: '@s', value: eventSlug }],
+    })
+    .fetchAll()
+  return resources
+}
+
 export function isAuctionOpen(item: ShopItem, now = Date.now()): boolean {
   if (!item.auction) return false
   if (item.auction.closedAt) return false
