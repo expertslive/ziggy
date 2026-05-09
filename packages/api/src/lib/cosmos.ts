@@ -81,6 +81,20 @@ export async function ensureNominationsContainer(): Promise<void> {
   nominationsEnsured = true
 }
 
+/** Ensure the kiosks container exists. Partitioned by eventSlug. No TTL —
+ * admin-managed config. Holds display-name/short-code aliases for the
+ * kiosk-IDs that show up in analytics heartbeats. */
+let kiosksEnsured = false
+export async function ensureKiosksContainer(): Promise<void> {
+  if (kiosksEnsured) return
+  const db = getClient().database(DATABASE_NAME)
+  await db.containers.createIfNotExists({
+    id: 'kiosks',
+    partitionKey: { paths: ['/eventSlug'], kind: PartitionKeyKind.Hash },
+  })
+  kiosksEnsured = true
+}
+
 // ---------------------------------------------------------------------------
 // CRUD helpers
 // ---------------------------------------------------------------------------
