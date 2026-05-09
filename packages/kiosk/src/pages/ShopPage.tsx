@@ -242,8 +242,8 @@ export function ShopPage() {
 
       {/* Full-width info strip — subtitle + Merch button (added in Task 6) +
           handmade line. */}
-      <div className="mt-4 mb-8 bg-el-blue/10 border border-el-blue/40 rounded-2xl p-5 sm:p-6 flex flex-col gap-3">
-        <p className="text-el-light/90 text-base sm:text-lg leading-relaxed">
+      <div className="mt-4 mb-8 bg-el-blue/10 border border-el-blue/40 rounded-2xl p-4 sm:p-5 flex flex-col gap-2">
+        <p className="text-el-light/90 text-sm sm:text-base leading-relaxed">
           {t('shop.subtitle')}
         </p>
         {merchTarget && (
@@ -259,7 +259,7 @@ export function ShopPage() {
             {t('shop.merchOnMap')}
           </button>
         )}
-        <p className="text-el-light/65 italic leading-relaxed text-sm sm:text-base">
+        <p className="text-el-light/60 italic leading-relaxed text-xs sm:text-sm">
           {t('shop.handmade')}
         </p>
       </div>
