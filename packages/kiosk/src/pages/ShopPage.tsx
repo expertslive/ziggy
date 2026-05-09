@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -177,16 +177,18 @@ export function ShopPage() {
 
   // Find the Merch hotspot across all floor maps. Hidden when not yet
   // loaded or when the hotspot is missing — never shows a broken state.
-  const merchTarget = (() => {
+  // Memoised so we don't walk the floor-map tree on every render of this
+  // page (re-renders fire on store touch + observer state too).
+  const merchTarget = useMemo(() => {
     for (const map of floorMapsData ?? []) {
       for (const h of map.hotspots ?? []) {
-        if (h.roomName?.trim().toLowerCase() === 'merchandise') {
+        if (h.roomName.trim().toLowerCase() === 'merchandise') {
           return { mapId: map.id, hotspotId: h.id };
         }
       }
     }
     return null;
-  })();
+  }, [floorMapsData]);
   const [selected, setSelected] = useState<ShopItem | null>(null);
 
   const items = (data ?? []).slice().sort((a, b) => a.sortOrder - b.sortOrder);
@@ -296,7 +298,6 @@ export function ShopPage() {
             touch();
           }}
           className="fixed bottom-24 right-4 z-40 inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-el-blue text-white text-sm font-semibold shadow-lg active:bg-el-blue/80 animate-bounce-soft"
-          aria-label={t('shop.moreBelow', { count: regular.length })}
         >
           {t('shop.moreBelow', { count: regular.length })}
         </button>
