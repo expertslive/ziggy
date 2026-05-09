@@ -17,12 +17,14 @@ export function DashboardPage() {
         <RefreshIndicator />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
         <KiosksBlock />
-        <HealthBlock />
+        <div className="flex flex-col gap-4">
+          <HealthBlock />
+          <EasterEggsBlock />
+        </div>
         <div className="flex flex-col gap-4">
           <TodayBlock />
-          <EasterEggsBlock />
           <ActionItemsBlock />
         </div>
       </div>

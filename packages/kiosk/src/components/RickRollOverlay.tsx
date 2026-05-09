@@ -10,10 +10,11 @@ export function RickRollOverlay({ onClose }: RickRollOverlayProps) {
   const [frame, setFrame] = useState(0)
 
   useEffect(() => {
-    // 8 fps loop through baked ASCII braille frames
+    // 12 fps loop — fast enough for the dance to read as motion at small
+    // text sizes; slow enough that adjacent frames stay legible.
     const id = window.setInterval(() => {
       setFrame((f) => (f + 1) % RICKROLL_FRAMES.length)
-    }, 125)
+    }, 83)
     return () => window.clearInterval(id)
   }, [])
 
@@ -47,20 +48,15 @@ export function RickRollOverlay({ onClose }: RickRollOverlayProps) {
         className="text-white text-center whitespace-pre leading-[1.0] m-0"
         style={{
           fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-          fontSize: 'clamp(6px, 1.2vw, 11px)',
+          fontSize: 'clamp(8px, 1.6vw, 14px)',
           lineHeight: 1.0,
         }}
       >
         {RICKROLL_FRAMES[frame]}
       </pre>
-      <div className="mt-6 text-center px-4">
-        <p className="text-white text-lg sm:text-xl font-bold">
-          🕺 Never Gonna Give You Up — You&apos;ve been rickrolled!
-        </p>
-        <p className="text-white/60 text-sm mt-2">
-          Tap &times; or press Esc to dismiss
-        </p>
-      </div>
+      <p className="mt-6 text-center px-4 text-white text-lg sm:text-xl font-bold">
+        🕺 Never Gonna Give You Up — You&apos;ve been rickrolled!
+      </p>
     </div>,
     document.body,
   )
