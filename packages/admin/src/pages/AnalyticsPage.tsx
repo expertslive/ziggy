@@ -12,17 +12,11 @@ import {
   type LangSplit,
 } from '../lib/api'
 import { useFloorMaps } from '../lib/hooks'
+import { KIOSKS } from '@ziggy/shared'
 
-const KIOSK_LABELS: Record<string, string> = {
-  'kiosk-registratie': 'Registratiebalie',
-  'kiosk-trap-gh': 'Trap naast Grand Hall',
-  'kiosk-trap-e2': 'Trap naar Entresol 2',
-  'kiosk-merch': 'Bij Merch stand',
-  'kiosk-entresol-1': 'Entresol 1',
-  'kiosk-entresol-2': 'Entresol 2',
-  'kiosk-lounge-1': 'Lounge — A',
-  'kiosk-lounge-2': 'Lounge — B',
-}
+const KIOSK_LABELS: Record<string, string> = Object.fromEntries(
+  KIOSKS.map((k) => [k.id, k.label]),
+)
 
 const HEARTBEAT_ACTIVE_MS = 3 * 60_000
 

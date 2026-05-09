@@ -10,14 +10,15 @@
 
 import { Hono } from 'hono'
 import { BlobServiceClient } from '@azure/storage-blob'
-import type {
-  AuctionBid,
-  AuditEntry,
-  FloorMap,
-  KioskMeta,
-  Nomination,
-  ShopItem,
-  Sponsor,
+import {
+  KIOSKS,
+  type AuctionBid,
+  type AuditEntry,
+  type FloorMap,
+  type KioskMeta,
+  type Nomination,
+  type ShopItem,
+  type Sponsor,
 } from '@ziggy/shared'
 import { requireAuth } from '../middleware/auth.js'
 import {
@@ -432,16 +433,27 @@ adminDashboard.get('/api/admin/events/:slug/dashboard/kiosks', async (c) => {
   const slug = c.req.param('slug')
   const [aliases, heartbeats] = await Promise.all([loadAliases(slug), loadHeartbeats()])
 
-  const kioskIds = new Set<string>([...aliases.keys(), ...heartbeats.keys()])
+  // Canonical KIOSKS (from @ziggy/shared) seed the result so volunteers see
+  // every expected kiosk pre-event, even before any heartbeat has arrived.
+  // Cosmos aliases override the canonical label; heartbeats from unknown
+  // kioskIds (e.g. a paired test device) still get included on top.
+  const kioskIds = new Set<string>([
+    ...KIOSKS.map((k) => k.id),
+    ...aliases.keys(),
+    ...heartbeats.keys(),
+  ])
   const now = Date.now()
   const rows: DashboardKiosk[] = Array.from(kioskIds).map((kioskId) => {
     const alias = aliases.get(kioskId)
+    const canonical = KIOSKS.find((k) => k.id === kioskId)
     const lastHeartbeatAt = heartbeats.get(kioskId) ?? null
+    const displayName = alias?.displayName ?? canonical?.label ?? kioskId
+    const location = alias?.location ?? canonical?.floor
     return {
       kioskId,
-      displayName: alias?.displayName ?? kioskId,
+      displayName,
       ...(alias?.shortCode !== undefined && { shortCode: alias.shortCode }),
-      ...(alias?.location !== undefined && { location: alias.location }),
+      ...(location !== undefined && { location }),
       lastHeartbeatAt,
       status: statusFor(lastHeartbeatAt, now),
     }

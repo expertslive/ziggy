@@ -36,7 +36,9 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
 // Dashboard is pinned at the top; everything else is sorted A-Z by label so
 // the sidebar stays scannable as we add pages. Adding a new entry should keep
-// the alphabetical order.
+// the alphabetical order. Profile is reachable via the user card at the
+// bottom of the sidebar — keeping it out of the nav so 16 entries fit
+// comfortably without scrolling at common laptop zoom levels.
 const navItems = [
   { to: '/', label: 'Dashboard', icon: DashboardIcon },
   { to: '/users', label: 'Admins', icon: UsersIcon },
@@ -49,7 +51,6 @@ const navItems = [
   { to: '/kiosks', label: 'Kiosks', icon: KiosksIcon },
   { to: '/nominations', label: 'Nominations', icon: NominationsIcon },
   { to: '/preview', label: 'Preview', icon: PreviewIcon },
-  { to: '/profile', label: 'Profile', icon: ProfileIcon },
   { to: '/shop-items', label: 'Shop Items', icon: ShopItemsIcon },
   { to: '/sponsors', label: 'Sponsors', icon: SponsorsIcon },
   { to: '/tiers', label: 'Tiers', icon: TiersIcon },
@@ -123,7 +124,7 @@ function AdminLayout({ children }: { children: ReactNode }) {
               to={item.to}
               end={item.to === '/'}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-primary/10 text-primary'
                     : 'text-gray-600 hover:bg-surface-alt hover:text-secondary'
@@ -339,14 +340,6 @@ function UsersIcon({ active }: { active: boolean }) {
   return (
     <svg className={`h-5 w-5 ${active ? 'text-primary' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-    </svg>
-  );
-}
-
-function ProfileIcon({ active }: { active: boolean }) {
-  return (
-    <svg className={`h-5 w-5 ${active ? 'text-primary' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   );
 }

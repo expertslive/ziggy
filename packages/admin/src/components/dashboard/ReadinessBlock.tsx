@@ -2,8 +2,16 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { fetchActionItems, type DashboardActionItems } from '../../lib/api'
 
-const LABELS: Record<keyof DashboardActionItems, string> = {
-  pendingNominations: 'Pending nominations',
+// Pending nominations are a post-event review task — never a pre-event
+// readiness blocker. They live in ActionItemsBlock, not here.
+const READINESS_KEYS = [
+  'sponsorsNoLogo',
+  'shopItemsNoImage',
+  'sessionsNoRoom',
+  'hotspotsEmpty',
+] as const
+
+const LABELS: Record<(typeof READINESS_KEYS)[number], string> = {
   sponsorsNoLogo: 'Sponsors with logo',
   shopItemsNoImage: 'Shop items with image',
   sessionsNoRoom: 'Sessions assigned to rooms',
@@ -18,7 +26,7 @@ export function ReadinessBlock() {
     staleTime: 30_000,
   })
 
-  const keys = Object.keys(LABELS) as (keyof DashboardActionItems)[]
+  const keys = READINESS_KEYS
   const data = query.data
   const okCount = data ? keys.filter((k) => data[k].count === 0).length : 0
   const total = keys.length

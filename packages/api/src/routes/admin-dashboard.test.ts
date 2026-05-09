@@ -691,14 +691,26 @@ describe('GET /api/admin/events/:slug/dashboard/kiosks', () => {
     expect(res.status).toBe(401)
   })
 
-  it('returns empty array when no aliases or heartbeats', async () => {
+  it('seeds the canonical KIOSKS list when no aliases or heartbeats yet', async () => {
     const app = buildApp()
     const res = await app.request(
       `/api/admin/events/${SLUG}/dashboard/kiosks`,
       { headers: AUTH },
     )
     expect(res.status).toBe(200)
-    expect(await res.json()).toEqual([])
+    const rows = (await res.json()) as Array<{
+      kioskId: string
+      displayName: string
+      lastHeartbeatAt: number | null
+      status: string
+    }>
+    // Eight canonical kiosks from @ziggy/shared, all offline pre-event.
+    expect(rows).toHaveLength(8)
+    for (const row of rows) {
+      expect(row.lastHeartbeatAt).toBeNull()
+      expect(row.status).toBe('offline')
+      expect(row.displayName).not.toBe(row.kioskId) // canonical label applied
+    }
   })
 
   it('merges aliases + heartbeats and computes status thresholds', async () => {
