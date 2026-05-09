@@ -1,4 +1,4 @@
-import type { Nomination, NominationStatus } from '@ziggy/shared';
+import type { KioskMeta, Nomination, NominationStatus } from '@ziggy/shared';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -604,6 +604,68 @@ export async function downloadNominationsCsv(): Promise<void> {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// Kiosks (admin) — alias metadata + dashboard joined view
+export type KioskStatus = 'online' | 'idle' | 'stale' | 'offline'
+export interface DashboardKiosk {
+  kioskId: string
+  displayName: string
+  shortCode?: string
+  location?: string
+  lastHeartbeatAt: number | null
+  status: KioskStatus
+}
+export interface KioskCreateInput {
+  id: string
+  displayName: string
+  shortCode?: string
+  location?: string
+}
+export interface KioskUpdateInput {
+  displayName?: string
+  shortCode?: string
+  location?: string
+}
+export function fetchDashboardKiosks() {
+  return fetchJson<DashboardKiosk[]>(
+    `/api/admin/events/${slug}/dashboard/kiosks`,
+  )
+}
+export function createKiosk(data: KioskCreateInput) {
+  return fetchJson<KioskMeta>(`/api/admin/events/${slug}/kiosks`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+export function updateKiosk(id: string, data: KioskUpdateInput) {
+  return fetchJson<KioskMeta>(`/api/admin/events/${slug}/kiosks/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+export async function deleteKiosk(id: string): Promise<void> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${BASE_URL}/api/admin/events/${slug}/kiosks/${id}`, {
+    method: 'DELETE',
+    headers,
+  });
+  if (res.status === 401) {
+    clearToken();
+    window.location.href = '/login';
+    throw new ApiError(401, 'Unauthorized');
+  }
+  if (!res.ok && res.status !== 204) {
+    let body: { error?: string } = {};
+    try {
+      body = await res.json();
+    } catch {
+      // ignore
+    }
+    throw new ApiError(res.status, body.error || `API error ${res.status}`);
+  }
 }
 
 // I18n Overrides
