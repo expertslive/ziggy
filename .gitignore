@@ -49,3 +49,6 @@ BRAINSTORM-*.md
 # Live-data scripts that should never be in the public repo.
 orphan-check.mjs
 ops-*.mjs
+
+# ASCII-art skill output dir — intermediate text/png renders.
+ascii/
