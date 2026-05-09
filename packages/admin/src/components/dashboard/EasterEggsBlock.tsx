@@ -16,12 +16,12 @@ export function EasterEggsBlock() {
       <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">
         Easter eggs
       </h2>
-      <p className="text-sm text-secondary">
-        🕺 Rickrolls:{' '}
-        <span className="font-semibold">
+      <div className="flex items-center justify-between gap-3 text-sm">
+        <span className="text-secondary">🕺 Rickrolls</span>
+        <span className="font-semibold text-secondary">
           {query.isLoading ? '…' : query.isError ? '—' : total}
         </span>
-      </p>
+      </div>
     </div>
   )
 }
