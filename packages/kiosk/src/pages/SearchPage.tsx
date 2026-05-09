@@ -4,6 +4,7 @@ import { SessionCard } from '../components/SessionCard';
 import { SessionDetailModal } from '../components/SessionDetailModal';
 import { SpeakerCard } from '../components/SpeakerCard';
 import { SpeakerDetailModal } from '../components/SpeakerDetailModal';
+import { RickRollOverlay } from '../components/RickRollOverlay';
 import { VirtualKeyboard } from '../components/VirtualKeyboard';
 import { useFloorMaps, useSearch, useSpeakers } from '../lib/hooks';
 import { useKioskStore } from '../store/kiosk';
@@ -45,6 +46,7 @@ export function SearchPage() {
   const [keyboardOpen, setKeyboardOpen] = useState<boolean>(false);
   const [focused, setFocused] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [rickrolled, setRickrolled] = useState(false);
 
   const q = query.trim().toLowerCase();
 
@@ -119,6 +121,16 @@ export function SearchPage() {
     }, 800)
     return () => clearTimeout(timer)
   }, [q, hasAny, sessionsQ.isFetching])
+
+  // Easter egg: searching exactly '42' triggers a rickroll overlay. Effect is
+  // keyed on the query so it fires once per query change, not per render.
+  useEffect(() => {
+    if (q === '42' && !rickrolled) {
+      setRickrolled(true);
+      track('easter_egg_rickrolled', { trigger: '42' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q]);
 
   // Discoverability hint: show after 2s of focus on empty query, while keyboard is closed.
   useEffect(() => {
@@ -368,6 +380,7 @@ export function SearchPage() {
           onClose={() => openSpeaker(null)}
         />
       )}
+      {rickrolled && <RickRollOverlay onClose={() => setRickrolled(false)} />}
     </div>
   );
 }

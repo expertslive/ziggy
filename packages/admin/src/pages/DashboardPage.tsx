@@ -1,5 +1,6 @@
 import { ActionItemsBlock } from '../components/dashboard/ActionItemsBlock'
 import { ActivityBlock } from '../components/dashboard/ActivityBlock'
+import { EasterEggsBlock } from '../components/dashboard/EasterEggsBlock'
 import { HealthBlock } from '../components/dashboard/HealthBlock'
 import { KiosksBlock } from '../components/dashboard/KiosksBlock'
 import { ReadinessBlock } from '../components/dashboard/ReadinessBlock'
@@ -21,6 +22,7 @@ export function DashboardPage() {
         <HealthBlock />
         <div className="flex flex-col gap-4">
           <TodayBlock />
+          <EasterEggsBlock />
           <ActionItemsBlock />
         </div>
       </div>

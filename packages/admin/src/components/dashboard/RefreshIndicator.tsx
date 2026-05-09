@@ -8,6 +8,7 @@ const DASHBOARD_QUERY_KEYS: (string | unknown)[][] = [
   ['dashboard-today'],
   ['dashboard-action-items'],
   ['dashboard-activity'],
+  ['dashboard-easter-eggs'],
   ['bids', 'all', '', undefined],
   ['nominations', 'all', ''],
 ]

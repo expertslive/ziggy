@@ -34,6 +34,7 @@ const EVENT_TYPES = [
   'refresh_button',
   'session_end',
   'data_fetch_error',
+  'easter_egg_rickrolled',
 ] as const
 
 const eventSchema = z.object({

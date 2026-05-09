@@ -733,6 +733,15 @@ export function fetchRecentActivity(eventSlug: string = slug, limit: number = 20
   )
 }
 
+export interface DashboardEasterEggs {
+  rickrolls: { today: number; total: number; lastAt: string | null }
+}
+export function fetchEasterEggs(eventSlug: string = slug) {
+  return fetchJson<DashboardEasterEggs>(
+    `/api/admin/events/${eventSlug}/dashboard/easter-eggs`,
+  )
+}
+
 // I18n Overrides
 export function fetchI18nOverrides() {
   return fetchJson<any[]>(`/api/admin/events/${slug}/i18n-overrides`);

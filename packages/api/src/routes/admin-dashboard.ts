@@ -467,6 +467,56 @@ adminDashboard.get('/api/admin/events/:slug/dashboard/kiosks', async (c) => {
 })
 
 // ---------------------------------------------------------------------------
+// GET /api/admin/events/:slug/dashboard/easter-eggs
+// ---------------------------------------------------------------------------
+
+interface EasterEggsResponse {
+  rickrolls: { today: number; total: number; lastAt: string | null }
+}
+
+async function rickrollStats(): Promise<EasterEggsResponse['rickrolls']> {
+  const startMs = startOfAmsterdamDayMs()
+  try {
+    const container = getContainer('analytics')
+    const [totalRes, todayRes, lastRes] = await Promise.all([
+      container.items
+        .query<number>({
+          query: `SELECT VALUE COUNT(1) FROM c WHERE c.type = 'easter_egg_rickrolled'`,
+        })
+        .fetchAll(),
+      container.items
+        .query<number>({
+          query: `SELECT VALUE COUNT(1) FROM c
+                    WHERE c.type = 'easter_egg_rickrolled' AND c.ts >= @s`,
+          parameters: [{ name: '@s', value: startMs }],
+        })
+        .fetchAll(),
+      container.items
+        .query<number>({
+          query: `SELECT VALUE MAX(c.ts) FROM c WHERE c.type = 'easter_egg_rickrolled'`,
+        })
+        .fetchAll(),
+    ])
+    const total = (totalRes.resources[0] as number) ?? 0
+    const today = (todayRes.resources[0] as number) ?? 0
+    const lastTs = (lastRes.resources[0] as number | undefined) ?? null
+    return {
+      today,
+      total,
+      lastAt: lastTs ? new Date(lastTs).toISOString() : null,
+    }
+  } catch {
+    return { today: 0, total: 0, lastAt: null }
+  }
+}
+
+adminDashboard.get('/api/admin/events/:slug/dashboard/easter-eggs', async (c) => {
+  const rickrolls = await rickrollStats()
+  const body: EasterEggsResponse = { rickrolls }
+  return c.json(body)
+})
+
+// ---------------------------------------------------------------------------
 // GET /api/admin/events/:slug/dashboard/recent-activity?limit=20
 // ---------------------------------------------------------------------------
 
