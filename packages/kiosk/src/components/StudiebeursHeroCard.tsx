@@ -11,7 +11,7 @@ export function StudiebeursHeroCard() {
   const steps: ('step1' | 'step2' | 'step3')[] = ['step1', 'step2', 'step3']
   return (
     <div className="bg-white rounded-2xl flex flex-col overflow-hidden ring-1 ring-el-blue/30">
-      <div className="aspect-[3/2] w-full bg-el-light overflow-hidden">
+      <div className="relative aspect-[3/2] w-full bg-el-light overflow-hidden">
         <img
           src={heroImage}
           alt=""
@@ -19,6 +19,10 @@ export function StudiebeursHeroCard() {
           decoding="async"
           className="w-full h-full object-cover"
         />
+        {/* Program-name overlay — proper noun, identical across all locales. */}
+        <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-el-darker/70 backdrop-blur-sm text-white text-xs sm:text-sm font-bold uppercase tracking-wider">
+          Experts Live Studiebeurs
+        </span>
       </div>
       <div className="p-5 sm:p-6 flex flex-col gap-4 flex-1">
         <h2 className="text-xl sm:text-2xl font-extrabold text-el-dark leading-tight">
