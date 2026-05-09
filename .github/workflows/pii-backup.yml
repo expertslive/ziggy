@@ -1,0 +1,41 @@
+name: PII Backup
+
+# Nightly dump of bids + nominations to Blob Storage. The endpoint is
+# authenticated via a separate BACKUP_TOKEN (timing-safe compared on the
+# server) so we don't have to mint admin JWTs in CI.
+#
+# Required repo settings:
+#   - Secret: BACKUP_TOKEN — random string, also set as the API container
+#     env var BACKUP_TOKEN.
+#   - Variable: API_HOST — e.g. ziggy-api.expertslive.dev
+#   - Variable: EVENT_SLUG — e.g. experts-live-netherlands-2026
+
+on:
+  schedule:
+    # 02:00 UTC every day. Cron string is in UTC regardless of repo timezone.
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit backup-pii endpoint
+        env:
+          API_HOST: ${{ vars.API_HOST }}
+          EVENT_SLUG: ${{ vars.EVENT_SLUG }}
+          BACKUP_TOKEN: ${{ secrets.BACKUP_TOKEN }}
+        run: |
+          set -eo pipefail
+          if [ -z "${API_HOST}" ] || [ -z "${EVENT_SLUG}" ] || [ -z "${BACKUP_TOKEN}" ]; then
+            echo "Missing API_HOST var, EVENT_SLUG var, or BACKUP_TOKEN secret." >&2
+            exit 1
+          fi
+          response=$(curl -fsS \
+            -X POST \
+            -H "Authorization: Bearer ${BACKUP_TOKEN}" \
+            "https://${API_HOST}/api/admin/events/${EVENT_SLUG}/backup-pii")
+          echo "${response}" | jq '{ bids, nominations }'
