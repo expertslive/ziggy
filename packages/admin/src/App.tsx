@@ -20,6 +20,8 @@ import { UsersPage } from './pages/UsersPage';
 import { ImagesPage } from './pages/ImagesPage';
 import { PreviewPage } from './pages/PreviewPage';
 import { AuctionAdminPage } from './pages/AuctionAdminPage';
+import { AuctionsPage } from './pages/AuctionsPage';
+import { KiosksPage } from './pages/KiosksPage';
 import { NominationsPage } from './pages/NominationsPage';
 import { CommandPalette } from './components/CommandPalette';
 import { EventLiveBanner } from './components/EventLiveBanner';
@@ -32,22 +34,27 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+// Dashboard is pinned at the top; everything else is sorted A-Z by label so
+// the sidebar stays scannable as we add pages. Adding a new entry should keep
+// the alphabetical order.
 const navItems = [
   { to: '/', label: 'Dashboard', icon: DashboardIcon },
-  { to: '/sponsors', label: 'Sponsors', icon: SponsorsIcon },
-  { to: '/tiers', label: 'Tiers', icon: TiersIcon },
-  { to: '/shop-items', label: 'Shop Items', icon: ShopItemsIcon },
-  { to: '/nominations', label: 'Nominations', icon: NominationsIcon },
+  { to: '/users', label: 'Admins', icon: UsersIcon },
+  { to: '/analytics', label: 'Analytics', icon: AnalyticsIcon },
+  { to: '/auctions', label: 'Auctions', icon: AuctionsIcon },
+  { to: '/snapshots', label: 'Backups', icon: SnapshotsIcon },
+  { to: '/config', label: 'Config', icon: ConfigIcon },
   { to: '/floor-maps', label: 'Floor Maps', icon: FloorMapsIcon },
   { to: '/images', label: 'Images', icon: ImagesIcon },
+  { to: '/kiosks', label: 'Kiosks', icon: KiosksIcon },
+  { to: '/nominations', label: 'Nominations', icon: NominationsIcon },
   { to: '/preview', label: 'Preview', icon: PreviewIcon },
-  { to: '/config', label: 'Config', icon: ConfigIcon },
-  { to: '/i18n', label: 'Translations', icon: TranslationsIcon },
-  { to: '/analytics', label: 'Analytics', icon: AnalyticsIcon },
-  { to: '/snapshots', label: 'Snapshots', icon: SnapshotsIcon },
-  { to: '/trash', label: 'Trash', icon: TrashIcon },
-  { to: '/users', label: 'Admins', icon: UsersIcon },
   { to: '/profile', label: 'Profile', icon: ProfileIcon },
+  { to: '/shop-items', label: 'Shop Items', icon: ShopItemsIcon },
+  { to: '/sponsors', label: 'Sponsors', icon: SponsorsIcon },
+  { to: '/tiers', label: 'Tiers', icon: TiersIcon },
+  { to: '/i18n', label: 'Translations', icon: TranslationsIcon },
+  { to: '/trash', label: 'Trash', icon: TrashIcon },
 ];
 
 function initials(s: string | undefined | null): string {
@@ -208,6 +215,8 @@ export function App() {
                   <Route path="/images" element={<ImagesPage />} />
                   <Route path="/preview" element={<PreviewPage />} />
                   <Route path="/shop-items/:id/auction" element={<AuctionAdminPage />} />
+                  <Route path="/auctions" element={<AuctionsPage />} />
+                  <Route path="/kiosks" element={<KiosksPage />} />
                   <Route path="/nominations" element={<NominationsPage />} />
                 </Routes>
               </AdminLayout>
@@ -338,6 +347,22 @@ function ProfileIcon({ active }: { active: boolean }) {
   return (
     <svg className={`h-5 w-5 ${active ? 'text-primary' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  );
+}
+
+function AuctionsIcon({ active }: { active: boolean }) {
+  return (
+    <svg className={`h-5 w-5 ${active ? 'text-primary' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11l-7 7-3-3 7-7m3 3l1.5-1.5a2.121 2.121 0 00-3-3L11 11m4 0l-4-4m6.5 16h-9" />
+    </svg>
+  );
+}
+
+function KiosksIcon({ active }: { active: boolean }) {
+  return (
+    <svg className={`h-5 w-5 ${active ? 'text-primary' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
     </svg>
   );
 }
