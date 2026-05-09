@@ -119,6 +119,12 @@
         "step3": "Winner announced 30 days after the event on LinkedIn",
         "footnote": "More purchases = more nominations. Self-nomination is allowed."
       }
+    },
+    "octocat": {
+      "pitch": "The original drawing of GitHub's iconic mascot — signed by the creator himself.",
+      "bullet1": "Designed in 2006 by British illustrator Simon Oxley",
+      "bullet2": "Signed \"SMOX\" with the inscription \"Born in 2006\"",
+      "bullet3": "Donated by Martin Woodward (GitHub) — Simon Oxley passed away April 2026"
     }
   },
   "auction": {

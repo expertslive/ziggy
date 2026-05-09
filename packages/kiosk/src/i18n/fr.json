@@ -119,6 +119,12 @@
         "step3": "Gagnant annoncé 30 jours après l'événement sur LinkedIn",
         "footnote": "Plus d'achats = plus de nominations. L'autonomination est autorisée."
       }
+    },
+    "octocat": {
+      "pitch": "Le dessin original de la mascotte iconique de GitHub — signé par le créateur lui-même.",
+      "bullet1": "Conçu en 2006 par l'illustrateur britannique Simon Oxley",
+      "bullet2": "Signé « SMOX » avec l'inscription « Born in 2006 »",
+      "bullet3": "Donné par Martin Woodward (GitHub) — Simon Oxley est décédé en avril 2026"
     }
   },
   "auction": {

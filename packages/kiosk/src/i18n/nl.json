@@ -119,6 +119,12 @@
         "step3": "Winnaar bekendgemaakt 30 dagen na het event op LinkedIn",
         "footnote": "Meer aankopen = meer nominaties. Zelfnominatie is toegestaan."
       }
+    },
+    "octocat": {
+      "pitch": "De originele tekening van GitHub's iconische mascotte — gesigneerd door de bedenker zelf.",
+      "bullet1": "Ontworpen in 2006 door illustrator Simon Oxley (Brits)",
+      "bullet2": "Gesigneerd \"SMOX\" met inscriptie \"Born in 2006\"",
+      "bullet3": "Gedoneerd door Martin Woodward (GitHub) — Simon Oxley overleed in april 2026"
     }
   },
   "auction": {

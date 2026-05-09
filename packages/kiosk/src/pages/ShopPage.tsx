@@ -39,6 +39,27 @@ function ShopCard({ item, onTap }: { item: ShopItem; onTap: () => void }) {
         <p className="text-el-blue font-extrabold mt-1">
           {hasAuction ? t('shop.bidNow') : item.priceLabel}
         </p>
+        {hasAuction && (
+          <div className="mt-3 space-y-2">
+            <p className="text-sm text-el-dark/80 leading-relaxed">
+              {t('shop.octocat.pitch')}
+            </p>
+            <ul className="space-y-1.5 text-xs text-el-dark/70">
+              <li className="flex items-start gap-2">
+                <span className="text-el-blue font-bold mt-0.5">•</span>
+                {t('shop.octocat.bullet1')}
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-el-blue font-bold mt-0.5">•</span>
+                {t('shop.octocat.bullet2')}
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-el-blue font-bold mt-0.5">•</span>
+                {t('shop.octocat.bullet3')}
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
     </motion.button>
   );
