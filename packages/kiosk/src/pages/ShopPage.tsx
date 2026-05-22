@@ -9,6 +9,7 @@ import { useKioskStore } from '../store/kiosk';
 import type { ShopItem } from '../lib/api';
 import { AuctionPanel } from '../components/AuctionPanel';
 import { StudiebeursHeroCard } from '../components/StudiebeursHeroCard';
+import { Markdown } from '../components/Markdown';
 
 function ShopCard({ item, onTap }: { item: ShopItem; onTap: () => void }) {
   const { t } = useTranslation();
@@ -163,7 +164,10 @@ function ShopDetailModal({ item, onClose }: { item: ShopItem; onClose: () => voi
                 <p className="text-el-blue font-extrabold text-xl sm:text-2xl">{item.priceLabel}</p>
               )}
               {description && (
-                <p className="text-el-light/70 leading-relaxed whitespace-pre-line text-sm sm:text-base">{description}</p>
+                <Markdown
+                  source={description}
+                  className="text-el-light/70 text-sm sm:text-base"
+                />
               )}
             </div>
           </div>
