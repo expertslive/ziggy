@@ -247,19 +247,32 @@ function FloorMapViewer({
   // CSS aspect-ratio + max-h-full doesn't reliably "shrink to fit" when the
   // parent's height is implicit. We compute the box dimensions explicitly:
   // start from the viewport width, derive the aspect-driven height, and clamp
-  // by available vertical space (window height minus header+nav+page chrome).
-  // Result: floor map always visible whole on landscape kiosks AND on phones
-  // where the natural width-bound rendering already fits.
+  // by available vertical space measured live from the DOM (window height
+  // minus the viewport's top offset minus the bottom nav's actual height).
+  // Result: floor map always fits the kiosk viewport whole.
   const [viewportW, setViewportW] = useState<number>(0);
-  const [availableH, setAvailableH] = useState<number>(() =>
-    typeof window === 'undefined' ? 0 : Math.max(0, window.innerHeight - 260),
-  );
+  const [availableH, setAvailableH] = useState<number>(0);
+
+  const recomputeAvailableH = () => {
+    if (typeof window === 'undefined' || !viewportRef.current) return;
+    const top = viewportRef.current.getBoundingClientRect().top;
+    const navEl = document.querySelector('nav');
+    const navH = navEl ? navEl.getBoundingClientRect().height : 80;
+    // Small breathing room so the bottom never crowds the nav border.
+    setAvailableH(Math.max(0, window.innerHeight - top - navH - 12));
+  };
   useEffect(() => {
-    const onWinResize = () =>
-      setAvailableH(Math.max(0, window.innerHeight - 260));
-    window.addEventListener('resize', onWinResize);
-    return () => window.removeEventListener('resize', onWinResize);
+    recomputeAvailableH();
+    window.addEventListener('resize', recomputeAvailableH);
+    return () => window.removeEventListener('resize', recomputeAvailableH);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // Re-measure once the image has loaded — by then the viewport has its
+  // real layout position (matters when the box was display:none before).
+  useEffect(() => {
+    if (imgSize) recomputeAvailableH();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imgSize]);
 
   const boxSize = useMemo(() => {
     if (!imgSize || !viewportW) return null;
