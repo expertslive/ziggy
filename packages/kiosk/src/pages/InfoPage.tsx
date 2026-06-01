@@ -174,9 +174,11 @@ function DeviceInfo() {
   const paired = !!id
 
   function handleReset() {
-    if (!confirm('Apparaat opnieuw instellen? De pair-overlay verschijnt zodat je een andere locatie kunt kiezen.')) return
+    // Skip the browser-native confirm() — on the PixioDisplay's embedded
+    // browser the dialog renders without its OK/Cancel buttons, leaving
+    // staff with no way out. The pair overlay itself has a "Niet pairen"
+    // escape hatch so this isn't actually destructive.
     setKioskId(null)
-    // Reload with ?pair=1 so the overlay opens immediately
     const url = new URL(window.location.href)
     url.searchParams.set('pair', '1')
     window.location.href = url.toString()
