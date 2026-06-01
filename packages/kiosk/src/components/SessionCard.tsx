@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { AgendaSession } from '../lib/api';
-import { cleanSessionTitle } from '../lib/title';
+import { cleanSessionTitle, isAteSession } from '../lib/title';
 import { eventLocalToDate } from '../lib/clock';
 
 interface SessionCardProps {
@@ -38,6 +38,7 @@ export function SessionCard({ session, now, forceState, onTap }: SessionCardProp
   const { t } = useTranslation();
   const visibleLabels = session.labels.filter((l) => l.showInElement);
   const kind = classifySession(session);
+  const ate = isAteSession(session.title);
 
   const current = now ?? new Date();
   const start = eventLocalToDate(session.startDate);
@@ -62,14 +63,25 @@ export function SessionCard({ session, now, forceState, onTap }: SessionCardProp
           aria-hidden
         />
       )}
-      {kind === 'short' && (
+      {ate ? (
         <span
-          className="absolute bottom-3 right-3 rounded-full font-bold text-[11px] flex items-center justify-center bg-transparent text-el-blue ring-1 ring-el-blue/60"
+          className="absolute bottom-3 right-3 rounded-full font-bold text-[11px] flex items-center justify-center bg-transparent text-amber-300 ring-1 ring-amber-300/60"
           style={{ width: '36px', height: '36px' }}
-          aria-label={t('session.shortDuration', { defaultValue: '20 minute session' })}
+          aria-label={t('session.ateBadge', { defaultValue: 'Ask the Experts slot' })}
+          title={t('session.ateBadge', { defaultValue: 'Ask the Experts slot' })}
         >
-          20m
+          ATE
         </span>
+      ) : (
+        kind === 'short' && (
+          <span
+            className="absolute bottom-3 right-3 rounded-full font-bold text-[11px] flex items-center justify-center bg-transparent text-el-blue ring-1 ring-el-blue/60"
+            style={{ width: '36px', height: '36px' }}
+            aria-label={t('session.shortDuration', { defaultValue: '20 minute session' })}
+          >
+            20m
+          </span>
+        )
       )}
       {isLive && (
         <span className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse z-10">
