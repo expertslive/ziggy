@@ -2,6 +2,76 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { KIOSKS, setKioskId, findKioskEntry } from '../lib/kiosks'
 
+type HealthState = 'checking' | 'ok' | 'fail'
+
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || ''
+
+/** Subtle API-reachability ping. Hits /api/health on mount and every 30s
+ *  while the overlay is open so on-site staff can confirm the kiosk's
+ *  network can reach our backend without leaving this screen.
+ *  Grey ✓ / ✗ — never alarming, always informational. */
+function useApiHealth(): HealthState {
+  const [state, setState] = useState<HealthState>('checking')
+  useEffect(() => {
+    let cancelled = false
+    async function ping() {
+      if (!cancelled) setState((s) => (s === 'fail' ? 'checking' : s))
+      try {
+        const controller = new AbortController()
+        const tid = setTimeout(() => controller.abort(), 6_000)
+        const res = await fetch(`${API_BASE}/api/health`, {
+          method: 'GET',
+          signal: controller.signal,
+          cache: 'no-store',
+        })
+        clearTimeout(tid)
+        if (!cancelled) setState(res.ok ? 'ok' : 'fail')
+      } catch {
+        if (!cancelled) setState('fail')
+      }
+    }
+    void ping()
+    const iv = window.setInterval(ping, 30_000)
+    return () => {
+      cancelled = true
+      window.clearInterval(iv)
+    }
+  }, [])
+  return state
+}
+
+function ApiHealthBadge({ state }: { state: HealthState }) {
+  const icon =
+    state === 'checking' ? (
+      <span className="inline-block w-1.5 h-1.5 rounded-full bg-el-light/40 animate-pulse" />
+    ) : state === 'ok' ? (
+      <svg viewBox="0 0 16 16" className="w-3 h-3 text-el-light/40" fill="none" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.5l3.5 3.5L13 5" />
+      </svg>
+    ) : (
+      <svg viewBox="0 0 16 16" className="w-3 h-3 text-el-light/40" fill="none" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4l8 8M12 4l-8 8" />
+      </svg>
+    )
+  const label =
+    state === 'checking' ? 'API…' : state === 'ok' ? 'API' : 'API'
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-el-light/40"
+      title={
+        state === 'checking'
+          ? 'Checking API connectivity…'
+          : state === 'ok'
+            ? 'API reachable'
+            : 'API not reachable from this device'
+      }
+    >
+      {icon}
+      <span>{label}</span>
+    </span>
+  )
+}
+
 /** Full-screen overlay shown when a device hasn't been paired to a known
  * kiosk location yet. Volunteer picks a location from the grouped list →
  * we persist it to localStorage and dismiss the overlay. Subsequent loads
@@ -47,6 +117,8 @@ export function PairOverlay({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const apiHealth = useApiHealth()
+
   if (!show) return null
 
   function pick(id: string) {
@@ -57,6 +129,11 @@ export function PairOverlay({
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex flex-col bg-el-darker">
+      {/* Subtle API-health indicator — staff can spot before pairing whether
+          this device can actually reach the backend. */}
+      <div className="absolute top-3 right-4 z-10">
+        <ApiHealthBadge state={apiHealth} />
+      </div>
       {/* iPhone (<sm): single-column scrollable list. Everything ≥sm: a
        * 2×4 grid that fits the 8 kiosks without scrolling on the kiosk's
        * 1080×1920 portrait display. */}

@@ -78,7 +78,25 @@ export function Header() {
           aria-label="Refresh"
           onClick={() => {
             touch();
-            window.location.reload();
+            // True "everything fresh": wipe the persisted react-query cache
+            // and any service-worker caches before reload. Otherwise the
+            // PersistQueryClientProvider rehydrates stale data straight back
+            // in, making the refresh feel like a no-op.
+            try {
+              window.localStorage.removeItem('ziggy-query-cache');
+              window.sessionStorage.clear();
+            } catch {
+              /* private mode / quota — proceed with reload anyway */
+            }
+            if (typeof caches !== 'undefined') {
+              caches.keys().then((names) => {
+                Promise.all(names.map((n) => caches.delete(n))).finally(() => {
+                  window.location.reload();
+                });
+              }).catch(() => window.location.reload());
+            } else {
+              window.location.reload();
+            }
           }}
           className="min-w-[44px] min-h-[44px] sm:min-w-[48px] sm:min-h-[48px] rounded-xl bg-el-gray text-el-light flex items-center justify-center text-xl font-bold active:bg-el-gray-light"
         >

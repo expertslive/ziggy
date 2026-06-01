@@ -404,26 +404,11 @@ function FloorMapViewer({
     };
   }, [isMobile]);
 
-  // Auto-zoom to highlighted hotspot (sponsor "Show on map" deeplink)
-  useEffect(() => {
-    if (!isMobile || !highlightId || !imgSize || !imageBoxRef.current) return;
-    const hotspot = map.hotspots.find((h) => h.id === highlightId);
-    if (!hotspot) return;
-    const xs = hotspot.points.map((p) => p[0]);
-    const ys = hotspot.points.map((p) => p[1]);
-    const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
-    const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-    const rect = imageBoxRef.current.getBoundingClientRect();
-    const w = rect.width;
-    const h = rect.height;
-    const targetS = 2.5;
-    const tx = w / 2 - cx * w * targetS;
-    const ty = h / 2 - cy * h * targetS;
-    setAnimating(true);
-    setTransform(clampT({ s: targetS, tx, ty }, w, h));
-    const tid = setTimeout(() => setAnimating(false), 450);
-    return () => clearTimeout(tid);
-  }, [highlightId, imgSize, isMobile, map.hotspots]);
+  // Hotspot deeplinks no longer auto-zoom. The earlier 2.5× zoom-in was
+  // landscape-kiosk-hostile: it cropped most of the floor on PixioDisplay so
+  // visitors couldn't see context around the highlighted room. The pulse
+  // animation (hotspot-pulse class) already makes the target unmissable;
+  // pinch-zoom remains available for users who want a closer look.
 
   // Reset zoom whenever the active map changes (defensive)
   useEffect(() => {
@@ -506,18 +491,23 @@ function FloorMapViewer({
 
       <div
         ref={viewportRef}
-        className="relative w-full bg-el-gray rounded-2xl overflow-hidden flex items-center justify-center"
+        // max-h fits the whole floor on landscape kiosks (PixioDisplay 1920×1080)
+        // and tablet-landscape; on phones the calc still leaves plenty of room
+        // and the image stays width-bound. Letterboxing in the bg-el-gray bands
+        // is the trade-off for "always see the whole floor".
+        className="relative w-full bg-el-gray rounded-2xl overflow-hidden flex items-center justify-center max-h-[calc(100dvh-260px)]"
       >
         {!imgSize && (
           <div className="text-el-light/50">
             <div className="animate-pulse">{t('common.loading')}</div>
           </div>
         )}
-        {/* Inner box sized to image aspect — pan/zoom anchored on this so the
-            user can never pan the image off-screen into the gray bands. */}
+        {/* Inner box sized to image aspect, capped by parent on both axes so
+            the floor map never overflows the visible viewport. Pan/zoom is
+            anchored on this so users can never pan into the gray bands. */}
         <div
           ref={imageBoxRef}
-          className="relative w-full overflow-hidden touch-none"
+          className="relative max-w-full max-h-full overflow-hidden touch-none"
           style={{
             aspectRatio: imgSize ? `${imgSize.w}/${imgSize.h}` : '16/9',
             display: imgSize ? 'block' : 'none',
@@ -537,7 +527,7 @@ function FloorMapViewer({
               alt={map.name}
               loading="eager"
               decoding="async"
-              className="w-full h-full object-cover select-none pointer-events-none"
+              className="w-full h-full object-contain select-none pointer-events-none"
               draggable={false}
               onLoad={(e) => {
                 const img = e.currentTarget;
