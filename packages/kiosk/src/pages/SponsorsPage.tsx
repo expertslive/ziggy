@@ -20,8 +20,11 @@ function SponsorCard({
   // iPhone (default): bigger logos for legibility (full-width Ultimate/Gold,
   // half-width smaller tiers). Kiosk (sm: and up): original tier-based grid.
   const sizeClasses = {
-    large: 'w-full sm:w-1/2 p-3',
-    medium: 'w-full sm:w-1/3 p-2',
+    // Wide landscape kiosks (PixioDisplay 1920px) fit one more column per tier
+    // than iPads do — kicks in at xl (1280px+) so iPad landscape (1024) is
+    // unaffected and iPad portrait + phones keep their compact layout.
+    large: 'w-full sm:w-1/2 xl:w-1/3 p-3',
+    medium: 'w-full sm:w-1/3 xl:w-1/4 p-2',
     small: 'w-1/2 sm:w-1/4 p-2',
   };
   const aspectBox = size === 'small' ? 'aspect-[2/1]' : 'aspect-[3/2]';
