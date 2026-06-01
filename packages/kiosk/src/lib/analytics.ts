@@ -15,7 +15,11 @@
 
 import { getKioskId } from './kiosks'
 
-const ENDPOINT = '/api/analytics/event'
+// Kiosk SPA and API are on different domains in production (ziggy.expertslive.dev
+// vs the API container's azurecontainerapps.io). Without this prefix the POST
+// hits the SWA's SPA fallback and gets a 405 — every heartbeat silently
+// dropped, every kiosk stays "offline" in admin forever.
+const ENDPOINT = `${import.meta.env.VITE_API_URL || ''}/api/analytics/event`
 const QUEUE_KEY = 'ziggy.analytics.queue'
 const SESSION_ID_KEY = 'ziggy.analytics.sessionId'
 const SESSION_START_KEY = 'ziggy.analytics.sessionStartMs'
