@@ -135,7 +135,11 @@ export function endSession() {
 let flushing = false
 async function flush() {
   if (flushing) return
-  if (typeof window === 'undefined' || !navigator.onLine) return
+  // Note: we don't gate on navigator.onLine. Embedded kiosk browsers
+  // (PixioDisplay) misreport offline=true while the network is fine, which
+  // strands the queue forever. The fetch below already handles real
+  // failures and retries on the next interval.
+  if (typeof window === 'undefined') return
   const q = readQueue()
   if (q.length === 0) return
   flushing = true
@@ -170,6 +174,8 @@ export function startAnalytics() {
     if (document.visibilityState === 'hidden') flush()
   })
   window.addEventListener('pagehide', () => flush())
-  // First flush soon after page load (catch any leftovers from previous tabs)
-  setTimeout(flush, 5_000)
+  // First flush soon after page load (catch any leftovers from previous tabs).
+  // Ship within ~1s so the kiosk shows up online in admin quickly after
+  // pairing, instead of waiting up to 30s for the next interval.
+  setTimeout(flush, 1_000)
 }
