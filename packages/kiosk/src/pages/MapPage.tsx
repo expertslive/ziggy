@@ -243,6 +243,36 @@ function FloorMapViewer({
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  // ---------------- JS-computed fit ----------------
+  // CSS aspect-ratio + max-h-full doesn't reliably "shrink to fit" when the
+  // parent's height is implicit. We compute the box dimensions explicitly:
+  // start from the viewport width, derive the aspect-driven height, and clamp
+  // by available vertical space (window height minus header+nav+page chrome).
+  // Result: floor map always visible whole on landscape kiosks AND on phones
+  // where the natural width-bound rendering already fits.
+  const [viewportW, setViewportW] = useState<number>(0);
+  const [availableH, setAvailableH] = useState<number>(() =>
+    typeof window === 'undefined' ? 0 : Math.max(0, window.innerHeight - 260),
+  );
+  useEffect(() => {
+    const onWinResize = () =>
+      setAvailableH(Math.max(0, window.innerHeight - 260));
+    window.addEventListener('resize', onWinResize);
+    return () => window.removeEventListener('resize', onWinResize);
+  }, []);
+
+  const boxSize = useMemo(() => {
+    if (!imgSize || !viewportW) return null;
+    const aspect = imgSize.w / imgSize.h;
+    let w = viewportW;
+    let h = w / aspect;
+    if (availableH > 0 && h > availableH) {
+      h = availableH;
+      w = h * aspect;
+    }
+    return { w: Math.round(w), h: Math.round(h) };
+  }, [imgSize, viewportW, availableH]);
+
   const [transform, setTransform] = useState({ s: 1, tx: 0, ty: 0 });
   const [animating, setAnimating] = useState(false);
   const transformRef = useRef(transform);
@@ -257,6 +287,19 @@ function FloorMapViewer({
   }, [transform, map.id]);
 
   const viewportRef = useRef<HTMLDivElement>(null);
+  // ResizeObserver keeps viewportW in sync with the actual rendered container
+  // width — covers orientation changes + admin Preview iframe resizes.
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    setViewportW(el.getBoundingClientRect().width);
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) setViewportW(entry.contentRect.width);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   // Inner box sized to the image's aspect ratio. Pan/zoom transform applies to
   // its content so the image always fills it (no contain bands), and bounds
   // calculations are anchored on the actual image content — preventing the
@@ -491,24 +534,24 @@ function FloorMapViewer({
 
       <div
         ref={viewportRef}
-        // max-h fits the whole floor on landscape kiosks (PixioDisplay 1920×1080)
-        // and tablet-landscape; on phones the calc still leaves plenty of room
-        // and the image stays width-bound. Letterboxing in the bg-el-gray bands
-        // is the trade-off for "always see the whole floor".
-        className="relative w-full bg-el-gray rounded-2xl overflow-hidden flex items-center justify-center max-h-[calc(100dvh-260px)]"
+        className="relative w-full bg-el-gray rounded-2xl overflow-hidden flex items-center justify-center"
       >
         {!imgSize && (
           <div className="text-el-light/50">
             <div className="animate-pulse">{t('common.loading')}</div>
           </div>
         )}
-        {/* Inner box sized to image aspect, capped by parent on both axes so
-            the floor map never overflows the visible viewport. Pan/zoom is
-            anchored on this so users can never pan into the gray bands. */}
+        {/* Inner box: JS-computed pixel dimensions so the floor map always
+            fits within the viewport both horizontally AND vertically (no
+            scroll-clip on landscape kiosks). Falls back to a 16/9 ratio
+            while the source image is still loading. Pan/zoom is anchored on
+            this so users can never pan past the gray bands. */}
         <div
           ref={imageBoxRef}
-          className="relative max-w-full max-h-full overflow-hidden touch-none"
+          className="relative overflow-hidden touch-none"
           style={{
+            width: boxSize ? `${boxSize.w}px` : '100%',
+            height: boxSize ? `${boxSize.h}px` : 'auto',
             aspectRatio: imgSize ? `${imgSize.w}/${imgSize.h}` : '16/9',
             display: imgSize ? 'block' : 'none',
           }}
