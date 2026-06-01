@@ -139,7 +139,7 @@ analytics.get('/api/admin/analytics/summary', requireAuth, async (c) => {
   const slug = env.eventSlug
   const titleById = new Map<number, string>()
   try {
-    const items = await runEvents.fetchRawAgenda(slug, env.runEventsApiKey)
+    const items = await runEvents.fetchRawAgenda(env.runEventsApiKey, slug)
     for (const it of items as Array<{ id: number; title: string }>) {
       titleById.set(it.id, it.title)
     }
