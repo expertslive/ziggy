@@ -34,11 +34,22 @@ function classifySession(session: AgendaSession): 'plenary' | 'long' | 'short' |
   return minutes <= 25 ? 'short' : 'long';
 }
 
+/** Real-world law enforcement keynote from the Politie is the headline
+ *  session of the security track — flag it so visitors can spot it in the
+ *  agenda at a glance. Matched by speaker.company so the marker survives
+ *  title edits in run.events. */
+function isPolitieSession(session: AgendaSession): boolean {
+  return session.speakers.some(
+    (s) => (s.company || '').trim().toLowerCase() === 'politie',
+  );
+}
+
 export function SessionCard({ session, now, forceState, onTap }: SessionCardProps) {
   const { t } = useTranslation();
   const visibleLabels = session.labels.filter((l) => l.showInElement);
   const kind = classifySession(session);
   const ate = isAteSession(session.title);
+  const politie = isPolitieSession(session);
 
   const current = now ?? new Date();
   const start = eventLocalToDate(session.startDate);
@@ -63,7 +74,16 @@ export function SessionCard({ session, now, forceState, onTap }: SessionCardProp
           aria-hidden
         />
       )}
-      {ate ? (
+      {politie ? (
+        <span
+          className="absolute bottom-3 right-3 rounded-full flex items-center justify-center bg-amber-300/15 text-amber-300 ring-1 ring-amber-300/70 text-base animate-pulse"
+          style={{ width: '36px', height: '36px' }}
+          aria-label={t('session.politieBadge', { defaultValue: 'Headline session — Politie' })}
+          title={t('session.politieBadge', { defaultValue: 'Headline session — Politie' })}
+        >
+          ★
+        </span>
+      ) : ate ? (
         <span
           className="absolute bottom-3 right-3 rounded-full font-bold text-[11px] flex items-center justify-center bg-transparent text-amber-300 ring-1 ring-amber-300/60"
           style={{ width: '36px', height: '36px' }}
