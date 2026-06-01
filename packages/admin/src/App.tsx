@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { isAuthenticated, clearToken, fetchMe, type AdminUser } from './lib/api';
 import { useTheme } from './lib/theme';
 import { ToastProvider } from './components/Toast';
@@ -106,6 +107,14 @@ function AdminLayout({ children }: { children: ReactNode }) {
     staleTime: 60_000,
   });
 
+  // Mobile drawer: sidebar slides over the content on phones/iPad-portrait;
+  // becomes a permanent column on md+. Auto-closes on route change so a tap
+  // on a nav link both navigates AND dismisses the overlay.
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [location.pathname]);
+
   const handleLogout = () => {
     clearToken();
     navigate('/login');
@@ -114,68 +123,100 @@ function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-screen flex-col bg-surface-alt">
       <EventLiveBanner />
-      <div className="flex flex-1 min-h-0">
-      {/* Sidebar */}
-      <aside className="flex w-64 flex-col border-r border-border bg-white">
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/'}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-gray-600 hover:bg-surface-alt hover:text-secondary'
-                }`
-              }
-            >
-              <item.icon active={location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to))} />
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* User card + theme toggle + logout — single compact row to keep
-         *  vertical space available for menu items. */}
-        <div className="flex items-center gap-1 border-t border-border p-2">
-          <NavLink
-            to="/profile"
-            className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-surface-alt"
-          >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
-              {initials(me.data?.displayName || me.data?.email)}
-            </div>
-            <div className="min-w-0 leading-tight">
-              <div className="truncate text-xs font-semibold text-secondary">
-                {me.data?.displayName || me.data?.email || '—'}
-              </div>
-              {me.data?.displayName && (
-                <div className="truncate text-[10px] text-gray-400">
-                  {me.data.email}
-                </div>
-              )}
-            </div>
-          </NavLink>
-          <ThemeIconButton />
+      <div className="relative flex flex-1 min-h-0">
+        {/* Backdrop — only present on mobile when drawer is open */}
+        {drawerOpen && (
           <button
-            onClick={handleLogout}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600"
-            title="Log out"
-            aria-label="Log out"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3l3-3m0 0l-3-3m3 3H9" />
-            </svg>
-          </button>
-        </div>
-      </aside>
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setDrawerOpen(false)}
+            className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          />
+        )}
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-8 py-8">{children}</div>
-      </main>
+        {/* Sidebar — fixed-position drawer on mobile, static column on md+ */}
+        <aside
+          className={`flex w-64 shrink-0 flex-col border-r border-border bg-white transition-transform duration-200 ease-out
+            fixed inset-y-0 left-0 z-40
+            md:static md:translate-x-0 md:z-auto
+            ${drawerOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+          aria-label="Sidebar"
+        >
+          <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === '/'}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-gray-600 hover:bg-surface-alt hover:text-secondary'
+                  }`
+                }
+              >
+                <item.icon active={location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to))} />
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* User card + theme toggle + logout — single compact row to keep
+           *  vertical space available for menu items. */}
+          <div className="flex items-center gap-1 border-t border-border p-2">
+            <NavLink
+              to="/profile"
+              className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-surface-alt"
+            >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                {initials(me.data?.displayName || me.data?.email)}
+              </div>
+              <div className="min-w-0 leading-tight">
+                <div className="truncate text-xs font-semibold text-secondary">
+                  {me.data?.displayName || me.data?.email || '—'}
+                </div>
+                {me.data?.displayName && (
+                  <div className="truncate text-[10px] text-gray-400">
+                    {me.data.email}
+                  </div>
+                )}
+              </div>
+            </NavLink>
+            <ThemeIconButton />
+            <button
+              onClick={handleLogout}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600"
+              title="Log out"
+              aria-label="Log out"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+            </button>
+          </div>
+        </aside>
+
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto">
+          {/* Mobile top bar — hamburger + brand mark. Hidden on md+ where the
+              sidebar is always visible. */}
+          <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-white px-4 py-2.5 md:hidden">
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Open menu"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-700 hover:bg-surface-alt"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+            <span className="text-sm font-semibold text-secondary">Ziggy Admin</span>
+          </div>
+
+          <div className="mx-auto max-w-6xl px-4 py-4 md:px-8 md:py-8">{children}</div>
+        </main>
       </div>
       <CommandPalette />
     </div>
