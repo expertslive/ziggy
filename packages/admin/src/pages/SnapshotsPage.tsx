@@ -148,12 +148,12 @@ export function SnapshotsPage() {
           run before destructive PUTs already; this is for manual milestones
           ("before adding 2026 sponsors", etc.).
         </p>
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
           <input
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Reason (optional, e.g. 'before sponsor reorg')"
-            className="flex-1 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 sm:flex-1"
           />
           <button
             onClick={() => createMut.mutate(reason || undefined)}
@@ -165,8 +165,49 @@ export function SnapshotsPage() {
         </div>
       </div>
 
-      {/* Snapshot list */}
-      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      {/* Mobile card list */}
+      <div className="md:hidden">
+        {q.isLoading && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            Loading…
+          </div>
+        )}
+        {!q.isLoading && (q.data ?? []).length === 0 && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            No snapshots yet — take one above.
+          </div>
+        )}
+        <ul className="space-y-3">
+          {(q.data ?? []).map((s) => (
+            <li key={s.name} className="rounded-xl border border-border bg-white p-4 shadow-sm">
+              <div className="text-sm font-semibold text-secondary">{fmtDate(s.capturedAt)}</div>
+              <div className="mt-1 text-xs text-gray-500">
+                by {s.capturedBy} · {fmtSize(s.sizeBytes)}
+              </div>
+              {s.reason && (
+                <div className="mt-2 text-sm text-gray-700">{s.reason}</div>
+              )}
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={() => setRestoreTarget(s)}
+                  className="min-h-11 flex-1 rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold text-primary hover:bg-surface-alt"
+                >
+                  Restore
+                </button>
+                <button
+                  onClick={() => setDeleteTarget(s)}
+                  className="min-h-11 rounded-md border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-xl border border-border bg-white shadow-sm md:block">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-surface-alt text-left text-xs font-semibold uppercase tracking-wider text-gray-500">

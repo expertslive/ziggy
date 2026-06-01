@@ -99,21 +99,74 @@ export function SponsorTiersPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-secondary">Sponsor Tiers</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage sponsor tier levels</p>
+      <div className="mb-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-secondary">Sponsor Tiers</h1>
+            <p className="mt-1 text-sm text-gray-500">Manage sponsor tier levels</p>
+          </div>
+          <button
+            onClick={openCreate}
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark"
+          >
+            + Add Tier
+          </button>
         </div>
-        <button
-          onClick={openCreate}
-          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark"
-        >
-          + Add Tier
-        </button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      {/* Mobile card list */}
+      <div className="md:hidden">
+        {tiers.isLoading && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            Loading...
+          </div>
+        )}
+        {tiers.data?.length === 0 && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            No tiers yet. Add one to get started.
+          </div>
+        )}
+        <ul className="space-y-3">
+          {tiers.data?.map((tier: any) => (
+            <li key={tier.id} className="rounded-xl border border-border bg-white p-4 shadow-sm">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-secondary">{tier.name}</div>
+                  <div className="mt-0.5 text-xs text-gray-500">Sort: {tier.sortOrder}</div>
+                </div>
+                <span
+                  className={`inline-flex shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    tier.displaySize === 'large'
+                      ? 'bg-amber-100 text-amber-800'
+                      : tier.displaySize === 'medium'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  {sizeLabel(tier.displaySize)}
+                </span>
+              </div>
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={() => openEdit(tier)}
+                  className="min-h-11 flex-1 rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-surface-alt"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => setDeleteTarget({ id: tier.id, name: tier.name })}
+                  className="min-h-11 rounded-md border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-xl border border-border bg-white shadow-sm md:block">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-surface-alt text-left text-xs font-semibold uppercase tracking-wider text-gray-500">

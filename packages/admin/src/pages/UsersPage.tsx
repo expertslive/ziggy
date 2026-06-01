@@ -91,22 +91,96 @@ export function UsersPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-secondary">Admins</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Accounts that can sign in to this admin panel.
-          </p>
+      <div className="mb-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-secondary">Admins</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Accounts that can sign in to this admin panel.
+            </p>
+          </div>
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark"
+          >
+            + Add admin
+          </button>
         </div>
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark"
-        >
-          + Add admin
-        </button>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      {/* Mobile card list */}
+      <div className="md:hidden">
+        {list.isLoading && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            Loading…
+          </div>
+        )}
+        <ul className="space-y-3">
+          {(list.data ?? []).map((u) => (
+            <li key={u.id} className="rounded-xl border border-border bg-white p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="break-all text-sm font-semibold text-secondary">
+                    {u.email}
+                    {isMe(u) && (
+                      <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+                        You
+                      </span>
+                    )}
+                  </div>
+                  {u.displayName && (
+                    <div className="mt-0.5 text-xs text-gray-500">{u.displayName}</div>
+                  )}
+                  <div className="mt-1 text-xs text-gray-500">
+                    Last login: {fmtDate(u.lastLoginAt)}
+                  </div>
+                </div>
+                {u.disabled ? (
+                  <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
+                    Disabled
+                  </span>
+                ) : (
+                  <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                    Active
+                  </span>
+                )}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  onClick={() => setResetTarget(u)}
+                  className="min-h-11 flex-1 rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold text-primary hover:bg-surface-alt"
+                >
+                  Reset pw
+                </button>
+                {!isMe(u) && (
+                  <>
+                    <button
+                      onClick={() =>
+                        updateMut.mutate({
+                          id: u.id,
+                          data: { disabled: !u.disabled },
+                        })
+                      }
+                      className="min-h-11 flex-1 rounded-md border border-amber-200 bg-white px-3 py-2 text-sm font-semibold text-amber-700 hover:bg-amber-50"
+                    >
+                      {u.disabled ? 'Enable' : 'Disable'}
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(u)}
+                      className="min-h-11 rounded-md border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-xl border border-border bg-white shadow-sm md:block">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-surface-alt text-left text-xs font-semibold uppercase tracking-wider text-gray-500">

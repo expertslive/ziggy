@@ -12,7 +12,7 @@ import { TodayBlock } from '../components/dashboard/TodayBlock'
 export function DashboardPage() {
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-secondary">Dashboard</h1>
         <RefreshIndicator />
       </div>

@@ -98,22 +98,24 @@ export function NominationsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-baseline justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-secondary">Nominations</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            {query.isLoading
-              ? 'Loading…'
-              : `${counts.total} total · ${counts.pending} pending · ${counts.verified} verified · ${counts.rejected} rejected`}
-          </p>
+      <div className="mb-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-secondary">Nominations</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              {query.isLoading
+                ? 'Loading…'
+                : `${counts.total} total · ${counts.pending} pending · ${counts.verified} verified · ${counts.rejected} rejected`}
+            </p>
+          </div>
+          <button
+            onClick={handleCsv}
+            disabled={csvBusy}
+            className="rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-surface-alt disabled:opacity-40"
+          >
+            {csvBusy ? 'Exporting…' : 'Download CSV'}
+          </button>
         </div>
-        <button
-          onClick={handleCsv}
-          disabled={csvBusy}
-          className="rounded-md border border-border bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-surface-alt disabled:opacity-40"
-        >
-          {csvBusy ? 'Exporting…' : 'Download CSV'}
-        </button>
       </div>
 
       {/* Toolbar */}
@@ -123,7 +125,7 @@ export function NominationsPage() {
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Search nominee, nominator, reason…"
-          className="w-72 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 sm:w-72"
         />
         <select
           value={statusFilter}
@@ -141,8 +143,50 @@ export function NominationsPage() {
         )}
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      {/* Mobile card list */}
+      <div className="md:hidden">
+        {query.isLoading && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            Loading nominations…
+          </div>
+        )}
+        {!query.isLoading && rows.length === 0 && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            No nominations yet.
+          </div>
+        )}
+        <ul className="space-y-3">
+          {rows.map((n) => (
+            <li
+              key={n.id}
+              onClick={() => setSelectedId(n.id)}
+              className="cursor-pointer rounded-xl border border-border bg-white p-4 shadow-sm active:bg-surface-alt/60"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <StatusPill status={n.status} />
+                <span className="text-xs text-gray-500">{fmtCreated(n.createdAt)}</span>
+              </div>
+              <div className="mt-2 text-sm font-semibold text-secondary">{n.nomineeName}</div>
+              <div className="text-xs text-gray-500">by {n.nominatorName}</div>
+              <p className="mt-2 text-sm text-gray-600">{truncate(n.reason, 140)}</p>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xs text-gray-500">
+                  Consent:{' '}
+                  {n.consentToShareNomineeName ? (
+                    <span className="font-semibold text-green-700">Yes</span>
+                  ) : (
+                    <span className="text-gray-400">No</span>
+                  )}
+                </span>
+                <span className="text-xs font-semibold text-primary">Open →</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-xl border border-border bg-white shadow-sm md:block">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-surface-alt text-left text-xs font-semibold uppercase tracking-wider text-gray-500">

@@ -74,20 +74,22 @@ export function PreviewPage() {
 
   return (
     <div>
-      <div className="mb-4 flex items-baseline justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-secondary">Kiosk preview</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Iframe rendered at native device resolution and scaled down — what
-            you see is what attendees see.
-          </p>
+      <div className="mb-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-secondary">Kiosk preview</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Iframe rendered at native device resolution and scaled down — what
+              you see is what attendees see.
+            </p>
+          </div>
+          <button
+            onClick={() => setIframeKey((k) => k + 1)}
+            className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
+          >
+            ↻ Reload
+          </button>
         </div>
-        <button
-          onClick={() => setIframeKey((k) => k + 1)}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-dark"
-        >
-          ↻ Reload
-        </button>
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-2">

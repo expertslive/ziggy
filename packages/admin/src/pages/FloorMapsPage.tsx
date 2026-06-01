@@ -114,21 +114,81 @@ export function FloorMapsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-secondary">Floor Maps</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage venue floor maps and hotspot regions</p>
+      <div className="mb-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-secondary">Floor Maps</h1>
+            <p className="mt-1 text-sm text-gray-500">Manage venue floor maps and hotspot regions</p>
+          </div>
+          <button
+            onClick={openCreate}
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark"
+          >
+            + Add Floor Map
+          </button>
         </div>
-        <button
-          onClick={openCreate}
-          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark"
-        >
-          + Add Floor Map
-        </button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      {/* Mobile notice — the hotspot editor is desktop-only because spatial
+       *  canvas editing isn't usable on a phone. */}
+      <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800 md:hidden">
+        Tip: open this page on a larger screen to draw hotspot regions on the map.
+      </div>
+
+      {/* Mobile card list */}
+      <div className="md:hidden">
+        {floorMaps.isLoading && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            Loading...
+          </div>
+        )}
+        {floorMaps.data?.length === 0 && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            No floor maps yet. Add one to get started.
+          </div>
+        )}
+        <ul className="space-y-3">
+          {floorMaps.data?.map((map: any) => (
+            <li key={map.id} className="rounded-xl border border-border bg-white p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                {map.imageUrl ? (
+                  <img
+                    src={map.imageUrl}
+                    alt={map.name}
+                    className="h-14 w-20 shrink-0 rounded border border-border object-cover"
+                  />
+                ) : (
+                  <div className="h-14 w-20 shrink-0 rounded border border-border bg-surface-alt" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-secondary">{map.name}</div>
+                  <div className="mt-0.5 text-xs text-gray-500">
+                    {map.hotspots?.length ?? 0} hotspot
+                    {(map.hotspots?.length ?? 0) !== 1 ? 's' : ''} · Sort: {map.sortOrder}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={() => openEdit(map)}
+                  className="min-h-11 flex-1 rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-surface-alt"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => setDeleteTarget({ id: map.id, name: map.name })}
+                  className="min-h-11 rounded-md border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-xl border border-border bg-white shadow-sm md:block">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-surface-alt text-left text-xs font-semibold uppercase tracking-wider text-gray-500">

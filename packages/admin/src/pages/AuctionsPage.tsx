@@ -110,22 +110,24 @@ export function AuctionsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-baseline justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-secondary">Auctions</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            {query.isLoading
-              ? 'Loading…'
-              : `${totals.count} total bids · ${eurFmt.format(totals.totalEur)} total`}
-          </p>
+      <div className="mb-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-secondary">Auctions</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              {query.isLoading
+                ? 'Loading…'
+                : `${totals.count} total bids · ${eurFmt.format(totals.totalEur)} total`}
+            </p>
+          </div>
+          <button
+            onClick={handleCsv}
+            disabled={csvBusy || query.isLoading}
+            className="rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-surface-alt disabled:opacity-40"
+          >
+            {csvBusy ? 'Exporting…' : 'Download CSV'}
+          </button>
         </div>
-        <button
-          onClick={handleCsv}
-          disabled={csvBusy || query.isLoading}
-          className="rounded-md border border-border bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-surface-alt disabled:opacity-40"
-        >
-          {csvBusy ? 'Exporting…' : 'Download CSV'}
-        </button>
       </div>
 
       {/* Toolbar */}
@@ -135,7 +137,7 @@ export function AuctionsPage() {
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Search bidder, email, item…"
-          className="w-72 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 sm:w-72"
         />
         <select
           value={statusFilter}
@@ -153,8 +155,69 @@ export function AuctionsPage() {
         )}
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      {/* Mobile card list */}
+      <div className="md:hidden">
+        {query.isLoading && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            Loading bids…
+          </div>
+        )}
+        {!query.isLoading && rows.length === 0 && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            No bids yet.
+          </div>
+        )}
+        <ul className="space-y-3">
+          {rows.map((b) => (
+            <li
+              key={b.id}
+              onClick={() => setSelectedId(b.id)}
+              className="cursor-pointer rounded-xl border border-border bg-white p-4 shadow-sm active:bg-surface-alt/60"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-secondary">
+                    {truncate(b.itemName || '—', 60)}
+                  </div>
+                  <div className="mt-0.5 text-xs text-gray-500">{fmtTs(b.ts)}</div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="text-lg font-bold tabular-nums text-secondary">
+                    {fmtAmount(b.amount)}
+                  </div>
+                  <div className="mt-1">
+                    <StatusPill status={b.itemAuctionStatus} />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 text-sm text-gray-700">{b.displayName || b.name}</div>
+              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
+                {b.email && (
+                  <a
+                    href={`mailto:${b.email}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-primary hover:underline"
+                  >
+                    {truncate(b.email, 32)}
+                  </a>
+                )}
+                {b.phone && (
+                  <a
+                    href={`tel:${b.phone}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-primary hover:underline"
+                  >
+                    {b.phone}
+                  </a>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-xl border border-border bg-white shadow-sm md:block">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>

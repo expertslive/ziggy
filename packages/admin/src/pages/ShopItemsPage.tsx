@@ -188,23 +188,90 @@ export function ShopItemsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-secondary">Shop Items</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage merchandise sold at the event for charity
-          </p>
+      <div className="mb-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-secondary">Shop Items</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Manage merchandise sold at the event for charity
+            </p>
+          </div>
+          <button
+            onClick={openCreate}
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark"
+          >
+            + Add Shop Item
+          </button>
         </div>
-        <button
-          onClick={openCreate}
-          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark"
-        >
-          + Add Shop Item
-        </button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      {/* Mobile card list */}
+      <div className="md:hidden">
+        {items.isLoading && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            Loading...
+          </div>
+        )}
+        {items.data?.length === 0 && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            No shop items yet. Add one to get started.
+          </div>
+        )}
+        <ul className="space-y-3">
+          {items.data?.map((item: any) => (
+            <li key={item.id} className="rounded-xl border border-border bg-white p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                {item.imageUrl ? (
+                  <img
+                    src={item.imageUrl}
+                    alt=""
+                    className="h-14 w-14 shrink-0 rounded border border-border object-cover"
+                  />
+                ) : (
+                  <div className="h-14 w-14 shrink-0 rounded border border-border bg-surface-alt" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-secondary">{item.name}</div>
+                  <div className="mt-0.5 text-xs text-gray-500">{item.priceLabel}</div>
+                  <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500">
+                    {item.isHighlighted && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-800">
+                        Featured
+                      </span>
+                    )}
+                    <span>Sort: {item.sortOrder}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {item.auction && (
+                  <Link
+                    to={`/shop-items/${item.id}/auction`}
+                    className="min-h-11 flex-1 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-center text-sm font-semibold text-amber-800 hover:bg-amber-100"
+                  >
+                    Veiling
+                  </Link>
+                )}
+                <button
+                  onClick={() => openEdit(item)}
+                  className="min-h-11 flex-1 rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-surface-alt"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => setDeleteTarget({ id: item.id, name: item.name })}
+                  className="min-h-11 rounded-md border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-xl border border-border bg-white shadow-sm md:block">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-surface-alt text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -425,7 +492,7 @@ export function ShopItemsPage() {
               Configuratie kan vóór de eerste bod nog gewijzigd worden; daarna alleen sluittijd.
             </p>
             {form.auction.enabled && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-xs font-medium uppercase text-gray-500">
                     Min. start (€)
@@ -468,7 +535,7 @@ export function ShopItemsPage() {
                     className="w-full rounded-md border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <label className="mb-1 block text-xs font-medium uppercase text-gray-500">
                     Sluittijd
                   </label>
@@ -493,7 +560,7 @@ export function ShopItemsPage() {
                   </div>
                 )}
                 {editingId && (
-                  <div className="col-span-2">
+                  <div className="sm:col-span-2">
                     <Link
                       to={`/shop-items/${editingId}/auction`}
                       className="text-xs font-semibold text-primary hover:underline"

@@ -105,7 +105,7 @@ export function EventConfigPage() {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* General */}
-        <section className="rounded-xl border border-border bg-white p-6 shadow-sm">
+        <section className="rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
           <h2 className="mb-4 text-lg font-bold text-secondary">General</h2>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
@@ -129,7 +129,7 @@ export function EventConfigPage() {
         </section>
 
         {/* Languages */}
-        <section className="rounded-xl border border-border bg-white p-6 shadow-sm">
+        <section className="rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
           <h2 className="mb-4 text-lg font-bold text-secondary">Languages</h2>
           <div className="mb-4">
             <label className="mb-2 block text-sm font-medium text-gray-700">Enabled Languages</label>
@@ -172,7 +172,7 @@ export function EventConfigPage() {
         </section>
 
         {/* Branding */}
-        <section className="rounded-xl border border-border bg-white p-6 shadow-sm">
+        <section className="rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
           <h2 className="mb-4 text-lg font-bold text-secondary">Branding</h2>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <ColorField

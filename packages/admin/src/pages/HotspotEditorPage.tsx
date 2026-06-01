@@ -509,6 +509,10 @@ export function HotspotEditorPage() {
 
   return (
     <div className="flex h-screen flex-col bg-surface-alt">
+      {/* Mobile notice — spatial canvas editing is not usable below md. */}
+      <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800 md:hidden">
+        Open this page on a larger screen to edit hotspots — the canvas needs more space than a phone offers.
+      </div>
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border bg-white px-4 py-3">
         <div className="flex items-center gap-4">

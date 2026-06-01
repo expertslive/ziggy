@@ -120,22 +120,24 @@ export function KiosksPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-baseline justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-secondary">Kiosks</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            {query.isLoading
-              ? 'Loading…'
-              : `${counts.aliased} aliased · ${counts.total} total seen`}
-          </p>
+      <div className="mb-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-secondary">Kiosks</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              {query.isLoading
+                ? 'Loading…'
+                : `${counts.aliased} aliased · ${counts.total} total seen`}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => openCreate()}
+            className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark"
+          >
+            Add alias
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => openCreate()}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-dark"
-        >
-          Add alias
-        </button>
       </div>
 
       {/* Toolbar */}
@@ -145,7 +147,7 @@ export function KiosksPage() {
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Search name, ID, location, code…"
-          className="w-72 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 sm:w-72"
         />
         <Legend />
         {query.isFetching && !query.isLoading && (
@@ -153,8 +155,80 @@ export function KiosksPage() {
         )}
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      {/* Mobile card list */}
+      <div className="md:hidden">
+        {query.isLoading && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            Loading kiosks…
+          </div>
+        )}
+        {!query.isLoading && filtered.length === 0 && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            {rows.length === 0
+              ? "No kiosks yet — they'll appear here once they heartbeat in or you add an alias manually."
+              : 'No kiosks match your search.'}
+          </div>
+        )}
+        <ul className="space-y-3">
+          {filtered.map((k) => {
+            const aliased = k.displayName !== k.kioskId
+            return (
+              <li
+                key={k.kioskId}
+                className="rounded-xl border border-border bg-white p-4 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    {aliased ? (
+                      <div className="text-sm font-semibold text-secondary">
+                        {k.displayName}
+                      </div>
+                    ) : (
+                      <code className="rounded bg-surface-alt px-1.5 py-0.5 font-mono text-xs text-gray-500">
+                        {k.kioskId}
+                      </code>
+                    )}
+                    {k.location && (
+                      <div className="mt-1 text-xs text-gray-500">{k.location}</div>
+                    )}
+                  </div>
+                  <StatusDot status={k.status} />
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                  {k.shortCode && (
+                    <span className="inline-flex rounded-full bg-surface-alt px-2 py-0.5 font-mono text-xs font-semibold uppercase text-gray-700">
+                      {k.shortCode}
+                    </span>
+                  )}
+                  {aliased && (
+                    <code className="font-mono text-xs text-gray-400">{k.kioskId}</code>
+                  )}
+                  <span className="ml-auto">{relativeTime(k.lastHeartbeatAt)}</span>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => (aliased ? openEdit(k) : openCreate(k))}
+                    className="min-h-11 flex-1 rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-surface-alt"
+                  >
+                    {aliased ? 'Edit' : 'Add alias'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => copyKioskId(k.kioskId)}
+                    className="min-h-11 rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-surface-alt"
+                  >
+                    {copiedId === k.kioskId ? 'Copied!' : 'Copy ID'}
+                  </button>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-xl border border-border bg-white shadow-sm md:block">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>

@@ -146,9 +146,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-1 gap-1 sm:grid-cols-3 sm:gap-3">
       <div className="text-xs uppercase tracking-wider text-gray-500">{label}</div>
-      <div className="col-span-2 min-w-0 text-sm text-gray-700">{children}</div>
+      <div className="min-w-0 text-sm text-gray-700 sm:col-span-2">{children}</div>
     </div>
   )
 }

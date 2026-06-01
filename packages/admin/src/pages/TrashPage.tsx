@@ -92,7 +92,38 @@ export function TrashPage() {
               {label}{' '}
               <span className="text-sm font-medium text-gray-400">({items.length})</span>
             </h2>
-            <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+            {/* Mobile card list */}
+            <ul className="space-y-3 md:hidden">
+              {items.map((it: { id: string; name: string; deletedAt?: string }) => (
+                <li key={it.id} className="rounded-xl border border-border bg-white p-4 shadow-sm">
+                  <div className="text-sm font-semibold text-secondary">{it.name}</div>
+                  <div className="mt-1 text-xs text-gray-500">
+                    Deleted: {fmtDate(it.deletedAt)}
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() =>
+                        restoreMut.mutate({ target: key, id: it.id })
+                      }
+                      className="min-h-11 flex-1 rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold text-primary hover:bg-surface-alt"
+                    >
+                      Restore
+                    </button>
+                    <button
+                      onClick={() =>
+                        setHardTarget({ target: key, id: it.id, name: it.name })
+                      }
+                      className="min-h-11 rounded-md border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                    >
+                      Delete forever
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* Desktop table */}
+            <div className="hidden overflow-hidden rounded-xl border border-border bg-white shadow-sm md:block">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-surface-alt text-left text-xs font-semibold uppercase tracking-wider text-gray-500">

@@ -62,15 +62,17 @@ export function AnalyticsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-baseline justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-secondary">Analytics</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Live event metrics — auto-refresh every 30s
-          </p>
-        </div>
-        <div className="text-xs text-gray-400">
-          {q.isFetching ? 'refreshing…' : data ? `updated ${formatLastSeen(Date.now(), now)}` : ''}
+      <div className="mb-8">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-secondary">Analytics</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Live event metrics — auto-refresh every 30s
+            </p>
+          </div>
+          <div className="text-xs text-gray-400">
+            {q.isFetching ? 'refreshing…' : data ? `updated ${formatLastSeen(Date.now(), now)}` : ''}
+          </div>
         </div>
       </div>
 
@@ -82,7 +84,7 @@ export function AnalyticsPage() {
 
       {/* Top stat cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
           <p className="text-sm font-medium text-gray-500">Events last hour</p>
           <p className="mt-1 text-4xl font-bold text-secondary">
             {data ? data.totalLastHour : '-'}
@@ -92,7 +94,7 @@ export function AnalyticsPage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
           <p className="text-sm font-medium text-gray-500">Active kiosks</p>
           <p className="mt-1 text-4xl font-bold text-secondary">
             {data
@@ -108,9 +110,9 @@ export function AnalyticsPage() {
       </div>
 
       {/* Per-kiosk breakdown */}
-      <div className="mt-6 rounded-xl border border-border bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
         <h2 className="mb-4 text-lg font-bold text-secondary">Kiosks</h2>
-        <div className="overflow-hidden rounded-lg border border-border">
+        <div className="overflow-x-auto rounded-lg border border-border">
           <table className="min-w-full divide-y divide-border text-sm">
             <thead className="bg-surface-alt">
               <tr>
@@ -158,14 +160,14 @@ export function AnalyticsPage() {
       </div>
 
       {/* Hourly chart */}
-      <div className="mt-6 rounded-xl border border-border bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
         <h2 className="mb-4 text-lg font-bold text-secondary">Events per hour (last 24h)</h2>
         <HourlyBars data={hourlyQ.data} />
       </div>
 
       {/* Top sessions + no-result searches + search funnel + lang split */}
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
           <h2 className="mb-4 text-lg font-bold text-secondary">Top sessions opened (24h)</h2>
           {!data || data.topSessions.length === 0 ? (
             <p className="text-sm text-gray-400">No data yet.</p>
@@ -185,12 +187,12 @@ export function AnalyticsPage() {
           )}
         </div>
 
-        <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
           <h2 className="mb-4 text-lg font-bold text-secondary">Search funnel (24h)</h2>
           <SearchFunnelView data={funnelQ.data} />
         </div>
 
-        <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
           <h2 className="mb-4 text-lg font-bold text-secondary">No-result searches (24h)</h2>
           {!data || data.searchNoResults.length === 0 ? (
             <p className="text-sm text-gray-400">No data yet.</p>
@@ -209,7 +211,7 @@ export function AnalyticsPage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
           <h2 className="mb-4 text-lg font-bold text-secondary">Language switches (24h)</h2>
           {!langQ.data || langQ.data.langs.length === 0 ? (
             <p className="text-sm text-gray-400">No data yet.</p>
@@ -227,7 +229,7 @@ export function AnalyticsPage() {
       </div>
 
       {/* Hotspot heatmap */}
-      <div className="mt-6 rounded-xl border border-border bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-border bg-white p-4 shadow-sm md:p-6">
         <h2 className="mb-4 text-lg font-bold text-secondary">Top hotspot taps (24h)</h2>
         {!heatmapQ.data || heatmapQ.data.taps.length === 0 ? (
           <p className="text-sm text-gray-400">No taps yet.</p>

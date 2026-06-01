@@ -112,31 +112,33 @@ export function AuctionAdminPage() {
           ← Shop items
         </Link>
       </div>
-      <div className="mb-6 flex items-baseline justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-secondary">
-            Veiling — {item?.name || (id ? id.slice(0, 8) : '')}
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Live bod-overzicht. Auto-refresh elke 15s.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={downloadCsv}
-            disabled={!q.data || bids.length === 0}
-            className="rounded-md border border-border bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-surface-alt disabled:opacity-40"
-          >
-            Export CSV
-          </button>
-          {q.data?.isOpen && (
+      <div className="mb-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-secondary">
+              Veiling — {item?.name || (id ? id.slice(0, 8) : '')}
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Live bod-overzicht. Auto-refresh elke 15s.
+            </p>
+          </div>
+          <div className="flex gap-2">
             <button
-              onClick={() => setCloseOpen(true)}
-              className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
+              onClick={downloadCsv}
+              disabled={!q.data || bids.length === 0}
+              className="rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-surface-alt disabled:opacity-40"
             >
-              Sluit veiling
+              Export CSV
             </button>
-          )}
+            {q.data?.isOpen && (
+              <button
+                onClick={() => setCloseOpen(true)}
+                className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
+              >
+                Sluit veiling
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -208,7 +210,63 @@ export function AuctionAdminPage() {
         </div>
       )}
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      {/* Mobile card list */}
+      <div className="mt-6 md:hidden">
+        {q.isLoading && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            Laden…
+          </div>
+        )}
+        {!q.isLoading && bids.length === 0 && (
+          <div className="rounded-xl border border-border bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+            Nog geen biedingen.
+          </div>
+        )}
+        <ul className="space-y-3">
+          {bids.map((b) => {
+            const isTop = top && b.id === top.id
+            return (
+              <li
+                key={b.id}
+                className={`rounded-xl border p-4 shadow-sm ${
+                  isTop ? 'border-emerald-300 bg-emerald-50' : 'border-border bg-white'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-secondary">
+                      {b.name}
+                      {isTop && (
+                        <span className="ml-2 rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-900">
+                          Hoogste
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-0.5 text-xs text-gray-500">{fmtTs(b.ts)}</div>
+                  </div>
+                  <div className="shrink-0 font-mono text-lg font-bold text-secondary">
+                    {fmtEur(b.amount)}
+                  </div>
+                </div>
+                <div className="mt-2 space-y-1 text-xs text-gray-600">
+                  {b.email && <div className="break-all">{b.email}</div>}
+                  {b.phone && <div className="font-mono">{b.phone}</div>}
+                  <div className="text-gray-500">
+                    {b.kioskId
+                      ? KIOSK_LABELS[b.kioskId] || (
+                          <span className="font-mono">{b.kioskId}</span>
+                        )
+                      : '(test pc)'}
+                  </div>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+
+      {/* Desktop table */}
+      <div className="mt-6 hidden overflow-hidden rounded-xl border border-border bg-white shadow-sm md:block">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border bg-surface-alt text-left text-xs font-semibold uppercase tracking-wider text-gray-500">

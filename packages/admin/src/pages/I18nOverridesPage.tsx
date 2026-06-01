@@ -166,9 +166,9 @@ export function I18nOverridesPage() {
         ))}
       </div>
 
-      {/* Overrides table */}
+      {/* Overrides list */}
       <section className="rounded-xl border border-border bg-white shadow-sm">
-        <div className="grid grid-cols-[1fr_1fr_1fr] gap-0 border-b border-border bg-surface-alt px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <div className="hidden grid-cols-[1fr_1fr_1fr] gap-0 border-b border-border bg-surface-alt px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 md:grid">
           <div>Key</div>
           <div>Default Value</div>
           <div>Override</div>
@@ -181,10 +181,13 @@ export function I18nOverridesPage() {
             return (
               <div
                 key={key}
-                className="grid grid-cols-[1fr_1fr_1fr] items-center gap-4 px-6 py-3"
+                className="flex flex-col gap-2 px-4 py-3 md:grid md:grid-cols-[1fr_1fr_1fr] md:items-center md:gap-4 md:px-6"
               >
-                <div className="font-mono text-sm text-gray-700">{key}</div>
-                <div className="text-sm text-gray-500">{defaultValue}</div>
+                <div className="font-mono text-xs text-gray-700 md:text-sm">{key}</div>
+                <div className="text-xs text-gray-500 md:text-sm">
+                  <span className="md:hidden text-gray-400">Default: </span>
+                  {defaultValue}
+                </div>
                 <input
                   type="text"
                   value={overrideValue}
