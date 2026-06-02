@@ -166,15 +166,18 @@ export async function placeBid(args: PlaceBidArgs): Promise<PlaceBidResult> {
     sessionId: args.sessionId,
   }
 
-  // Identify the bidder this new bid will dethrone — used to fire the
-  // outbid email after the write lands. Picked from the bids array we
-  // already loaded; if multiple bids share the previous high we take the
-  // latest one (their amount is the one being beaten).
-  const prevTop = bids.reduce<AuctionBid | null>(
-    (best, b) => (best == null || b.amount > best.amount ||
-      (b.amount === best.amount && b.ts > best.ts) ? b : best),
-    null,
-  )
+  // Dedupe previous bidders by email and keep each person's highest bid.
+  // Used for the outbid-notification fan-out after the write lands —
+  // everyone whose current best is now below the new high gets one mail.
+  const byEmail = new Map<string, AuctionBid>()
+  for (const b of bids) {
+    if (!b.email) continue
+    const key = b.email.trim().toLowerCase()
+    const existing = byEmail.get(key)
+    if (!existing || b.amount > existing.amount) {
+      byEmail.set(key, b)
+    }
+  }
 
   await ensureAuctionContainer()
   const container = getContainer('auction-bids')
@@ -183,14 +186,21 @@ export async function placeBid(args: PlaceBidArgs): Promise<PlaceBidResult> {
   // higher amount wins because publicState picks max(amount).
   await container.items.create(bid)
 
-  // Outbid notification — fire-and-forget so the bid response stays snappy.
-  if (
-    prevTop &&
-    prevTop.email &&
-    prevTop.email.trim().toLowerCase() !== args.email.trim().toLowerCase()
-  ) {
-    void notifyOutbid(item, prevTop, bid).catch((err) => {
-      console.warn('[auction] outbid email failed:', (err as Error).message)
+  // Outbid notification — fan out to every distinct prior bidder whose
+  // highest bid is now below the new amount, skipping the new bidder
+  // themselves. Fire-and-forget per recipient so the bid response stays
+  // snappy and one failed send doesn't poison the others.
+  const newBidderKey = args.email.trim().toLowerCase()
+  for (const [key, prev] of byEmail) {
+    if (key === newBidderKey) continue
+    if (prev.amount >= bid.amount) continue
+    void notifyOutbid(item, prev, bid).catch((err) => {
+      console.warn(
+        '[auction] outbid email failed for',
+        prev.email,
+        '-',
+        (err as Error).message,
+      )
     })
   }
 
