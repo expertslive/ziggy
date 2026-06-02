@@ -8,6 +8,9 @@ export interface EnvConfig {
   storageConnectionString: string
   setupToken: string
   backupToken?: string
+  resendApiKey?: string
+  outbidSender?: string
+  kioskBaseUrl?: string
 }
 
 function requireInProd(name: string, value: string, nodeEnv: string): void {
@@ -42,5 +45,8 @@ export function getEnv(): EnvConfig {
     storageConnectionString: process.env.STORAGE_CONNECTION_STRING || '',
     setupToken: process.env.SETUP_TOKEN || '',
     backupToken: process.env.BACKUP_TOKEN || undefined,
+    resendApiKey: process.env.RESEND_API_KEY || undefined,
+    outbidSender: process.env.OUTBID_SENDER || undefined,
+    kioskBaseUrl: process.env.KIOSK_BASE_URL || undefined,
   }
 }
