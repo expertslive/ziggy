@@ -234,7 +234,9 @@ export async function placeBid(
   shopItemId: string,
   body: PlaceBidArgs,
 ): Promise<{ amount: number; displayName: string; ts: number }> {
-  const res = await fetch(`/api/events/${slug}/shop-items/${shopItemId}/auction`, {
+  // Must use BASE_URL — same-origin "/api/..." hits the SWA navigationFallback
+  // (HTML) and the POST returns 405. Identical fix as the analytics flusher.
+  const res = await fetch(`${BASE_URL}/api/events/${slug}/shop-items/${shopItemId}/auction`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
